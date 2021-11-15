@@ -8,6 +8,7 @@ defmodule Chess.Board.Square do
     color: color()
   }
   @opaque color :: :white | :black
+
   defstruct [:color]
 
   @spec init(non_neg_integer()) :: t()
