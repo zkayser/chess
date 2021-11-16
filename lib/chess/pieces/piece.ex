@@ -3,13 +3,13 @@ defmodule Chess.Piece do
   Representation of a chess piece and associated
   functions.
   """
-
+  alias Chess.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
 
   @type t() :: %__MODULE__{
     type: type(),
     color: color()
   } | nil
-  @type type() :: :pawn | :rook | :knight | :bishop | :queen | :king
+  @type type() :: Pawn | Rook | Knight | Bishop | Queen | King
   @opaque color() :: :white | :black
   @typep index :: non_neg_integer()
 
@@ -30,7 +30,7 @@ defmodule Chess.Piece do
   at that index.
 
   iex> Chess.Piece.for_starting_position(0)
-  %Chess.Piece{type: :rook, color: :black}
+  %Chess.Piece{type: Chess.Pieces.Rook, color: :black}
   """
   @spec for_starting_position(index()) :: t()
   def for_starting_position(index) when index in @empty_indices, do: nil
@@ -44,12 +44,12 @@ defmodule Chess.Piece do
   @spec type_at_starting_position(index()) :: type()
   defp type_at_starting_position(index) do
     case index do
-      i when i in @pawn_indices -> :pawn
-      i when i in @rook_indices -> :rook
-      i when i in @knight_indices -> :knight
-      i when i in @bishop_indices -> :bishop
-      i when i in @queen_indices -> :queen
-      i when i in @king_indices -> :king
+      i when i in @pawn_indices -> Pawn
+      i when i in @rook_indices -> Rook
+      i when i in @knight_indices -> Knight
+      i when i in @bishop_indices -> Bishop
+      i when i in @queen_indices -> Queen
+      i when i in @king_indices -> King
     end
   end
 end
