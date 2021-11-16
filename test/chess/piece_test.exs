@@ -50,7 +50,7 @@ defmodule Chess.PieceTest do
 
     for empty_square <- @empty_squares do
       test "index #{empty_square} is empty" do
-        assert %Piece{type: :empty} = Piece.for_starting_position(unquote(empty_square))
+        assert is_nil(Piece.for_starting_position(unquote(empty_square)))
       end
     end
   end
