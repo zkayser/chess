@@ -53,5 +53,17 @@ defmodule Chess.PieceTest do
         assert is_nil(Piece.for_starting_position(unquote(empty_square)))
       end
     end
+
+    for black_piece <- 0..15 do
+      test "piece at index #{black_piece} is colored black" do
+        assert %Piece{color: :black} = Piece.for_starting_position(unquote(black_piece))
+      end
+    end
+
+    for white_piece <- 48..63 do
+      test "piece at index #{white_piece} is colored white" do
+        assert %Piece{color: :white} = Piece.for_starting_position(unquote(white_piece))
+      end
+    end
   end
 end
