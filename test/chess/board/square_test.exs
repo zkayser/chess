@@ -62,7 +62,7 @@ defmodule Chess.Board.SquareTest do
       end
     end
 
-    for empty_square <- @empty_square do
+    for empty_square <- @empty_squares do
       test "index #{empty_square} is empty" do
         assert %Square{piece: :empty} = Square.init(unquote(empty_square))
       end
