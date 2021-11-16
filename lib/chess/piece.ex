@@ -8,7 +8,7 @@ defmodule Chess.Piece do
   @type t() :: %__MODULE__{
     type: type(),
     color: color()
-  }
+  } | nil
   @type type() :: :pawn | :rook | :knight | :bishop | :queen | :king
   @opaque color :: :white | :black
 
