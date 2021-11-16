@@ -7,6 +7,7 @@ defmodule Chess.Board.SquareTest do
 
   describe "init/1" do
     @pawn_indices Enum.concat(8..15, 48..55)
+    @rook_indices [0, 7, 56, 63]
 
     property "returns a white square when given index is even" do
       check all index <- filter(integer(0..64), &Integer.is_even/1) do
@@ -23,6 +24,12 @@ defmodule Chess.Board.SquareTest do
     for pawn_index <- @pawn_indices do
       test "places a pawn at #{pawn_index} index" do
         assert %Square{piece: :pawn} = Square.init(unquote(pawn_index))
+      end
+    end
+
+    for rook_index <- @rook_indices do
+      test "places a rook at #{rook_index} index" do
+        assert %Square{piece: :rook} = Square.init(unquote(rook_index))
       end
     end
   end
