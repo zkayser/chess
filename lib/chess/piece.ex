@@ -4,5 +4,13 @@ defmodule Chess.Piece do
   functions.
   """
 
-  @type t() :: :pawn | :rook | :knight | :bishop | :queen | :king
+
+  @type t() :: %__MODULE__{
+    type: type(),
+    color: color()
+  }
+  @type type() :: :pawn | :rook | :knight | :bishop | :queen | :king
+  @opaque color :: :white | :black
+
+  defstruct [:type, :color]
 end
