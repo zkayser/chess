@@ -24,7 +24,6 @@ defmodule Chess.Piece do
   @king_indices [4, 60]
   @empty_indices 16..47
 
-
   @doc """
   Given a starting index, returns the piece that is placed
   at that index.
