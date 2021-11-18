@@ -5,10 +5,12 @@ defmodule Chess.Piece do
   """
   alias Chess.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
 
-  @type t() :: %__MODULE__{
-    type: type(),
-    color: color()
-  } | nil
+  @type t() ::
+          %__MODULE__{
+            type: type(),
+            color: color()
+          }
+          | nil
   @type type() :: Pawn | Rook | Knight | Bishop | Queen | King
   @opaque color() :: :white | :black
   @typep index :: non_neg_integer()
@@ -33,6 +35,7 @@ defmodule Chess.Piece do
   """
   @spec for_starting_position(index()) :: t()
   def for_starting_position(index) when index in @empty_indices, do: nil
+
   def for_starting_position(index) do
     %__MODULE__{
       type: type_at_starting_position(index),

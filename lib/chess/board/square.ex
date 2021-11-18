@@ -9,16 +9,14 @@ defmodule Chess.Board.Square do
   alias Chess.Piece
 
   @type t() :: %__MODULE__{
-    color: color(),
-    piece: Piece.t()
-  }
+          color: color(),
+          piece: Piece.t()
+        }
   @opaque color :: :white | :black
   @typep index :: non_neg_integer()
 
-  defstruct [
-    color: nil,
-    piece: :empty
-  ]
+  defstruct color: nil,
+            piece: :empty
 
   @decorate pre("Index is a non-negative integer between 0 and 64", fn index -> index in 0..64 end)
   @spec init(non_neg_integer()) :: t()
