@@ -14,6 +14,7 @@ defmodule Chess.BoardTest do
 
     test "places chess pieces on squares 0 through 15 and 48 through 63" do
       board = Board.layout()
+
       for non_empty_square <- Enum.concat(0..15, 48..63) do
         assert %Square{piece: %Piece{}} = :array.get(non_empty_square, board)
       end
@@ -21,6 +22,7 @@ defmodule Chess.BoardTest do
 
     test "square 16 through 47 are empty" do
       board = Board.layout()
+
       for empty_square <- 16..47 do
         assert %Square{piece: nil} = :array.get(empty_square, board)
       end
