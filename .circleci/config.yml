@@ -68,7 +68,7 @@ jobs:
   compile-warnings:
     parallelism: 1
     docker:
-      - image: 
+      - image: cimg/elixir:1.12.3-browser
 
     working_directory: ~/app
 
