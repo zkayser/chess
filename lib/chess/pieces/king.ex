@@ -6,4 +6,8 @@ defmodule Chess.Pieces.King do
   defstruct [
     moves: []
   ]
+
+  @type t() :: %__MODULE__{
+    moves: list()
+  }
 end
