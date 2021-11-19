@@ -6,9 +6,14 @@ defmodule Chess.Board do
 
   @type t :: :array.array(Square.t())
 
+  @bounds 0..63
+
   @spec layout() :: t()
   def layout do
     board = :array.new(size: 64, fixed: true, default: :empty)
     :array.map(fn index, _ -> Square.init(index) end, board)
   end
+
+  @spec bounds() :: Range.t(0, 63)
+  def bounds, do: @bounds
 end

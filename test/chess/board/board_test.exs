@@ -28,4 +28,10 @@ defmodule Chess.BoardTest do
       end
     end
   end
+
+  describe "bounds/0" do
+    test "returns the range giving bounds of a chess board" do
+      assert 0..63 == Board.bounds()
+    end
+  end
 end
