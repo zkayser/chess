@@ -34,4 +34,22 @@ defmodule Chess.BoardTest do
       assert 0..63 == Board.bounds()
     end
   end
+
+  describe "in_bounds?/1" do
+    test "returns true when the given index is within the bounds of a chess board" do
+      assert Board.in_bounds?(Enum.random(Board.bounds()))
+    end
+
+    test "returns false when given index is outside of bounds of a chess board" do
+      invalid_index = [
+        StreamData.map(StreamData.positive_integer(), fn index -> -index end),
+        StreamData.map(StreamData.positive_integer(), fn index -> index + 64 end)
+      ]
+      |> StreamData.one_of()
+      |> Enum.take(1)
+      |> List.first()
+
+      refute Board.in_bounds?(invalid_index)
+    end
+  end
 end
