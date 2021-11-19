@@ -3,6 +3,7 @@ defmodule Chess.Piece do
   Representation of a chess piece and associated
   functions.
   """
+  alias Chess.Board
   alias Chess.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
 
   @type t() ::
