@@ -16,4 +16,7 @@ defmodule Chess.Board do
 
   @spec bounds() :: Range.t(0, 63)
   def bounds, do: @bounds
+
+  @spec in_bounds?(integer()) :: boolean()
+  def in_bounds?(index), do: index in @bounds
 end
