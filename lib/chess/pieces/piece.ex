@@ -16,11 +16,9 @@ defmodule Chess.Piece do
   @opaque color() :: :white | :black
   @typep index :: non_neg_integer()
 
-  defstruct [
-    type: nil,
-    color: nil,
-    moves: []
-  ]
+  defstruct type: nil,
+            color: nil,
+            moves: []
 
   # Starting Positions
   @pawn_indices Enum.concat(8..15, 48..55)
@@ -36,7 +34,7 @@ defmodule Chess.Piece do
   at that index.
 
   iex> Chess.Piece.for_starting_position(0)
-  %Chess.Piece{type: %Chess.Pieces.Rook{}, color: :black}
+  %Chess.Piece{type: Chess.Pieces.Rook, color: :black}
   """
   @spec for_starting_position(index()) :: t()
   def for_starting_position(index) when index in @empty_indices, do: nil
@@ -46,6 +44,15 @@ defmodule Chess.Piece do
       type: type_at_starting_position(index),
       color: if(index in 0..15, do: :black, else: :white)
     }
+  end
+
+  @doc """
+  Returns a set of squares that a piece could potentially
+  move to.
+  """
+  @spec potential_moves(t(), starting_position :: index(), Board.t()) :: MapSet.t(index())
+  def potential_moves(%__MODULE__{type: module} = piece, starting_position, board) do
+    module.potential_moves(piece, starting_position, board)
   end
 
   @spec type_at_starting_position(index()) :: type()
