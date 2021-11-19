@@ -41,13 +41,14 @@ defmodule Chess.BoardTest do
     end
 
     test "returns false when given index is outside of bounds of a chess board" do
-      invalid_index = [
-        StreamData.map(StreamData.positive_integer(), fn index -> -index end),
-        StreamData.map(StreamData.positive_integer(), fn index -> index + 64 end)
-      ]
-      |> StreamData.one_of()
-      |> Enum.take(1)
-      |> List.first()
+      invalid_index =
+        [
+          StreamData.map(StreamData.positive_integer(), fn index -> -index end),
+          StreamData.map(StreamData.positive_integer(), fn index -> index + 64 end)
+        ]
+        |> StreamData.one_of()
+        |> Enum.take(1)
+        |> List.first()
 
       refute Board.in_bounds?(invalid_index)
     end
