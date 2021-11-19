@@ -8,14 +8,19 @@ defmodule Chess.Piece do
   @type t() ::
           %__MODULE__{
             type: type(),
-            color: color()
+            color: color(),
+            moves: list(non_neg_integer())
           }
           | nil
-  @type type() :: Pawn.t() | Rook.t() | Knight.t() | Bishop.t() | Queen.t() | King.t()
+  @type type() :: Pawn | Rook | Knight | Bishop | Queen | King
   @opaque color() :: :white | :black
   @typep index :: non_neg_integer()
 
-  defstruct [:type, :color]
+  defstruct [
+    type: nil,
+    color: nil,
+    moves: []
+  ]
 
   # Starting Positions
   @pawn_indices Enum.concat(8..15, 48..55)
@@ -46,12 +51,12 @@ defmodule Chess.Piece do
   @spec type_at_starting_position(index()) :: type()
   defp type_at_starting_position(index) do
     case index do
-      i when i in @pawn_indices -> %Pawn{}
-      i when i in @rook_indices -> %Rook{}
-      i when i in @knight_indices -> %Knight{}
-      i when i in @bishop_indices -> %Bishop{}
-      i when i in @queen_indices -> %Queen{}
-      i when i in @king_indices -> %King{}
+      i when i in @pawn_indices -> Pawn
+      i when i in @rook_indices -> Rook
+      i when i in @knight_indices -> Knight
+      i when i in @bishop_indices -> Bishop
+      i when i in @queen_indices -> Queen
+      i when i in @king_indices -> King
     end
   end
 end
