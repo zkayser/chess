@@ -52,8 +52,8 @@ defmodule Chess.Piece do
   move to.
   """
   @spec potential_moves(t(), starting_position :: index(), Board.t()) :: MapSet.t(index())
-  def potential_moves(%__MODULE__{type: module} = piece, starting_position, board) do
-    module.potential_moves(piece, starting_position, board)
+  def potential_moves(%__MODULE__{type: type_module} = piece, starting_position, board) do
+    type_module.potential_moves(piece, starting_position, board)
   end
 
   @spec type_at_starting_position(index()) :: type()
