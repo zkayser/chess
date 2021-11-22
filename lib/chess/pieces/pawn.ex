@@ -2,11 +2,15 @@ defmodule Chess.Pieces.Pawn do
   @moduledoc """
   Represents a Pawn piece.
   """
+  @behaviour Chess.Piece
+
   alias Chess.Board
+  alias Chess.Board.Square
   alias Chess.Piece
 
-  @spec potential_moves(Piece.t(), position :: non_neg_integer(), Board.t()) ::
-          MapSet.t(position :: non_neg_integer())
+  @impl Piece
+  @spec potential_moves(Piece.t(), Square.index(), Board.t()) ::
+          MapSet.t(Square.index())
   def potential_moves(%Piece{color: color, moves: moves}, starting_position, board) do
     moves
     |> list_of_potential_moves(starting_position, color)
@@ -15,8 +19,8 @@ defmodule Chess.Pieces.Pawn do
     |> MapSet.new()
   end
 
-  @spec list_of_potential_moves(list(non_neg_integer()), non_neg_integer(), Piece.color()) ::
-          list(non_neg_integer())
+  @spec list_of_potential_moves(list(Square.index()), Square.index(), Piece.color()) ::
+          list(Square.index())
   defp list_of_potential_moves(moves, starting_position, color) do
     case moves do
       [] ->
