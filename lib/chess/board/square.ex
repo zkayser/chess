@@ -12,8 +12,8 @@ defmodule Chess.Board.Square do
           color: color(),
           piece: Piece.t()
         }
+  @type index :: non_neg_integer()
   @opaque color :: :white | :black
-  @typep index :: non_neg_integer()
 
   defstruct color: nil,
             piece: :empty
