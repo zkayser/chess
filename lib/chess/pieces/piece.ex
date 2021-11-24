@@ -53,7 +53,8 @@ defmodule Chess.Piece do
   Returns a set of squares that a piece could potentially
   move to.
   """
-  @spec potential_moves(t(), starting_position :: Square.index(), Board.t()) :: MapSet.t(Square.index())
+  @spec potential_moves(t(), starting_position :: Square.index(), Board.t()) ::
+          MapSet.t(Square.index())
   def potential_moves(%__MODULE__{type: type_module} = piece, starting_position, board) do
     type_module.potential_moves(piece, starting_position, board)
   end
