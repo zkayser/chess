@@ -58,7 +58,7 @@ defmodule Chess.BoardTest do
     test "returns the square at the given index" do
       assert %Square{
                color: :white,
-               piece: %Piece{type: Chess.Piece.Rook, color: :black, moves: []}
+               piece: %Piece{type: Chess.Pieces.Rook, color: :black, moves: []}
              } == Board.square_at(Board.layout(), 0)
     end
   end
