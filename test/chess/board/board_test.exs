@@ -53,4 +53,13 @@ defmodule Chess.BoardTest do
       refute Board.in_bounds?(invalid_index)
     end
   end
+
+  describe "square_at/2" do
+    test "returns the square at the given index" do
+      assert %Square{
+               color: :white,
+               piece: %Piece{type: Chess.Piece.Rook, color: :black, moves: []}
+             } == Board.square_at(Board.layout(), 0)
+    end
+  end
 end
