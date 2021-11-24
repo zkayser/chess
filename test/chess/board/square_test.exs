@@ -3,6 +3,7 @@ defmodule Chess.Board.SquareTest do
   use ExUnitProperties
 
   alias Chess.Board.Square
+  alias Chess.Piece
   require Integer
 
   describe "init/1" do
@@ -16,6 +17,16 @@ defmodule Chess.Board.SquareTest do
       check all(index <- filter(integer(0..63), &Integer.is_odd/1)) do
         assert %Square{color: :black} = Square.init(index)
       end
+    end
+  end
+
+  describe "occupied?/1" do
+    test "returns false if the square given is not occupied by a chess piece" do
+      refute Square.occupied?(%Square{piece: nil})
+    end
+
+    test "returns true if the square given contains a chess piece" do
+      assert Square.occupied?(%Square{piece: %Piece{}})
     end
   end
 end
