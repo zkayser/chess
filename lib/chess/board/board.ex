@@ -4,7 +4,8 @@ defmodule Chess.Board do
   """
   alias Chess.Board.Square
 
-  @type t :: :array.array(Square.t())
+  @opaque t :: :array.array(Square.t())
+  @type index :: non_neg_integer()
 
   @bounds 0..63
 
@@ -19,4 +20,7 @@ defmodule Chess.Board do
 
   @spec in_bounds?(integer()) :: boolean()
   def in_bounds?(index), do: index in @bounds
+
+  @spec square_at(t(), index()) :: Square.t()
+  def square_at(board, index), do: :array.get(index, board)
 end
