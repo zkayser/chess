@@ -27,6 +27,10 @@ defmodule Chess.Board.Square do
     }
   end
 
+  @spec occupied?(t()) :: boolean()
+  def occupied?(%__MODULE__{piece: %Piece{}}), do: true
+  def occupied?(_), do: false
+
   @spec color_for(index()) :: color()
   defp color_for(index) when is_even(index), do: :white
   defp color_for(_index), do: :black
