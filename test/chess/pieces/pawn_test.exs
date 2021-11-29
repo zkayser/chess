@@ -40,6 +40,27 @@ defmodule Chess.Pieces.PawnTest do
     end
   end
 
+  describe "potential_moves/3 with at least one prior move taken" do
+    property "returns at most 1 potential move" do
+      check all(piece <- piece_generator(), starting_position <- integer(0..63)) do
+        case piece.moves do
+          [] ->
+            assert Enum.count(
+                     Pawn.potential_moves(
+                       %Piece{piece | moves: [Enum.random(0..63)]},
+                       starting_position,
+                       Board.layout()
+                     )
+                   ) <=
+                     1
+
+          _ ->
+            assert Enum.count(Pawn.potential_moves(piece, starting_position, Board.layout())) <= 1
+        end
+      end
+    end
+  end
+
   def piece_generator do
     gen all(
           type <- constant(Pawn),
