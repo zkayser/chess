@@ -15,7 +15,7 @@ defmodule Chess.Pieces.Pawn do
     moves
     |> list_of_potential_moves(starting_position, color)
     |> Stream.filter(&Board.in_bounds?/1)
-    |> Stream.reject(fn index -> :array.get(index, board) end)
+    |> Stream.reject(&Square.occupied?(Board.square_at(board, &1)))
     |> MapSet.new()
   end
 
