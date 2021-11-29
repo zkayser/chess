@@ -60,6 +60,19 @@ defmodule Chess.BoardTest do
                color: :white,
                piece: %Piece{type: Chess.Pieces.Rook, color: :black, moves: []}
              } == Board.square_at(Board.layout(), 0)
+  describe "Access callbacks" do
+    setup do
+      {:ok, board: Board.layout()}
+    end
+
+    test "fetch/2 returns the square at the given index when index is between 0 and 63", %{
+      board: board
+    } do
+      assert %Square{} = board[Enum.random(Board.bounds())]
+    end
+
+    test "fetch/2 returns an error when the given index is invalid", %{board: board} do
+      assert :error = board[-1]
     end
   end
 end
