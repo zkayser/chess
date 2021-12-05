@@ -9,13 +9,11 @@ defmodule Chess.Pieces.Pawn do
   alias Chess.Piece
 
   @impl Piece
-  @spec potential_moves(Piece.t(), Square.index(), Board.t()) ::
-          MapSet.t(Square.index())
   def potential_moves(%Piece{color: color, moves: moves}, starting_position, board) do
     moves
     |> list_of_potential_moves(starting_position, color)
     |> Stream.filter(&Board.in_bounds?/1)
-    |> Stream.reject(&Square.occupied?(Board.square_at(board, &1)))
+    |> Stream.reject(&Square.occupied?(board[&1]))
     |> MapSet.new()
   end
 
