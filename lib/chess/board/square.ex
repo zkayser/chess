@@ -27,6 +27,14 @@ defmodule Chess.Board.Square do
     }
   end
 
+  @spec occupiable?(t(), Piece.t()) :: boolean()
+  def occupiable?(%__MODULE__{piece: %Piece{color: color}}, %Piece{color: color}), do: false
+
+  def occupiable?(%__MODULE__{piece: %Piece{color: _color}}, %Piece{color: _other_color}),
+    do: true
+
+  def occupiable?(_, _), do: true
+
   @spec occupied?(t()) :: boolean()
   def occupied?(%__MODULE__{piece: %Piece{}}), do: true
   def occupied?(_), do: false
