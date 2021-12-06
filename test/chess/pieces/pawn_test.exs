@@ -41,22 +41,24 @@ defmodule Chess.Pieces.PawnTest do
   end
 
   describe "potential_moves/3 with at least one prior move taken" do
-    property "returns at most 1 potential move" do
+    property "returns at most 3 potential moves where only 1 is a straight move and 2 are diagonal captures" do
       check all(piece <- piece_generator(), starting_position <- integer(0..63)) do
-        case piece.moves do
-          [] ->
-            assert Enum.count(
-                     Pawn.potential_moves(
-                       %Piece{piece | moves: [Enum.random(0..63)]},
-                       starting_position,
-                       Board.layout()
-                     )
-                   ) <=
-                     1
+        piece =
+          case piece.moves do
+            [] -> %Piece{piece | moves: [Enum.random(0..63)]}
+            _ -> piece
+          end
 
-          _ ->
-            assert Enum.count(Pawn.potential_moves(piece, starting_position, Board.layout())) <= 1
-        end
+        potential_moves = Pawn.potential_moves(piece, starting_position, Board.layout())
+        assert Enum.count(potential_moves) <= 3
+
+        {straight_moves, diagonal_captures} =
+          Enum.split_with(potential_moves, fn index ->
+            rem(abs(starting_position - index), 8) == 0
+          end)
+
+        assert Enum.count(straight_moves) <= 1
+        assert Enum.count(diagonal_captures) <= 2
       end
     end
   end
