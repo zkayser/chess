@@ -71,6 +71,21 @@ defmodule Chess.BoardTest do
         assert 0 < row and row < 9
       end
     end
+
+    test "raises when given an out of bound index" do
+      invalid_index =
+        [
+          StreamData.map(StreamData.positive_integer(), fn index -> -index end),
+          StreamData.map(StreamData.positive_integer(), fn index -> index + 64 end)
+        ]
+        |> StreamData.one_of()
+        |> Enum.take(1)
+        |> List.first()
+
+      assert_raise(FunctionClauseError, fn ->
+        _ = Board.index_to_coordinates(invalid_index)
+      end)
+    end
   end
 
   describe "Access callbacks" do
