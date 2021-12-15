@@ -1,5 +1,6 @@
 defmodule Chess.BoardTest do
   use ExUnit.Case
+  use ExUnitProperties
 
   alias Chess.Board
   alias Chess.Board.Square
@@ -85,6 +86,15 @@ defmodule Chess.BoardTest do
       assert_raise(FunctionClauseError, fn ->
         _ = Board.index_to_coordinates(invalid_index)
       end)
+    end
+  end
+
+  describe "coordinates_to_index/1" do
+    property "is the reverse of index_to_coordinates" do
+      check all(index <- StreamData.integer(Board.bounds())) do
+        {column, row} = Board.index_to_coordinates(index)
+        assert index == Board.coordinates_to_index({column, row})
+      end
     end
   end
 
