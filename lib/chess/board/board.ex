@@ -42,6 +42,11 @@ defmodule Chess.Board do
   def index_to_coordinates(index) when index in @bounds,
     do: Map.get(@index_to_column_and_row, index)
 
+  @spec coordinates_to_index(coordinates()) :: index()
+  def coordinates_to_index(coordinates) do
+    Map.get(@column_and_row_to_index, coordinates)
+  end
+
   @impl Access
   @spec fetch(t(), index()) :: {:ok, Square.t()} | :error
   def fetch(board, index) when index in @bounds do
