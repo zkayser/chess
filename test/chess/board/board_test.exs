@@ -78,6 +78,13 @@ defmodule Chess.BoardTest do
       assert is_nil(board[-1])
     end
 
+    test "fetch/2 returns the square at the given column, row combination", %{board: board} do
+      index = Enum.random(Board.bounds())
+      {column, row} = {rem(index, 8) + 1, div(index, 8) + 1}
+
+      assert %Square{} = board[{column, row}]
+    end
+
     test "get_and_update/3 allows squares to be updated", %{board: board} do
       new_square = %Square{
         color: :white,
