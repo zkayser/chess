@@ -19,15 +19,21 @@ defmodule Chess.Pieces.Knight do
 
   @spec list_of_potential_moves(Board.index()) :: list(Board.index())
   defp list_of_potential_moves(starting_index) do
+    {starting_column, starting_row} = Board.index_to_coordinates(starting_index)
+
     [
-      starting_index + 8 * 2 + 1,
-      starting_index + 8 * 2 - 1,
-      starting_index - 8 * 2 + 1,
-      starting_index - 8 * 2 - 1,
-      starting_index + 2 + 8,
-      starting_index + 2 - 8,
-      starting_index - 2 + 8,
-      starting_index - 2 - 8
+      {starting_column + 1, starting_row + 2},
+      {starting_column - 1, starting_row + 2},
+      {starting_column + 1, starting_row - 2},
+      {starting_column - 1, starting_row - 2},
+      {starting_column - 2, starting_row + 1},
+      {starting_column - 2, starting_row - 1},
+      {starting_column + 2, starting_row + 1},
+      {starting_column + 2, starting_row - 1}
     ]
+    |> Stream.reject(fn {column, row} ->
+      min(column, row) < 1 || max(column, row) > 8
+    end)
+    |> Enum.map(&Board.coordinates_to_index/1)
   end
 end
