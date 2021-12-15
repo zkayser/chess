@@ -63,6 +63,16 @@ defmodule Chess.BoardTest do
     end
   end
 
+  describe "index_to_coordinates/1" do
+    test "returns a tuple of {column, row} coordinates for indices in bounds" do
+      for index <- Board.bounds() do
+        assert {column, row} = Board.index_to_coordinates(index)
+        assert 0 < column and column < 9
+        assert 0 < row and row < 9
+      end
+    end
+  end
+
   describe "Access callbacks" do
     setup do
       {:ok, board: Board.layout()}
