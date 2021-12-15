@@ -11,12 +11,16 @@ defmodule Chess.Board do
         }
   @opaque board :: :array.array(Square.t())
   @type index :: non_neg_integer()
+  @type coordinates :: {non_neg_integer(), non_neg_integer()}
 
   defstruct [:board]
 
   @bounds 0..63
   @column_and_row_to_index Enum.reduce(@bounds, %{}, fn index, lookups ->
                              Map.put(lookups, {rem(index, 8) + 1, div(index, 8) + 1}, index)
+                           end)
+  @index_to_column_and_row Enum.reduce(@bounds, %{}, fn index, lookups ->
+                             Map.put(lookups, index, {rem(index, 8) + 1, div(index, 8) + 1})
                            end)
 
   @spec layout() :: t()
@@ -33,6 +37,10 @@ defmodule Chess.Board do
 
   @spec square_at(t(), index()) :: Square.t()
   def square_at(%__MODULE__{board: board}, index), do: :array.get(index, board)
+
+  @spec index_to_coordinates(index()) :: coordinates()
+  def index_to_coordinates(index) when index in @bounds,
+    do: Map.get(@index_to_column_and_row, index)
 
   @impl Access
   @spec fetch(t(), index()) :: {:ok, Square.t()} | :error
