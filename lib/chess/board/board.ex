@@ -15,6 +15,9 @@ defmodule Chess.Board do
   defstruct [:board]
 
   @bounds 0..63
+  @column_and_row_to_index Enum.reduce(@bounds, %{}, fn index, lookups ->
+                             Map.put(lookups, {rem(index, 8) + 1, div(index, 8) + 1}, index)
+                           end)
 
   @spec layout() :: t()
   def layout do
@@ -34,6 +37,11 @@ defmodule Chess.Board do
   @impl Access
   @spec fetch(t(), index()) :: {:ok, Square.t()} | :error
   def fetch(board, index) when index in @bounds do
+    {:ok, square_at(board, index)}
+  end
+
+  def fetch(board, {column, row}) when column < 9 and column > 0 and row < 9 and row > 0 do
+    index = Map.get(@column_and_row_to_index, {column, row})
     {:ok, square_at(board, index)}
   end
 
