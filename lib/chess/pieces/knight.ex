@@ -17,23 +17,23 @@ defmodule Chess.Pieces.Knight do
     |> MapSet.new()
   end
 
-  @spec list_of_potential_moves(Board.index()) :: list(Board.index())
+  @spec list_of_potential_moves(Board.index()) :: Enumerable.t()
   defp list_of_potential_moves(starting_index) do
     {starting_column, starting_row} = Board.index_to_coordinates(starting_index)
 
     [
       {starting_column + 1, starting_row + 2},
-      {starting_column - 1, starting_row + 2},
       {starting_column + 1, starting_row - 2},
+      {starting_column + 2, starting_row + 1},
+      {starting_column + 2, starting_row - 1},
+      {starting_column - 1, starting_row + 2},
       {starting_column - 1, starting_row - 2},
       {starting_column - 2, starting_row + 1},
-      {starting_column - 2, starting_row - 1},
-      {starting_column + 2, starting_row + 1},
-      {starting_column + 2, starting_row - 1}
+      {starting_column - 2, starting_row - 1}
     ]
     |> Stream.reject(fn {column, row} ->
       min(column, row) < 1 || max(column, row) > 8
     end)
-    |> Enum.map(&Board.coordinates_to_index/1)
+    |> Stream.map(&Board.coordinates_to_index/1)
   end
 end
