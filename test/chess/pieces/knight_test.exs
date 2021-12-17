@@ -8,83 +8,88 @@ defmodule Chess.Pieces.KnightTest do
   alias Chess.Test.BoardHelpers
 
   describe "potential_moves/3 with empty board," do
-    test "allows knights in the middle of the board 8 potential moves" do
-      board = BoardHelpers.empty_board()
-      starting_index = 35
-      piece = %Piece{type: Knight}
-      square = :array.get(starting_index, board.board)
-      square = %Square{square | piece: piece}
-      board = %Board{board: :array.set(starting_index, square, board.board)}
+    for corner <- [{1, 1}, {1, 8}, {8, 1}, {8, 8}] do
+      test "lists two moves for knights in corner position #{inspect(corner)}" do
+        board = BoardHelpers.empty_board()
+        starting_index = Board.coordinates_to_index(unquote(corner))
+        piece = %Piece{type: Knight}
+        square = :array.get(starting_index, board.board)
+        square = %Square{square | piece: piece}
+        board = %Board{board: :array.set(starting_index, square, board.board)}
 
-      assert MapSet.new([18, 20, 25, 29, 41, 45, 50, 52]) ==
-               Knight.potential_moves(piece, starting_index, board)
+        assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 2
+      end
     end
 
-    test "allows knights in the lower right corner 2 potential moves" do
-      board = BoardHelpers.empty_board()
-      starting_index = 63
-      piece = %Piece{type: Knight}
-      square = :array.get(starting_index, board.board)
-      square = %Square{square | piece: piece}
-      board = %Board{board: :array.set(starting_index, square, board.board)}
+    for edge <-
+          Enum.flat_map(3..6, fn middle ->
+            [{1, middle}, {8, middle}, {middle, 1}, {middle, 8}]
+          end) do
+      test "lists four potential moves for knights along vertical side #{inspect(edge)}" do
+        board = BoardHelpers.empty_board()
+        starting_index = Board.coordinates_to_index(unquote(edge))
+        piece = %Piece{type: Knight}
+        square = :array.get(starting_index, board.board)
+        square = %Square{square | piece: piece}
+        board = %Board{board: :array.set(starting_index, square, board.board)}
 
-      assert MapSet.new([46, 53]) == Knight.potential_moves(piece, starting_index, board)
+        assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 4
+      end
     end
 
-    test "allows knights in the lower left corner 2 potential moves" do
-      board = BoardHelpers.empty_board()
-      starting_index = 56
-      piece = %Piece{type: Knight}
-      square = :array.get(starting_index, board.board)
-      square = %Square{square | piece: piece}
-      board = %Board{board: :array.set(starting_index, square, board.board)}
+    for edge_adjacent <-
+          Enum.flat_map(3..6, fn middle ->
+            [{2, middle}, {7, middle}, {middle, 2}, {middle, 7}]
+          end) do
+      test "lists six potential moves for knights in edge-adjacent position #{inspect(edge_adjacent)}" do
+        board = BoardHelpers.empty_board()
+        starting_index = Board.coordinates_to_index(unquote(edge_adjacent))
+        piece = %Piece{type: Knight}
+        square = :array.get(starting_index, board.board)
+        square = %Square{square | piece: piece}
+        board = %Board{board: :array.set(starting_index, square, board.board)}
 
-      assert MapSet.new([41, 50]) == Knight.potential_moves(piece, starting_index, board)
+        assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 6
+      end
     end
 
-    test "allows knights in the upper left corner 2 potential moves" do
-      board = BoardHelpers.empty_board()
-      starting_index = 0
-      piece = %Piece{type: Knight}
-      square = :array.get(starting_index, board.board)
-      square = %Square{square | piece: piece}
-      board = %Board{board: :array.set(starting_index, square, board.board)}
+    for corner_adjacent <- [{1, 2}, {1, 7}, {2, 1}, {7, 1}] do
+      test "lists three potential moves for knights in corner-adjacent position #{inspect(corner_adjacent)}" do
+        board = BoardHelpers.empty_board()
+        starting_index = Board.coordinates_to_index(unquote(corner_adjacent))
+        piece = %Piece{type: Knight}
+        square = :array.get(starting_index, board.board)
+        square = %Square{square | piece: piece}
+        board = %Board{board: :array.set(starting_index, square, board.board)}
 
-      assert MapSet.new([10, 17]) == Knight.potential_moves(piece, starting_index, board)
+        assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 3
+      end
     end
 
-    test "allows knights in the upper right corner 2 potential moves" do
-      board = BoardHelpers.empty_board()
-      starting_index = 7
-      piece = %Piece{type: Knight}
-      square = :array.get(starting_index, board.board)
-      square = %Square{square | piece: piece}
-      board = %Board{board: :array.set(starting_index, square, board.board)}
+    for inner_corner <- [{2, 2}, {2, 7}, {7, 2}, {7, 7}] do
+      test "lists four potential moves for knights in inner corner position #{inspect(inner_corner)}" do
+        board = BoardHelpers.empty_board()
+        starting_index = Board.coordinates_to_index(unquote(inner_corner))
+        piece = %Piece{type: Knight}
+        square = :array.get(starting_index, board.board)
+        square = %Square{square | piece: piece}
+        board = %Board{board: :array.set(starting_index, square, board.board)}
 
-      assert MapSet.new([13, 22]) == Knight.potential_moves(piece, starting_index, board)
+        assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 4
+      end
     end
 
-    test "allows knights in column 1 in the middle of the board 4 moves" do
-      board = BoardHelpers.empty_board()
-      starting_index = Board.coordinates_to_index({1, 4})
-      piece = %Piece{type: Knight}
-      square = :array.get(starting_index, board.board)
-      square = %Square{square | piece: piece}
-      board = %Board{board: :array.set(starting_index, square, board.board)}
+    for middle <- for(x <- 3..6, y <- 6..3, do: {x, y}) do
+      test "lists eight potential moves for knights in middle position #{inspect(middle)}" do
+        board = BoardHelpers.empty_board()
+        starting_index = Board.coordinates_to_index(unquote(middle))
+        piece = %Piece{type: Knight}
+        square = :array.get(starting_index, board.board)
+        square = %Square{square | piece: piece}
+        board = %Board{board: :array.set(starting_index, square, board.board)}
 
-      assert MapSet.new([9, 18, 34, 41]) == Knight.potential_moves(piece, starting_index, board)
-    end
-
-    test "allows knights in column 8 in the middle of the board 4 moves" do
-      board = BoardHelpers.empty_board()
-      # Starting index => 31
-      starting_index = Board.coordinates_to_index({8, 4})
-      piece = %Piece{type: Knight}
-      square = :array.get(starting_index, board.board)
-      square = %Square{square | piece: piece}
-      board = %Board{board: :array.set(starting_index, square, board.board)}
-
-      assert MapSet.new([14, 21, 37, 46]) == Knight.potential_moves(piece, starting_index, board)
+        assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 8
+      end
     end
   end
 end
