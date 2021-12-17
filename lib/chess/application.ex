@@ -10,6 +10,8 @@ defmodule Chess.Application do
     children = [
       # Start the Ecto repository
       Chess.Repo,
+      # Start Nebulex-based caches
+      Chess.Pieces.MoveCache,
       # Start the Telemetry supervisor
       ChessWeb.Telemetry,
       # Start the PubSub system
