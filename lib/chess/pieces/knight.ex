@@ -2,6 +2,8 @@ defmodule Chess.Pieces.Knight do
   @moduledoc """
   Represents a Knight piece.
   """
+  use Nebulex.Caching
+
   @behaviour Chess.Piece
 
   alias Chess.Piece
@@ -17,6 +19,7 @@ defmodule Chess.Pieces.Knight do
     |> MapSet.new()
   end
 
+  @decorate cacheable(cache: Chess.Pieces.MoveCache)
   @spec list_of_potential_moves(Board.index()) :: Enumerable.t()
   defp list_of_potential_moves(starting_index) do
     {starting_column, starting_row} = Board.index_to_coordinates(starting_index)
