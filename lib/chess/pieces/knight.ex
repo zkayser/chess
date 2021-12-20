@@ -11,11 +11,11 @@ defmodule Chess.Pieces.Knight do
   alias Chess.Board.Square
 
   @impl Piece
-  def potential_moves(_knight, starting_position, board) do
+  def potential_moves(knight, starting_position, board) do
     starting_position
     |> list_of_potential_moves()
     |> Stream.filter(&Board.in_bounds?/1)
-    |> Stream.reject(&Square.occupied?(board[&1]))
+    |> Stream.filter(&Square.occupiable?(board[&1], knight))
     |> MapSet.new()
   end
 
