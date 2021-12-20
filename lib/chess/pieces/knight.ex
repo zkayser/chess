@@ -6,9 +6,9 @@ defmodule Chess.Pieces.Knight do
 
   @behaviour Chess.Piece
 
-  alias Chess.Piece
   alias Chess.Board
   alias Chess.Board.Square
+  alias Chess.Piece
 
   @impl Piece
   def potential_moves(knight, starting_position, board) do
