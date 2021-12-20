@@ -1,4 +1,7 @@
 defmodule Chess.Test.BoardHelpers do
+  @moduledoc """
+  Test helpers for building Chess boards.
+  """
   alias Chess.Board
   alias Chess.Board.Square
 
