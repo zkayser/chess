@@ -92,4 +92,50 @@ defmodule Chess.Pieces.KnightTest do
       end
     end
   end
+
+  describe "potential_moves/3 starting in middle with non-empty board" do
+    starting_coordinates = {4, 4}
+
+    for reachable_coordinates <- [{3, 2}, {5, 2}, {2, 3}, {6, 3}, {2, 5}, {6, 5}, {3, 6}, {5, 6}] do
+      test "black piece starting at #{inspect(starting_coordinates)} cannot replace black piece at #{inspect(reachable_coordinates)}" do
+        board = BoardHelpers.empty_board()
+        piece_1 = %Piece{color: :black, type: Knight}
+        piece_2 = %Piece{color: :black, type: Knight}
+
+        middle = Board.coordinates_to_index(unquote(starting_coordinates))
+        reachable_coordinate = Board.coordinates_to_index(unquote(reachable_coordinates))
+
+        square_1 = %Square{piece: piece_1}
+        square_2 = %Square{piece: piece_2}
+
+        board = %Board{board | board: :array.set(middle, square_1, board.board)}
+        board = %Board{board | board: :array.set(reachable_coordinate, square_2, board.board)}
+
+        refute MapSet.member?(
+                 Knight.potential_moves(piece_1, middle, board),
+                 reachable_coordinate
+               )
+      end
+
+      test "black piece starting at #{inspect(starting_coordinates)} can overtake white piece at #{inspect(reachable_coordinates)}" do
+        board = BoardHelpers.empty_board()
+        piece_1 = %Piece{color: :black, type: Knight}
+        piece_2 = %Piece{color: :white, type: Knight}
+
+        middle = Board.coordinates_to_index(unquote(starting_coordinates))
+        reachable_coordinate = Board.coordinates_to_index(unquote(reachable_coordinates))
+
+        square_1 = %Square{piece: piece_1}
+        square_2 = %Square{piece: piece_2}
+
+        board = %Board{board | board: :array.set(middle, square_1, board.board)}
+        board = %Board{board | board: :array.set(reachable_coordinate, square_2, board.board)}
+
+        assert MapSet.member?(
+                 Knight.potential_moves(piece_1, middle, board),
+                 reachable_coordinate
+               )
+      end
+    end
+  end
 end
