@@ -2,7 +2,6 @@ defmodule Chess.Pieces.KnightTest do
   use ExUnit.Case
 
   alias Chess.Board
-  alias Chess.Board.Square
   alias Chess.Piece
   alias Chess.Pieces.Knight
   alias Chess.Test.BoardHelpers
@@ -13,9 +12,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(corner))
         piece = %Piece{type: Knight}
-        square = :array.get(starting_index, board.board)
-        square = %Square{square | piece: piece}
-        board = %Board{board: :array.set(starting_index, square, board.board)}
+        board = %Board{board: :array.set(starting_index, piece, board.board)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 2
       end
@@ -29,9 +26,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(edge))
         piece = %Piece{type: Knight}
-        square = :array.get(starting_index, board.board)
-        square = %Square{square | piece: piece}
-        board = %Board{board: :array.set(starting_index, square, board.board)}
+        board = %Board{board: :array.set(starting_index, piece, board.board)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 4
       end
@@ -45,9 +40,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(edge_adjacent))
         piece = %Piece{type: Knight}
-        square = :array.get(starting_index, board.board)
-        square = %Square{square | piece: piece}
-        board = %Board{board: :array.set(starting_index, square, board.board)}
+        board = %Board{board: :array.set(starting_index, piece, board.board)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 6
       end
@@ -58,9 +51,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(corner_adjacent))
         piece = %Piece{type: Knight}
-        square = :array.get(starting_index, board.board)
-        square = %Square{square | piece: piece}
-        board = %Board{board: :array.set(starting_index, square, board.board)}
+        board = %Board{board: :array.set(starting_index, piece, board.board)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 3
       end
@@ -71,9 +62,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(inner_corner))
         piece = %Piece{type: Knight}
-        square = :array.get(starting_index, board.board)
-        square = %Square{square | piece: piece}
-        board = %Board{board: :array.set(starting_index, square, board.board)}
+        board = %Board{board: :array.set(starting_index, piece, board.board)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 4
       end
@@ -84,9 +73,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(middle))
         piece = %Piece{type: Knight}
-        square = :array.get(starting_index, board.board)
-        square = %Square{square | piece: piece}
-        board = %Board{board: :array.set(starting_index, square, board.board)}
+        board = %Board{board: :array.set(starting_index, piece, board.board)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 8
       end
@@ -105,11 +92,8 @@ defmodule Chess.Pieces.KnightTest do
         middle = Board.coordinates_to_index(unquote(starting_coordinates))
         reachable_coordinate = Board.coordinates_to_index(unquote(reachable_coordinates))
 
-        square_1 = %Square{piece: piece_1}
-        square_2 = %Square{piece: piece_2}
-
-        board = %Board{board | board: :array.set(middle, square_1, board.board)}
-        board = %Board{board | board: :array.set(reachable_coordinate, square_2, board.board)}
+        board = %Board{board | board: :array.set(middle, piece_1, board.board)}
+        board = %Board{board | board: :array.set(reachable_coordinate, piece_2, board.board)}
 
         refute MapSet.member?(
                  Knight.potential_moves(piece_1, middle, board),
@@ -125,11 +109,8 @@ defmodule Chess.Pieces.KnightTest do
         middle = Board.coordinates_to_index(unquote(starting_coordinates))
         reachable_coordinate = Board.coordinates_to_index(unquote(reachable_coordinates))
 
-        square_1 = %Square{piece: piece_1}
-        square_2 = %Square{piece: piece_2}
-
-        board = %Board{board | board: :array.set(middle, square_1, board.board)}
-        board = %Board{board | board: :array.set(reachable_coordinate, square_2, board.board)}
+        board = %Board{board | board: :array.set(middle, piece_1, board.board)}
+        board = %Board{board | board: :array.set(reachable_coordinate, piece_2, board.board)}
 
         assert MapSet.member?(
                  Knight.potential_moves(piece_1, middle, board),
