@@ -8,9 +8,10 @@ defmodule Chess.Pieces.King do
   alias Chess.Piece
 
   @impl Piece
-  def potential_moves(_king, starting_index, _board) do
+  def potential_moves(king, starting_index, board) do
     starting_index
     |> list_of_potential_moves()
+    |> reject_capturable_indices(king, board)
     |> MapSet.new()
   end
 
@@ -32,5 +33,25 @@ defmodule Chess.Pieces.King do
       min(column, row) < 1 || max(column, row) > 8
     end)
     |> Stream.map(&Board.coordinates_to_index/1)
+  end
+
+  _docp = """
+  This prevents a King from moving itself into check (and violating a rule of chess).
+  """
+
+  @spec reject_capturable_indices(Enumerable.t(), Piece.t(), Board.t()) :: Enumerable.t()
+  defp reject_capturable_indices(stream, %Piece{color: king_color}, board) do
+    capturable_index_set_reducer = fn
+      index, %Piece{color: color} = piece, capturable_index_set when color != king_color ->
+        MapSet.union(capturable_index_set, Piece.potential_moves(piece, index, board))
+
+      _index, _same_color, capturable_index_set ->
+        capturable_index_set
+    end
+
+    capturable_index_set =
+      :array.sparse_foldl(capturable_index_set_reducer, MapSet.new(), board.grid)
+
+    Stream.reject(stream, &MapSet.member?(capturable_index_set, &1))
   end
 end
