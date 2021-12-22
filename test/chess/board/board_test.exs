@@ -10,14 +10,14 @@ defmodule Chess.BoardTest do
   describe "layout/0" do
     test "creates a board of 64 squares" do
       board = Board.layout()
-      assert :array.size(board.board) == 64
+      assert :array.size(board.grid) == 64
 
       :array.map(
         fn
           index, piece when index in @occupied_indices -> assert match?(%Piece{}, piece)
           _, piece -> assert is_nil(piece)
         end,
-        board.board
+        board.grid
       )
     end
 
@@ -25,7 +25,7 @@ defmodule Chess.BoardTest do
       board = Board.layout()
 
       for non_empty_square <- Enum.concat(0..15, 48..63) do
-        assert %Piece{} = :array.get(non_empty_square, board.board)
+        assert %Piece{} = :array.get(non_empty_square, board.grid)
       end
     end
 
@@ -33,7 +33,7 @@ defmodule Chess.BoardTest do
       board = Board.layout()
 
       for empty_square <- 16..47 do
-        assert is_nil(:array.get(empty_square, board.board))
+        assert is_nil(:array.get(empty_square, board.grid))
       end
     end
   end

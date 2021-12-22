@@ -6,14 +6,14 @@ defmodule Chess.Board do
 
   alias Chess.Piece
 
-  @type t :: %__MODULE__{
-          board: :array.array(Piece.t())
-        }
   @opaque board :: :array.array(Piece.t())
+  @type t :: %__MODULE__{
+          grid: board()
+        }
   @type index :: non_neg_integer()
   @type coordinates :: {non_neg_integer(), non_neg_integer()}
 
-  defstruct [:board]
+  defstruct [:grid]
 
   @bounds 0..63
   @column_and_row_to_index Enum.reduce(@bounds, %{}, fn index, lookups ->
@@ -26,7 +26,7 @@ defmodule Chess.Board do
   @spec layout() :: t()
   def layout do
     board = :array.new(size: 64, fixed: true, default: nil)
-    %__MODULE__{board: :array.map(fn index, _ -> Piece.for_starting_position(index) end, board)}
+    %__MODULE__{grid: :array.map(fn index, _ -> Piece.for_starting_position(index) end, board)}
   end
 
   @spec bounds() :: Range.t(0, 63)
@@ -36,7 +36,7 @@ defmodule Chess.Board do
   def in_bounds?(index), do: index in @bounds
 
   @spec square_at(t(), index()) :: Piece.t()
-  def square_at(%__MODULE__{board: board}, index), do: :array.get(index, board)
+  def square_at(%__MODULE__{grid: board}, index), do: :array.get(index, board)
 
   @spec index_to_coordinates(index()) :: coordinates()
   def index_to_coordinates(index) when index in @bounds,
@@ -63,17 +63,17 @@ defmodule Chess.Board do
   @impl Access
   @spec get_and_update(t(), index(), (Piece.t() -> {Piece.t(), Piece.t()})) ::
           {Piece.t(), t()}
-  def get_and_update(board, index, function) do
+  def get_and_update(%__MODULE__{grid: grid} = board, index, function) do
     {current_piece, new_piece} = function.(board[index])
 
-    new_board =
+    new_grid =
       :array.set(
         index,
         new_piece,
-        board.board
+        grid
       )
 
-    {current_piece, %__MODULE__{board: new_board}}
+    {current_piece, %__MODULE__{grid: new_grid}}
   end
 
   @impl Access
