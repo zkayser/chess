@@ -12,7 +12,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(corner))
         piece = %Piece{type: Knight}
-        board = %Board{board: :array.set(starting_index, piece, board.board)}
+        board = %Board{grid: :array.set(starting_index, piece, board.grid)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 2
       end
@@ -26,7 +26,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(edge))
         piece = %Piece{type: Knight}
-        board = %Board{board: :array.set(starting_index, piece, board.board)}
+        board = %Board{grid: :array.set(starting_index, piece, board.grid)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 4
       end
@@ -40,7 +40,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(edge_adjacent))
         piece = %Piece{type: Knight}
-        board = %Board{board: :array.set(starting_index, piece, board.board)}
+        board = %Board{grid: :array.set(starting_index, piece, board.grid)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 6
       end
@@ -51,7 +51,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(corner_adjacent))
         piece = %Piece{type: Knight}
-        board = %Board{board: :array.set(starting_index, piece, board.board)}
+        board = %Board{grid: :array.set(starting_index, piece, board.grid)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 3
       end
@@ -62,7 +62,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(inner_corner))
         piece = %Piece{type: Knight}
-        board = %Board{board: :array.set(starting_index, piece, board.board)}
+        board = %Board{grid: :array.set(starting_index, piece, board.grid)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 4
       end
@@ -73,7 +73,7 @@ defmodule Chess.Pieces.KnightTest do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(middle))
         piece = %Piece{type: Knight}
-        board = %Board{board: :array.set(starting_index, piece, board.board)}
+        board = %Board{grid: :array.set(starting_index, piece, board.grid)}
 
         assert Enum.count(Knight.potential_moves(piece, starting_index, board)) == 8
       end
@@ -92,8 +92,8 @@ defmodule Chess.Pieces.KnightTest do
         middle = Board.coordinates_to_index(unquote(starting_coordinates))
         reachable_coordinate = Board.coordinates_to_index(unquote(reachable_coordinates))
 
-        board = %Board{board | board: :array.set(middle, piece_1, board.board)}
-        board = %Board{board | board: :array.set(reachable_coordinate, piece_2, board.board)}
+        board = %Board{board | grid: :array.set(middle, piece_1, board.grid)}
+        board = %Board{board | grid: :array.set(reachable_coordinate, piece_2, board.grid)}
 
         refute MapSet.member?(
                  Knight.potential_moves(piece_1, middle, board),
@@ -109,8 +109,8 @@ defmodule Chess.Pieces.KnightTest do
         middle = Board.coordinates_to_index(unquote(starting_coordinates))
         reachable_coordinate = Board.coordinates_to_index(unquote(reachable_coordinates))
 
-        board = %Board{board | board: :array.set(middle, piece_1, board.board)}
-        board = %Board{board | board: :array.set(reachable_coordinate, piece_2, board.board)}
+        board = %Board{board | grid: :array.set(middle, piece_1, board.grid)}
+        board = %Board{board | grid: :array.set(reachable_coordinate, piece_2, board.grid)}
 
         assert MapSet.member?(
                  Knight.potential_moves(piece_1, middle, board),

@@ -10,6 +10,6 @@ defmodule Chess.Test.BoardHelpers do
   @spec empty_board() :: Board.t()
   def empty_board do
     board = :array.new(size: 64, fixed: true, default: nil)
-    %Board{board: board}
+    %Board{grid: board}
   end
 end

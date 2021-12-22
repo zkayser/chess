@@ -13,7 +13,7 @@ defmodule Chess.Pieces.KingTest do
         starting_index = Board.coordinates_to_index(unquote(corner))
         king = %Piece{type: King}
 
-        board = %Board{board: :array.set(starting_index, king, board.board)}
+        board = %Board{grid: :array.set(starting_index, king, board.grid)}
 
         assert Enum.count(King.potential_moves(king, starting_index, board)) == 3
       end
@@ -25,7 +25,7 @@ defmodule Chess.Pieces.KingTest do
         starting_index = Board.coordinates_to_index(unquote(vertical_edge))
         king = %Piece{type: King}
 
-        board = %Board{board: :array.set(starting_index, king, board.board)}
+        board = %Board{grid: :array.set(starting_index, king, board.grid)}
 
         assert Enum.count(King.potential_moves(king, starting_index, board)) == 5
       end
@@ -37,7 +37,7 @@ defmodule Chess.Pieces.KingTest do
         starting_index = Board.coordinates_to_index(unquote(horizontal_edge))
         king = %Piece{type: King}
 
-        board = %Board{board: :array.set(starting_index, king, board.board)}
+        board = %Board{grid: :array.set(starting_index, king, board.grid)}
 
         assert Enum.count(King.potential_moves(king, starting_index, board)) == 5
       end
@@ -49,7 +49,7 @@ defmodule Chess.Pieces.KingTest do
         starting_index = Board.coordinates_to_index(unquote(middle))
         king = %Piece{type: King}
 
-        board = %Board{board: :array.set(starting_index, king, board.board)}
+        board = %Board{grid: :array.set(starting_index, king, board.grid)}
 
         assert Enum.count(King.potential_moves(king, starting_index, board)) == 8
       end
