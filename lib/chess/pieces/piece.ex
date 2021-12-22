@@ -4,7 +4,6 @@ defmodule Chess.Piece do
   functions.
   """
   alias Chess.Board
-  alias Chess.Board.Square
   alias Chess.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
 
   @type t() ::
@@ -37,7 +36,7 @@ defmodule Chess.Piece do
   iex> Chess.Piece.for_starting_position(0)
   %Chess.Piece{type: Chess.Pieces.Rook, color: :black}
   """
-  @spec for_starting_position(Square.index()) :: t()
+  @spec for_starting_position(Board.index()) :: t()
   def for_starting_position(index) when index in @empty_indices, do: nil
 
   def for_starting_position(index) do
@@ -47,19 +46,19 @@ defmodule Chess.Piece do
     }
   end
 
-  @callback potential_moves(t(), Square.index(), Board.t()) :: MapSet.t(Square.index())
+  @callback potential_moves(t(), Board.index(), Board.t()) :: MapSet.t(Board.index())
 
   @doc """
   Returns a set of squares that a piece could potentially
   move to.
   """
-  @spec potential_moves(t(), starting_position :: Square.index(), Board.t()) ::
-          MapSet.t(Square.index())
+  @spec potential_moves(t(), starting_position :: Board.index(), Board.t()) ::
+          MapSet.t(Board.index())
   def potential_moves(%__MODULE__{type: type_module} = piece, starting_position, board) do
     type_module.potential_moves(piece, starting_position, board)
   end
 
-  @spec type_at_starting_position(Square.index()) :: type()
+  @spec type_at_starting_position(Board.index()) :: type()
   defp type_at_starting_position(index) do
     case index do
       i when i in @pawn_indices -> Pawn
