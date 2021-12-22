@@ -3,21 +3,29 @@ defmodule Chess.BoardTest do
   use ExUnitProperties
 
   alias Chess.Board
-  alias Chess.Board.Square
   alias Chess.Piece
+
+  @occupied_indices Enum.concat(0..15, 48..63)
 
   describe "layout/0" do
     test "creates a board of 64 squares" do
       board = Board.layout()
       assert :array.size(board.board) == 64
-      :array.map(fn _, square -> match?(%Square{}, square) end, board.board)
+
+      :array.map(
+        fn
+          index, piece when index in @occupied_indices -> assert match?(%Piece{}, piece)
+          _, piece -> assert is_nil(piece)
+        end,
+        board.board
+      )
     end
 
     test "places chess pieces on squares 0 through 15 and 48 through 63" do
       board = Board.layout()
 
       for non_empty_square <- Enum.concat(0..15, 48..63) do
-        assert %Square{piece: %Piece{}} = :array.get(non_empty_square, board.board)
+        assert %Piece{} = :array.get(non_empty_square, board.board)
       end
     end
 
@@ -25,7 +33,7 @@ defmodule Chess.BoardTest do
       board = Board.layout()
 
       for empty_square <- 16..47 do
-        assert %Square{piece: nil} = :array.get(empty_square, board.board)
+        assert is_nil(:array.get(empty_square, board.board))
       end
     end
   end
@@ -57,10 +65,8 @@ defmodule Chess.BoardTest do
 
   describe "square_at/2" do
     test "returns the square at the given index" do
-      assert %Square{
-               color: :white,
-               piece: %Piece{type: Chess.Pieces.Rook, color: :black, moves: []}
-             } == Board.square_at(Board.layout(), 0)
+      assert %Piece{type: Chess.Pieces.Rook, color: :black, moves: []} ==
+               Board.square_at(Board.layout(), 0)
     end
   end
 
@@ -106,7 +112,12 @@ defmodule Chess.BoardTest do
     test "fetch/2 returns the square at the given index when index is between 0 and 63", %{
       board: board
     } do
-      assert %Square{} = board[Enum.random(Board.bounds())]
+      index = Enum.random(Board.bounds())
+
+      case index in @occupied_indices do
+        true -> assert %Piece{} = board[index]
+        false -> assert is_nil(board[index])
+      end
     end
 
     test "fetch/2 returns an error when the given index is invalid", %{board: board} do
@@ -117,19 +128,16 @@ defmodule Chess.BoardTest do
       index = Enum.random(Board.bounds())
       {column, row} = {rem(index, 8) + 1, div(index, 8) + 1}
 
-      assert %Square{} = board[{column, row}]
+      case index in @occupied_indices do
+        true -> assert %Piece{} = board[{column, row}]
+        false -> assert is_nil(board[{column, row}])
+      end
     end
 
     test "get_and_update/3 allows squares to be updated", %{board: board} do
-      new_square = %Square{
-        color: :white,
-        piece: %Piece{type: Chess.Pieces.King, color: :white, moves: []}
-      }
+      new_square = %Piece{type: Chess.Pieces.King, color: :white, moves: []}
 
-      current_square = %Square{
-        color: :white,
-        piece: %Piece{type: Chess.Pieces.Rook, color: :black, moves: []}
-      }
+      current_square = %Piece{type: Chess.Pieces.Rook, color: :black, moves: []}
 
       assert {^current_square, new_board} =
                Board.get_and_update(board, 0, fn current -> {current, new_square} end)
@@ -140,10 +148,7 @@ defmodule Chess.BoardTest do
     test "pop/2 returns the square at the given index but is a no-op on the board", %{
       board: board
     } do
-      square = %Square{
-        color: :white,
-        piece: %Piece{type: Chess.Pieces.Rook, color: :black, moves: []}
-      }
+      square = %Piece{type: Chess.Pieces.Rook, color: :black, moves: []}
 
       assert {^square, ^board} = Board.pop(board, 0)
     end

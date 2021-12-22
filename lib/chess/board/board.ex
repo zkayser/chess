@@ -4,12 +4,12 @@ defmodule Chess.Board do
   """
   @behaviour Access
 
-  alias Chess.Board.Square
+  alias Chess.Piece
 
   @type t :: %__MODULE__{
-          board: :array.array(Square.t())
+          board: :array.array(Piece.t())
         }
-  @opaque board :: :array.array(Square.t())
+  @opaque board :: :array.array(Piece.t())
   @type index :: non_neg_integer()
   @type coordinates :: {non_neg_integer(), non_neg_integer()}
 
@@ -25,8 +25,8 @@ defmodule Chess.Board do
 
   @spec layout() :: t()
   def layout do
-    board = :array.new(size: 64, fixed: true, default: :empty)
-    %__MODULE__{board: :array.map(fn index, _ -> Square.init(index) end, board)}
+    board = :array.new(size: 64, fixed: true, default: nil)
+    %__MODULE__{board: :array.map(fn index, _ -> Piece.for_starting_position(index) end, board)}
   end
 
   @spec bounds() :: Range.t(0, 63)
@@ -35,7 +35,7 @@ defmodule Chess.Board do
   @spec in_bounds?(integer()) :: boolean()
   def in_bounds?(index), do: index in @bounds
 
-  @spec square_at(t(), index()) :: Square.t()
+  @spec square_at(t(), index()) :: Piece.t()
   def square_at(%__MODULE__{board: board}, index), do: :array.get(index, board)
 
   @spec index_to_coordinates(index()) :: coordinates()
@@ -48,7 +48,7 @@ defmodule Chess.Board do
   end
 
   @impl Access
-  @spec fetch(t(), index()) :: {:ok, Square.t()} | :error
+  @spec fetch(t(), index()) :: {:ok, Piece.t()} | :error
   def fetch(board, index) when index in @bounds do
     {:ok, square_at(board, index)}
   end
@@ -61,23 +61,23 @@ defmodule Chess.Board do
   def fetch(_board, _index), do: :error
 
   @impl Access
-  @spec get_and_update(t(), index(), (Square.t() -> {Square.t(), Square.t()})) ::
-          {Square.t(), t()}
+  @spec get_and_update(t(), index(), (Piece.t() -> {Piece.t(), Piece.t()})) ::
+          {Piece.t(), t()}
   def get_and_update(board, index, function) do
-    {current_square, new_square} = function.(board[index])
+    {current_piece, new_piece} = function.(board[index])
 
     new_board =
       :array.set(
         index,
-        new_square,
+        new_piece,
         board.board
       )
 
-    {current_square, %__MODULE__{board: new_board}}
+    {current_piece, %__MODULE__{board: new_board}}
   end
 
   @impl Access
-  @spec pop(t(), index()) :: {Square.t(), t()}
+  @spec pop(t(), index()) :: {Piece.t(), t()}
   def pop(board, index) when index in @bounds do
     {square_at(board, index), board}
   end
