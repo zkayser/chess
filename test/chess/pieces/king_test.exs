@@ -54,5 +54,23 @@ defmodule Chess.Pieces.KingTest do
         assert Enum.count(King.potential_moves(king, starting_index, board)) == 8
       end
     end
+
+    # TODO: Improve tests on this to assert a King cannot move itself in
+    # check against ALL types of opposing pieces.
+    test "does not allow a king to move itself into check" do
+      board = BoardHelpers.empty_board()
+      starting_index = 4
+      king = %Piece{color: :white, type: King}
+      opposing_knight = %Piece{color: :black, type: Chess.Pieces.Knight}
+
+      board = %Board{grid: :array.set(starting_index, king, board.grid)}
+      board = %Board{board | grid: :array.set(29, opposing_knight, board.grid)}
+
+      # The opposing knight at index 29 would be able to reach index 12 if
+      # the king decides to move up one row. Thus, index 29 should NOT be
+      # included in the list of potential moves for the king.
+      potential_moves = King.potential_moves(king, starting_index, board)
+      refute MapSet.member?(potential_moves, 12)
+    end
   end
 end
