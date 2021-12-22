@@ -4,25 +4,16 @@ defmodule Chess.Board.Square do
   """
   alias Chess.Piece
 
-  @type t() :: %__MODULE__{
-          color: color(),
-          piece: Piece.t()
-        }
-  @type index :: non_neg_integer()
-  @opaque color :: :white | :black
+  @spec occupiable?(Piece.t(), Piece.t()) :: boolean()
+  def occupiable?(%Piece{color: color}, %Piece{color: color}), do: false
 
-  defstruct color: nil,
-            piece: nil
-
-  @spec occupiable?(t(), Piece.t()) :: boolean()
-  def occupiable?(%__MODULE__{piece: %Piece{color: color}}, %Piece{color: color}), do: false
-
-  def occupiable?(%__MODULE__{piece: %Piece{color: _color}}, %Piece{color: _other_color}),
+  def occupiable?(%Piece{color: _color}, %Piece{color: _other_color}),
     do: true
 
-  def occupiable?(_, _), do: true
+  def occupiable?(%Piece{}, nil), do: false
+  def occupiable?(nil, _), do: true
 
-  @spec occupied?(t()) :: boolean()
-  def occupied?(%__MODULE__{piece: %Piece{}}), do: true
+  @spec occupied?(Piece.t()) :: boolean()
+  def occupied?(%Piece{}), do: true
   def occupied?(_), do: false
 end

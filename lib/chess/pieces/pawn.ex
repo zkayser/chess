@@ -18,8 +18,8 @@ defmodule Chess.Pieces.Pawn do
     |> MapSet.new()
   end
 
-  @spec list_of_potential_moves(list(Square.index()), Square.index(), Piece.color()) ::
-          list(Square.index())
+  @spec list_of_potential_moves(list(Board.index()), Board.index(), Piece.color()) ::
+          list(Board.index())
   defp list_of_potential_moves(moves, starting_position, color) do
     case moves do
       [] ->
@@ -43,7 +43,7 @@ defmodule Chess.Pieces.Pawn do
   defp direction_for(:white), do: -1
   defp direction_for(_), do: 1
 
-  @spec invalid_capture?(Square.index(), Square.index(), Piece.color(), Board.t()) :: boolean()
+  @spec invalid_capture?(Board.index(), Board.index(), Piece.color(), Board.t()) :: boolean()
   defp invalid_capture?(target, starting_point, color, board) do
     case rem(abs(target - starting_point), 8) do
       0 ->
@@ -54,10 +54,10 @@ defmodule Chess.Pieces.Pawn do
     end
   end
 
-  @spec should_drop_diagonal?(Square.index(), Piece.color(), Board.t()) :: boolean()
+  @spec should_drop_diagonal?(Board.index(), Piece.color(), Board.t()) :: boolean()
   defp should_drop_diagonal?(target, color, board) do
     case board[target] do
-      %Square{piece: %Piece{color: target_color}} when target_color != color ->
+      %Piece{color: target_color} when target_color != color ->
         false
 
       _ ->
@@ -65,7 +65,7 @@ defmodule Chess.Pieces.Pawn do
     end
   end
 
-  @spec occupied_non_capture?(Square.index(), Square.index(), Board.t()) :: boolean()
+  @spec occupied_non_capture?(Board.index(), Board.index(), Board.t()) :: boolean()
   defp occupied_non_capture?(target, starting_position, board) do
     case rem(abs(target - starting_position), 8) do
       0 ->

@@ -2,7 +2,6 @@ defmodule Chess.Pieces.KingTest do
   use ExUnit.Case
 
   alias Chess.Board
-  alias Chess.Board.Square
   alias Chess.Piece
   alias Chess.Pieces.King
   alias Chess.Test.BoardHelpers
@@ -14,7 +13,7 @@ defmodule Chess.Pieces.KingTest do
         starting_index = Board.coordinates_to_index(unquote(corner))
         king = %Piece{type: King}
 
-        board = %Board{board: :array.set(starting_index, %Square{piece: king}, board.board)}
+        board = %Board{board: :array.set(starting_index, king, board.board)}
 
         assert Enum.count(King.potential_moves(king, starting_index, board)) == 3
       end
@@ -26,7 +25,7 @@ defmodule Chess.Pieces.KingTest do
         starting_index = Board.coordinates_to_index(unquote(vertical_edge))
         king = %Piece{type: King}
 
-        board = %Board{board: :array.set(starting_index, %Square{piece: king}, board.board)}
+        board = %Board{board: :array.set(starting_index, king, board.board)}
 
         assert Enum.count(King.potential_moves(king, starting_index, board)) == 5
       end
@@ -38,7 +37,7 @@ defmodule Chess.Pieces.KingTest do
         starting_index = Board.coordinates_to_index(unquote(horizontal_edge))
         king = %Piece{type: King}
 
-        board = %Board{board: :array.set(starting_index, %Square{piece: king}, board.board)}
+        board = %Board{board: :array.set(starting_index, king, board.board)}
 
         assert Enum.count(King.potential_moves(king, starting_index, board)) == 5
       end
@@ -50,7 +49,7 @@ defmodule Chess.Pieces.KingTest do
         starting_index = Board.coordinates_to_index(unquote(middle))
         king = %Piece{type: King}
 
-        board = %Board{board: :array.set(starting_index, %Square{piece: king}, board.board)}
+        board = %Board{board: :array.set(starting_index, king, board.board)}
 
         assert Enum.count(King.potential_moves(king, starting_index, board)) == 8
       end

@@ -3,14 +3,13 @@ defmodule Chess.Test.BoardHelpers do
   Test helpers for building Chess boards.
   """
   alias Chess.Board
-  alias Chess.Board.Square
 
   @doc """
   Helper for generating an empty board to facilitate testing.
   """
   @spec empty_board() :: Board.t()
   def empty_board do
-    board = :array.new(size: 64, fixed: true, default: %Square{})
+    board = :array.new(size: 64, fixed: true, default: nil)
     %Board{board: board}
   end
 end
