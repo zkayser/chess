@@ -35,4 +35,41 @@ defmodule Chess.Pieces.RookTest do
       end
     end
   end
+
+  describe "potential_moves/3 with non-empty board" do
+    test "allows rook to move up to and including the spot of an opposing piece but not beyond" do
+      board = BoardHelpers.empty_board()
+      rook = %Piece{type: Rook, color: :white}
+      opposing_piece = %Piece{color: :black}
+
+      our_starting_coords = {1, 1}
+      opponent_starting_coords = {1, 4}
+
+      starting_index = Board.coordinates_to_index(our_starting_coords)
+      opponent_starting_index = Board.coordinates_to_index(opponent_starting_coords)
+
+      expected_potential_moves =
+        [{1, 2}, {1, 3}, {1, 4}] |> Enum.map(&Board.coordinates_to_index/1)
+
+      non_potential_moves =
+        [{1, 5}, {1, 6}, {1, 7}, {1, 8}] |> Enum.map(&Board.coordinates_to_index/1)
+
+      board = %Board{board | grid: :array.set(starting_index, rook, board.grid)}
+
+      board = %Board{
+        board
+        | grid: :array.set(opponent_starting_index, opposing_piece, board.grid)
+      }
+
+      potential_moves = Rook.potential_moves(rook, starting_index, board)
+
+      for move <- expected_potential_moves do
+        assert MapSet.member?(potential_moves, move)
+      end
+
+      for non_move <- non_potential_moves do
+        refute MapSet.member?(potential_moves, non_move)
+      end
+    end
+  end
 end
