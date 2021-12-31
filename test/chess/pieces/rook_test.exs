@@ -28,7 +28,10 @@ defmodule Chess.Pieces.RookTest do
         starting_index = Board.coordinates_to_index(unquote(corner_position))
         board = %Board{board | grid: :array.set(starting_index, rook, board.grid)}
 
-        assert MapSet.member?(Rook.potential_moves(rook, starting_index, board))
+        assert MapSet.member?(
+                 Rook.potential_moves(rook, starting_index, board),
+                 Board.coordinates_to_index(unquote(potential_move))
+               )
       end
     end
   end
