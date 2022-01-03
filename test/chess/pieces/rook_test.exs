@@ -71,5 +71,39 @@ defmodule Chess.Pieces.RookTest do
         refute MapSet.member?(potential_moves, non_move)
       end
     end
+
+    test "allows rook to move up to but not including the spot of a piece of the same color" do
+      board = BoardHelpers.empty_board()
+      rook = %Piece{type: Rook, color: :white}
+      cooperating_piece = %Piece{color: :white}
+
+      our_starting_coords = {1, 1}
+      other_piece_starting_coords = {1, 4}
+
+      starting_index = Board.coordinates_to_index(our_starting_coords)
+      other_piece_starting_index = Board.coordinates_to_index(other_piece_starting_coords)
+
+      expected_potential_moves = [{1, 2}, {1, 3}] |> Enum.map(&Board.coordinates_to_index/1)
+
+      non_potential_moves =
+        [{1, 4}, {1, 5}, {1, 6}, {1, 7}, {1, 8}] |> Enum.map(&Board.coordinates_to_index/1)
+
+      board = %Board{board | grid: :array.set(starting_index, rook, board.grid)}
+
+      board = %Board{
+        board
+        | grid: :array.set(other_piece_starting_index, cooperating_piece, board.grid)
+      }
+
+      potential_moves = Rook.potential_moves(rook, starting_index, board)
+
+      for move <- expected_potential_moves do
+        assert MapSet.member?(potential_moves, move)
+      end
+
+      for non_move <- non_potential_moves do
+        refute MapSet.member?(potential_moves, non_move)
+      end
+    end
   end
 end
