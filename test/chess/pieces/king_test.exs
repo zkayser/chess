@@ -55,8 +55,6 @@ defmodule Chess.Pieces.KingTest do
       end
     end
 
-    # TODO: Improve tests on this to assert a King cannot move itself in
-    # check against ALL types of opposing pieces.
     test "does not allow a king to move itself into check" do
       board = BoardHelpers.empty_board()
       starting_index = 4
