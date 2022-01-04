@@ -19,22 +19,24 @@ defmodule Chess.Pieces.Rook do
   defp list_of_potential_moves(starting_index, piece, board) do
     {starting_col, starting_row} = Board.index_to_coordinates(starting_index)
 
-    lateral_moves =
-      for column <- Enum.reject(1..8, &(&1 == starting_col)), do: {column, starting_row}
+    {lateral, vertical} = {
+      for(column <- Enum.reject(1..8, &(&1 == starting_col)), do: {column, starting_row}),
+      for(row <- Enum.reject(1..8, &(&1 == starting_row)), do: {starting_col, row})
+    }
 
-    {left, right} = Enum.split_with(lateral_moves, fn {col, _row} -> col < starting_col end)
+    [{left, right}, {below, above}] = [
+      Enum.split_with(lateral, fn {col, _row} -> col < starting_col end),
+      Enum.split_with(vertical, fn {_col, row} -> row < starting_row end)
+    ]
+
     left = Enum.sort_by(left, &elem(&1, 0), :desc)
+    below = Enum.sort_by(below, &elem(&1, 1), :desc)
 
     lateral_moves =
       Enum.concat(
         reduce_until_blocked_or_capture(left, piece, board),
         reduce_until_blocked_or_capture(right, piece, board)
       )
-
-    vertical_moves = for row <- Enum.reject(1..8, &(&1 == starting_row)), do: {starting_col, row}
-
-    {below, above} = Enum.split_with(vertical_moves, fn {_col, row} -> row < starting_row end)
-    below = Enum.sort_by(below, &elem(&1, 1), :desc)
 
     vertical_moves =
       Enum.concat(
@@ -45,6 +47,8 @@ defmodule Chess.Pieces.Rook do
     Stream.concat(lateral_moves, vertical_moves)
   end
 
+  @spec reduce_until_blocked_or_capture(list(Board.coordinates()), Piece.t(), Board.t()) ::
+          list(Board.coordinates())
   defp reduce_until_blocked_or_capture(potential_moves, %Piece{color: color}, board) do
     Enum.reduce_while(potential_moves, [], fn coords, moves ->
       case board[coords] do
