@@ -1,5 +1,6 @@
 defmodule Chess.Pieces.RookTest do
   use ExUnit.Case
+  use ExUnitProperties
 
   alias Chess.Board
   alias Chess.Piece
@@ -103,6 +104,49 @@ defmodule Chess.Pieces.RookTest do
 
       for non_move <- non_potential_moves do
         refute MapSet.member?(potential_moves, non_move)
+      end
+    end
+
+    property "ensures rooks can only move up to but not including the spot of a piece of the same color on the same row" do
+      check all({column, row} <- {StreamData.integer(1..8), StreamData.integer(1..8)}) do
+        {other_col, _row} =
+          other_piece_coordinates = {Enum.random(Enum.reject(1..8, &(&1 == column))), row}
+
+        board = BoardHelpers.empty_board()
+        rook = %Piece{type: Rook, color: :white}
+        cooperating_piece = %Piece{color: :white}
+
+        our_starting_coords = {column, row}
+        starting_index = Board.coordinates_to_index(our_starting_coords)
+        other_piece_starting_index = Board.coordinates_to_index(other_piece_coordinates)
+
+        playable_columns =
+          if column > other_col do
+            Enum.concat((other_col + 1)..max(column - 1, 1), min(column + 1, 8)..8)
+          else
+            Enum.concat(1..max(column - 1, 1), min(column + 1, 8)..(other_col - 1))
+          end
+
+        expected_potential_moves =
+          Enum.map(playable_columns, fn col -> {col, row} end)
+          |> Enum.reject(fn coordinates ->
+            coordinates == our_starting_coords || coordinates == other_piece_coordinates
+          end)
+          |> Enum.map(&Board.coordinates_to_index/1)
+
+        board = %Board{board | grid: :array.set(starting_index, rook, board.grid)}
+
+        board = %Board{
+          board
+          | grid: :array.set(other_piece_starting_index, cooperating_piece, board.grid)
+        }
+
+        actual_potential_moves = Rook.potential_moves(rook, starting_index, board)
+
+        for potential_move <- expected_potential_moves do
+          assert MapSet.member?(actual_potential_moves, potential_move),
+                 "Expected #{inspect(Board.index_to_coordinates(potential_move))} (#{inspect(potential_move)}) to be included in potential moves for Rook at starting coordinates #{inspect(our_starting_coords)}"
+        end
       end
     end
   end
