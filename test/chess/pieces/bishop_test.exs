@@ -1,5 +1,6 @@
 defmodule Chess.Pieces.BishopTest do
   use ExUnit.Case
+  use ExUnitProperties
 
   alias Chess.Board
   alias Chess.Piece
@@ -53,5 +54,86 @@ defmodule Chess.Pieces.BishopTest do
       assert MapSet.equal?(potential_moves, expected),
              "Expected potential moves #{inspect(potential_moves)}\nto equal\n#{inspect(expected)}"
     end
+  end
+
+  describe "potential_moves/3 with non-empty board" do
+    property "ensures rooks can only move up to but not including the spot of a piece of the same color on the same diagonal" do
+      check all({column, row} <- {StreamData.integer(2..7), StreamData.integer(2..7)}) do
+        other_piece_coordinates = Enum.random(generate_diagonals(column, row))
+
+        board = BoardHelpers.empty_board()
+
+        bishop = %Piece{type: Bishop, color: :white}
+        cooperating_piece = %Piece{color: :white}
+        our_starting_coords = {column, row}
+        starting_index = Board.coordinates_to_index(our_starting_coords)
+        other_piece_starting_index = Board.coordinates_to_index(other_piece_coordinates)
+
+        board = %Board{board | grid: :array.set(starting_index, bishop, board.grid)}
+
+        board = %Board{
+          board
+          | grid: :array.set(other_piece_starting_index, cooperating_piece, board.grid)
+        }
+
+        potential_moves = Bishop.potential_moves(bishop, starting_index, board)
+
+        refute Enum.empty?(potential_moves)
+        refute Enum.member?(potential_moves, other_piece_starting_index)
+      end
+    end
+
+    property "ensures rooks can only move up to and including the spot of a piece of the opposite color on the same diagonal" do
+      check all({column, row} <- {StreamData.integer(2..7), StreamData.integer(2..7)}) do
+        other_piece_coordinates = Enum.random(generate_diagonals(column, row))
+
+        board = BoardHelpers.empty_board()
+
+        bishop = %Piece{type: Bishop, color: :white}
+        opponent_piece = %Piece{color: :black}
+        our_starting_coords = {column, row}
+        starting_index = Board.coordinates_to_index(our_starting_coords)
+        other_piece_starting_index = Board.coordinates_to_index(other_piece_coordinates)
+
+        board = %Board{board | grid: :array.set(starting_index, bishop, board.grid)}
+
+        board = %Board{
+          board
+          | grid: :array.set(other_piece_starting_index, opponent_piece, board.grid)
+        }
+
+        potential_moves = Bishop.potential_moves(bishop, starting_index, board)
+
+        refute Enum.empty?(potential_moves)
+        assert Enum.member?(potential_moves, other_piece_starting_index)
+      end
+    end
+  end
+
+  defp generate_diagonals(starting_col, starting_row) do
+    ranges = [(starting_col - 1)..1, (starting_col + 1)..8] |> List.duplicate(2) |> List.flatten()
+    operators = [:-, :-, :+, :+]
+
+    ranges
+    |> Enum.zip(operators)
+    |> Enum.map(fn {quadrant, operator} ->
+      Enum.reduce_while(
+        quadrant,
+        {[], apply(Kernel, operator, [starting_row, 1])},
+        fn column, {coords, row} ->
+          case min(column, row) < 1 || max(column, row) > 8 do
+            true ->
+              {:halt, coords}
+
+            false ->
+              {:cont, {[{column, row} | coords], apply(Kernel, operator, [row, 1])}}
+          end
+        end
+      )
+    end)
+    |> Enum.flat_map(fn
+      {quadrant, _row} -> quadrant
+      quadrant -> quadrant
+    end)
   end
 end
