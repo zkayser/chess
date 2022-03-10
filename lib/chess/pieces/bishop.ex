@@ -36,15 +36,7 @@ defmodule Chess.Pieces.Bishop do
       Enum.reduce_while(
         quadrant,
         {MapSet.new(), apply(Kernel, operator, [starting_row, 1])},
-        fn column, {coords, row} ->
-          case min(column, row) < 1 || max(column, row) > 8 do
-            true ->
-              {:halt, coords}
-
-            false ->
-              {:cont, {MapSet.put(coords, {column, row}), apply(Kernel, operator, [row, 1])}}
-          end
-        end
+        &build_diagonal(&1, &2, operator)
       )
     end)
     |> Enum.map(fn
@@ -72,5 +64,18 @@ defmodule Chess.Pieces.Bishop do
         nil -> {:cont, [coords | moves]}
       end
     end)
+  end
+
+  @spec build_diagonal(integer(), {MapSet.t(Board.coordinates()), integer()}, :+ | :-) ::
+          {:halt, MapSet.t(Board.coordinates())}
+          | {:cont, {MapSet.t(Board.coordinates()), integer()}}
+  defp build_diagonal(column, {coords, row}, operator) do
+    case min(column, row) < 1 || max(column, row) > 8 do
+      true ->
+        {:halt, coords}
+
+      false ->
+        {:cont, {MapSet.put(coords, {column, row}), apply(Kernel, operator, [row, 1])}}
+    end
   end
 end
