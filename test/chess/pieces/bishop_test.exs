@@ -31,5 +31,27 @@ defmodule Chess.Pieces.BishopTest do
                "Expected #{inspect(expected_index)} (coordinate #{inspect(unquote(potential_move))}) to be in #{inspect(potential_moves)}, but it was not. \nInstead got #{inspect(Enum.map(potential_moves, fn m -> Board.index_to_coordinates(m) end))}"
       end
     end
+
+    test "allows a bishop starting at position {4, 4} to move all along diagonals", %{
+      board: board
+    } do
+      bishop = %Piece{type: Bishop}
+      starting_index = Board.coordinates_to_index({4, 4})
+      board = %Board{board | grid: :array.set(starting_index, bishop, board.grid)}
+
+      potential_moves = Bishop.potential_moves(bishop, starting_index, board)
+
+      diagonal_1 = [{1, 1}, {2, 2}, {3, 3}, {5, 5}, {6, 6}, {7, 7}, {8, 8}]
+      diagonal_2 = [{5, 3}, {6, 2}, {7, 1}, {3, 5}, {2, 6}, {1, 7}]
+
+      expected =
+        diagonal_1
+        |> Enum.concat(diagonal_2)
+        |> Enum.map(fn coords -> Board.coordinates_to_index(coords) end)
+        |> MapSet.new()
+
+      assert MapSet.equal?(potential_moves, expected),
+             "Expected potential moves #{inspect(potential_moves)}\nto equal\n#{inspect(expected)}"
+    end
   end
 end
