@@ -27,51 +27,29 @@ defmodule Chess.Pieces.Bishop do
   defp list_of_potential_moves(starting_index) do
     {starting_col, starting_row} = Board.index_to_coordinates(starting_index)
 
-    first_quadrant =
-      Enum.reduce_while((starting_col - 1)..1, {MapSet.new(), starting_row - 1}, fn column,
-                                                                                    {coords, row} ->
-        case min(column, row) < 1 do
-          true -> {:halt, coords}
-          false -> {:cont, {MapSet.put(coords, {column, row}), row - 1}}
-        end
-      end)
+    ranges = [(starting_col - 1)..1, (starting_col + 1)..8] |> List.duplicate(2) |> List.flatten()
+    operators = [:-, :-, :+, :+]
 
-    second_quadrant =
-      Enum.reduce_while((starting_col + 1)..8, {MapSet.new(), starting_row - 1}, fn column,
-                                                                                    {coords, row} ->
-        case min(column, row) < 1 || max(column, row) > 8 do
-          true -> {:halt, coords}
-          false -> {:cont, {MapSet.put(coords, {column, row}), row - 1}}
-        end
-      end)
+    ranges
+    |> Enum.zip(operators)
+    |> Enum.map(fn {quadrant, operator} ->
+      Enum.reduce_while(
+        quadrant,
+        {MapSet.new(), apply(Kernel, operator, [starting_row, 1])},
+        fn column, {coords, row} ->
+          case min(column, row) < 1 || max(column, row) > 8 do
+            true ->
+              {:halt, coords}
 
-    third_quadrant =
-      Enum.reduce_while((starting_col - 1)..1, {MapSet.new(), starting_row + 1}, fn column,
-                                                                                    {coords, row} ->
-        case min(column, row) < 1 || max(column, row) > 8 do
-          true -> {:halt, coords}
-          false -> {:cont, {MapSet.put(coords, {column, row}), row + 1}}
+            false ->
+              {:cont, {MapSet.put(coords, {column, row}), apply(Kernel, operator, [row, 1])}}
+          end
         end
-      end)
-
-    fourth_quadrant =
-      Enum.reduce_while((starting_col + 1)..8, {MapSet.new(), starting_row + 1}, fn column,
-                                                                                    {coords, row} ->
-        case min(column, row) < 1 || max(column, row) > 8 do
-          true -> {:halt, coords}
-          false -> {:cont, {MapSet.put(coords, {column, row}), row + 1}}
-        end
-      end)
-
-    [
-      {first_quadrant, :asc},
-      {second_quadrant, :desc},
-      {third_quadrant, :asc},
-      {fourth_quadrant, :desc}
-    ]
+      )
+    end)
     |> Enum.map(fn
-      {{quadrant, _row}, sort_order} -> Enum.sort(quadrant, sort_order)
-      {quadrant, sort_order} -> Enum.sort(quadrant, sort_order)
+      {quadrant, _row} -> quadrant
+      quadrant -> quadrant
     end)
   end
 
