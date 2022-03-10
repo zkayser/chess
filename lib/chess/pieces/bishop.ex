@@ -81,10 +81,7 @@ defmodule Chess.Pieces.Bishop do
           Board.t()
         ) :: Enumerable.t()
   defp filter_unreachable_coordinates(quadrants, piece, board) do
-    quadrants
-    |> Enum.flat_map(fn quadrant ->
-      reduce_until_blocked_or_capture(quadrant, piece, board)
-    end)
+    Enum.flat_map(quadrants, &reduce_until_blocked_or_capture(&1, piece, board))
   end
 
   @spec reduce_until_blocked_or_capture(list(Board.coordinates()), Piece.t(), Board.t()) ::
