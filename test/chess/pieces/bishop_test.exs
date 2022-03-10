@@ -120,20 +120,22 @@ defmodule Chess.Pieces.BishopTest do
       Enum.reduce_while(
         quadrant,
         {[], apply(Kernel, operator, [starting_row, 1])},
-        fn column, {coords, row} ->
-          case min(column, row) < 1 || max(column, row) > 8 do
-            true ->
-              {:halt, coords}
-
-            false ->
-              {:cont, {[{column, row} | coords], apply(Kernel, operator, [row, 1])}}
-          end
-        end
+        &build_diagonal(&1, &2, operator)
       )
     end)
     |> Enum.flat_map(fn
       {quadrant, _row} -> quadrant
       quadrant -> quadrant
     end)
+  end
+
+  defp build_diagonal(column, {coords, row}, operator) do
+    case min(column, row) < 1 || max(column, row) > 8 do
+      true ->
+        {:halt, coords}
+
+      false ->
+        {:cont, {[{column, row} | coords], apply(Kernel, operator, [row, 1])}}
+    end
   end
 end
