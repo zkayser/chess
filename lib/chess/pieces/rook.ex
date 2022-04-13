@@ -7,37 +7,16 @@ defmodule Chess.Pieces.Rook do
   @behaviour Chess.Piece
 
   alias Chess.Board
+  alias Chess.Moves.Generators.Perpendiculars
   alias Chess.Piece
 
   @impl Piece
   def potential_moves(piece, starting_index, board) do
     starting_index
-    |> list_of_potential_moves()
+    |> Perpendiculars.generate()
     |> filter_unreachable_coordinates(piece, board)
     |> Stream.map(&Board.coordinates_to_index/1)
     |> MapSet.new()
-  end
-
-  @decorate cacheable(cache: Chess.Pieces.MoveCache, key: {__MODULE__, starting_index})
-  @spec list_of_potential_moves(Board.index()) ::
-          list({list(Board.coordinates()), list(Board.coordinates())})
-  defp list_of_potential_moves(starting_index) do
-    {starting_col, starting_row} = Board.index_to_coordinates(starting_index)
-
-    {lateral, vertical} = {
-      for(column <- Enum.reject(1..8, &(&1 == starting_col)), do: {column, starting_row}),
-      for(row <- Enum.reject(1..8, &(&1 == starting_row)), do: {starting_col, row})
-    }
-
-    [{left, right}, {below, above}] = [
-      Enum.split_with(lateral, fn {col, _row} -> col < starting_col end),
-      Enum.split_with(vertical, fn {_col, row} -> row < starting_row end)
-    ]
-
-    left = Enum.sort_by(left, &elem(&1, 0), :desc)
-    below = Enum.sort_by(below, &elem(&1, 1), :desc)
-
-    [{left, right}, {below, above}]
   end
 
   @spec filter_unreachable_coordinates(
