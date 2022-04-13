@@ -8,6 +8,7 @@ defmodule Chess.Pieces.Bishop do
   @behaviour Chess.Piece
 
   alias Chess.Board
+  alias Chess.Moves.Generators.Diagonals
   alias Chess.Piece
 
   @typep coordinate_set :: MapSet.t(Board.coordinates())
@@ -16,33 +17,10 @@ defmodule Chess.Pieces.Bishop do
   @impl Piece
   def potential_moves(piece, starting_index, board) do
     starting_index
-    |> list_of_potential_moves()
+    |> Diagonals.generate()
     |> filter_unreachable_coordinates(piece, board)
     |> Stream.map(&Board.coordinates_to_index/1)
     |> MapSet.new()
-  end
-
-  @decorate cacheable(cache: Chess.Pieces.MoveCache, key: {__MODULE__, starting_index})
-  @spec list_of_potential_moves(Board.index()) :: quadrants()
-  defp list_of_potential_moves(starting_index) do
-    {starting_col, starting_row} = Board.index_to_coordinates(starting_index)
-
-    ranges = [(starting_col - 1)..1, (starting_col + 1)..8] |> List.duplicate(2) |> List.flatten()
-    operators = [:-, :-, :+, :+]
-
-    ranges
-    |> Enum.zip(operators)
-    |> Enum.map(fn {quadrant, operator} ->
-      Enum.reduce_while(
-        quadrant,
-        {MapSet.new(), apply(Kernel, operator, [starting_row, 1])},
-        &build_diagonal(&1, &2, operator)
-      )
-    end)
-    |> Enum.map(fn
-      {quadrant, _row} -> quadrant
-      quadrant -> quadrant
-    end)
   end
 
   @spec filter_unreachable_coordinates(
@@ -64,18 +42,5 @@ defmodule Chess.Pieces.Bishop do
         nil -> {:cont, [coords | moves]}
       end
     end)
-  end
-
-  @spec build_diagonal(integer(), {MapSet.t(Board.coordinates()), integer()}, :+ | :-) ::
-          {:halt, MapSet.t(Board.coordinates())}
-          | {:cont, {MapSet.t(Board.coordinates()), integer()}}
-  defp build_diagonal(column, {coords, row}, operator) do
-    case min(column, row) < 1 || max(column, row) > 8 do
-      true ->
-        {:halt, coords}
-
-      false ->
-        {:cont, {MapSet.put(coords, {column, row}), apply(Kernel, operator, [row, 1])}}
-    end
   end
 end
