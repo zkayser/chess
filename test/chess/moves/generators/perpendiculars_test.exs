@@ -52,5 +52,17 @@ defmodule Chess.Moves.Generators.PerpendicularsTest do
       assert expected_right == right
       assert expected_below == below
     end
+
+    test "given starting index at {8, 8}, returns perpendiculars below and to the left" do
+      starting_index = Board.coordinates_to_index({8, 8})
+
+      assert [{left, []} = _laterals, {below, []} = _verticals] =
+               Perpendiculars.generate(starting_index)
+
+      expected_left = for column <- 7..1, do: {column, 8}
+      expected_below = for row <- 7..1, do: {8, row}
+      assert expected_left == left
+      assert expected_below == below
+    end
   end
 end
