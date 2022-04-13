@@ -3,11 +3,14 @@ defmodule Chess.Moves.Generators.Perpendiculars do
   Exposes utility functions for generating sets of
   potential moves along a perpendicular.
   """
+  use Nebulex.Caching
+
   alias Chess.Board
   alias Chess.Moves.Generator
 
   @behaviour Generator
 
+  @decorate cacheable(cache: Chess.Pieces.MoveCache, key: {__MODULE__, starting_index})
   @impl Generator
   def generate(starting_index) do
     {starting_col, starting_row} = Board.index_to_coordinates(starting_index)
