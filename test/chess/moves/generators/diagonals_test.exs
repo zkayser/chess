@@ -15,5 +15,15 @@ defmodule Chess.Moves.Generators.DiagonalsTest do
       assert MapSet.new([{3, 5}, {2, 6}, {1, 7}]) == quadrant_3
       assert MapSet.new([{5, 5}, {6, 6}, {7, 7}, {8, 8}]) == quadrant_4
     end
+
+    test "given starting index at {1, 1}, returns only a single populated quadrant" do
+      assert quadrants = Diagonals.generate(Board.coordinates_to_index({1, 1}))
+
+      assert [quadrant] = Enum.reject(quadrants, fn quadrant -> Enum.empty?(quadrant) end)
+
+      expected = for position <- 2..8, into: MapSet.new(), do: {position, position}
+
+      assert expected == quadrant
+    end
   end
 end
