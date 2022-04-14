@@ -39,7 +39,7 @@ defmodule Chess.MixProject do
       {:esbuild, "~> 0.4.0", runtime: Mix.env() == :dev},
       {:ex_doc, "~> 0.28.3", only: :dev, runtime: false},
       {:floki, "~> 0.32.1", only: :test},
-      {:gettext, "~> 0.19"},
+      {:gettext, "~> 0.19.1"},
       {:jason, "~> 1.3"},
       {:nebulex, "~> 2.3.0"},
       {:oath, "~> 0.1.1", only: [:dev, :test]},
