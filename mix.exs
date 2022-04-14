@@ -43,7 +43,7 @@ defmodule Chess.MixProject do
       {:jason, "~> 1.3"},
       {:nebulex, "~> 2.3.2"},
       {:oath, "~> 0.1.1", only: [:dev, :test]},
-      {:phoenix, "~> 1.6.5"},
+      {:phoenix, "~> 1.6.6"},
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 3.2.0"},
       {:phoenix_live_dashboard, "~> 0.6.2"},
