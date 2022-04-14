@@ -37,7 +37,7 @@ defmodule Chess.MixProject do
       {:dialyxir, "~> 1.1", runtime: false},
       {:ecto_sql, "~> 3.6"},
       {:esbuild, "~> 0.4.0", runtime: Mix.env() == :dev},
-      {:ex_doc, "~> 0.25.5", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.28.3", only: :dev, runtime: false},
       {:floki, ">= 0.30.0", only: :test},
       {:gettext, "~> 0.19"},
       {:jason, "~> 1.3"},
