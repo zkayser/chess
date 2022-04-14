@@ -74,14 +74,27 @@ defmodule Chess.Piece do
     alias Chess.Piece
     alias Chess.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
 
-    def to_string(%Piece{type: Pawn, color: color}), do: "#{color_to_string(color)} P"
-    def to_string(%Piece{type: Rook, color: color}), do: "#{color_to_string(color)} R"
-    def to_string(%Piece{type: Knight, color: color}), do: "#{color_to_string(color)} K"
-    def to_string(%Piece{type: Bishop, color: color}), do: "#{color_to_string(color)} B"
-    def to_string(%Piece{type: Queen, color: color}), do: "#{color_to_string(color)} Q"
-    def to_string(%Piece{type: King, color: color}), do: "#{color_to_string(color)} 👑"
+    def to_string(%Piece{type: Pawn}), do: " ♟️ "
+    def to_string(%Piece{type: Rook}), do: " ♜ "
+    def to_string(%Piece{type: Knight}), do: " ♞ "
+    def to_string(%Piece{type: Bishop}), do: " ♝ "
+    def to_string(%Piece{type: Queen}), do: " ♛ "
+    def to_string(%Piece{type: King}), do: " ♚ "
+  end
 
-    defp color_to_string(:white), do: "⬜"
-    defp color_to_string(:black), do: "⬛"
+  defimpl Inspect do
+    import Inspect.Algebra
+    alias Chess.Piece
+
+    @black "\e[1;40;37m"
+    @white "\e[1;47;37m"
+
+    def inspect(%Piece{color: :white} = piece, _opts) do
+      color(string(to_string(piece)), :binary, Inspect.Opts.new(syntax_colors: [binary: @white]))
+    end
+
+    def inspect(%Piece{color: :black} = piece, _opts) do
+      color(string(to_string(piece)), :binary, Inspect.Opts.new(syntax_colors: [binary: @black]))
+    end
   end
 end
