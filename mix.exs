@@ -41,7 +41,7 @@ defmodule Chess.MixProject do
       {:floki, "~> 0.32.1", only: :test},
       {:gettext, "~> 0.19.1"},
       {:jason, "~> 1.3"},
-      {:nebulex, "~> 2.3.0"},
+      {:nebulex, "~> 2.3.2"},
       {:oath, "~> 0.1.1", only: [:dev, :test]},
       {:phoenix, "~> 1.6.5"},
       {:phoenix_ecto, "~> 4.4"},
