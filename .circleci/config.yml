@@ -11,7 +11,7 @@ jobs:
   build:
     parallelism: 1
     docker:
-      - image: circleci/elixir:1.13.4
+      - image: cimg/elixir:1.13.4
         environment:
           MIX_ENV: test
       - image: circleci/postgres:11.14
@@ -68,7 +68,7 @@ jobs:
   compile-warnings:
     parallelism: 1
     docker:
-      - image: circleci/elixir:1.13.4
+      - image: cimg/elixir:1.13.4
 
     working_directory: ~/app
 
@@ -82,7 +82,7 @@ jobs:
 
   test:
     docker:
-      - image: circleci/elixir:1.13.4
+      - image: cimg/elixir:1.13.4
         environment:
           MIX_ENV: test
       - image: circleci/postgres:11.14
@@ -109,7 +109,7 @@ jobs:
 
   format:
     docker:
-      - image: circleci/elixir:1.13.4
+      - image: cimg/elixir:1.13.4
     working_directory: ~/app
 
     steps:
@@ -122,7 +122,7 @@ jobs:
 
   credo:
     docker:
-      - image: circleci/elixir:1.13.4
+      - image: cimg/elixir:1.13.4
     working_directory: ~/app
 
     steps:
@@ -135,7 +135,7 @@ jobs:
 
   dialyzer:
     docker:
-      - image: circleci/elixir:1.13.4
+      - image: cimg/elixir:1.13.4
         environment:
           MIX_ENV: dev
     working_directory: ~/app
@@ -154,7 +154,7 @@ jobs:
 
   generate_documentation:
     docker:
-      - image: circleci/elixir:1.13.4
+      - image: cimg/elixir:1.13.4
 
     steps:
       - attach_workspace:
@@ -169,7 +169,7 @@ jobs:
 
   no_unused_deps:
     docker:
-      - image: circleci/elixir:1.13.4
+      - image: cimg/elixir:1.13.4
 
     steps:
       - attach_workspace:
@@ -181,7 +181,7 @@ jobs:
 
   security_analysis:
     docker:
-      - image: circleci/elixir:1.13.4
+      - image: cimg/elixir:1.13.4
 
     steps:
       - attach_workspace:
