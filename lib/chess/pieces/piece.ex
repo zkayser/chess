@@ -74,7 +74,6 @@ defmodule Chess.Piece do
     alias Chess.Piece
     alias Chess.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
 
-    def to_string(nil), do: "x"
     def to_string(%Piece{type: Pawn, color: color}), do: "#{color_to_string(color)} P"
     def to_string(%Piece{type: Rook, color: color}), do: "#{color_to_string(color)} R"
     def to_string(%Piece{type: Knight, color: color}), do: "#{color_to_string(color)} K"
