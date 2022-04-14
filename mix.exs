@@ -35,7 +35,7 @@ defmodule Chess.MixProject do
     [
       {:credo, "~> 1.6.1", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", runtime: false},
-      {:ecto_sql, "~> 3.6"},
+      {:ecto_sql, "~> 3.7.2"},
       {:esbuild, "~> 0.4.0", runtime: Mix.env() == :dev},
       {:ex_doc, "~> 0.28.3", only: :dev, runtime: false},
       {:floki, ">= 0.30.0", only: :test},
@@ -50,7 +50,7 @@ defmodule Chess.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 0.17.5"},
       {:plug_cowboy, "~> 2.5"},
-      {:postgrex, ">= 0.0.0"},
+      {:postgrex, "~> 0.15"},
       {:sobelow, "~> 0.11.1", only: :dev},
       {:stream_data, "~> 0.5.0"},
       {:swoosh, "~> 1.3"},
