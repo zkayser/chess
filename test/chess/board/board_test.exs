@@ -159,4 +159,13 @@ defmodule Chess.BoardTest do
       assert {nil, ^board} = Board.pop(board, -1)
     end
   end
+
+  describe "Inspect protocol" do
+    test "renders a custom representation of the board" do
+      expected_representation =
+        "#Board<\n\e[1;40;37m ♜ \e[0m\e[1;40;37m ♞ \e[0m\e[1;40;37m ♝ \e[0m\e[1;40;37m ♛ \e[0m\e[1;40;37m ♚ \e[0m\e[1;40;37m ♝ \e[0m\e[1;40;37m ♞ \e[0m\e[1;40;37m ♜ \e[0m\n \e[1;40;37m ♟️ \e[0m\e[1;40;37m ♟️ \e[0m\e[1;40;37m ♟️ \e[0m\e[1;40;37m ♟️ \e[0m\e[1;40;37m ♟️ \e[0m\e[1;40;37m ♟️ \e[0m\e[1;40;37m ♟️ \e[0m\e[1;40;37m ♟️ \e[0m\n  x  x  x  x  x  x  x  x \n  x  x  x  x  x  x  x  x \n  x  x  x  x  x  x  x  x \n  x  x  x  x  x  x  x  x \n \e[1;47;37m ♟️ \e[0m\e[1;47;37m ♟️ \e[0m\e[1;47;37m ♟️ \e[0m\e[1;47;37m ♟️ \e[0m\e[1;47;37m ♟️ \e[0m\e[1;47;37m ♟️ \e[0m\e[1;47;37m ♟️ \e[0m\e[1;47;37m ♟️ \e[0m\n \e[1;47;37m ♜ \e[0m\e[1;47;37m ♞ \e[0m\e[1;47;37m ♝ \e[0m\e[1;47;37m ♛ \e[0m\e[1;47;37m ♚ \e[0m\e[1;47;37m ♝ \e[0m\e[1;47;37m ♞ \e[0m\e[1;47;37m ♜ \e[0m\n>"
+
+      assert expected_representation == inspect(Board.layout())
+    end
+  end
 end
