@@ -53,7 +53,7 @@ defmodule Chess.MixProject do
       {:postgrex, "~> 0.15"},
       {:sobelow, "~> 0.11.1", only: :dev},
       {:stream_data, "~> 0.5.0"},
-      {:swoosh, "~> 1.3"},
+      {:swoosh, "~> 1.6.4"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"}
     ]
