@@ -70,44 +70,28 @@ defmodule Chess.PieceTest do
   end
 
   describe "String.Chars" do
-    test "returns '⬜  B' for a white Bishop" do
-      assert "⬜ B" == to_string(%Piece{type: Bishop, color: :white})
+    test "returns ♝ for Bishops" do
+      assert " ♝ " == to_string(%Piece{type: Bishop})
     end
 
-    test "returns '⬛ B' for a black Bishop" do
-      assert "⬛ B" == to_string(%Piece{type: Bishop, color: :black})
+    test "returns  ♟️  for Pawns" do
+      assert " ♟️ " == to_string(%Piece{type: Pawn})
     end
 
-    test "returns '⬜ P' for a white Pawn" do
-      assert "⬜ P" == to_string(%Piece{type: Pawn, color: :white})
+    test "returns  ♜  for Rooks" do
+      assert " ♜ " == to_string(%Piece{type: Rook})
     end
 
-    test "returns '⬛ P' for a black Pawn" do
-      assert "⬛ P" == to_string(%Piece{type: Pawn, color: :black})
+    test "returns  ♞  for Knights" do
+      assert " ♞ " == to_string(%Piece{type: Knight})
     end
 
-    test "returns '⬜ R' for a white Rook" do
-      assert "⬜ R" == to_string(%Piece{type: Rook, color: :white})
+    test "returns  ♛  for Queens" do
+      assert " ♛ " == to_string(%Piece{type: Queen})
     end
 
-    test "returns '⬛ R' for a black Rook" do
-      assert "⬛ R" == to_string(%Piece{type: Rook, color: :black})
-    end
-
-    test "returns '⬜ K' for a white Knight" do
-      assert "⬜ K" == to_string(%Piece{type: Knight, color: :white})
-    end
-
-    test "returns '⬛ K' for a black Knight" do
-      assert "⬛ K" == to_string(%Piece{type: Knight, color: :black})
-    end
-
-    test "returns '⬜ Q' for a white Queen" do
-      assert "⬜ Q" == to_string(%Piece{type: Queen, color: :white})
-    end
-
-    test "returns '⬛ Q' for a black Queen" do
-      assert "⬛ Q" == to_string(%Piece{type: Queen, color: :black})
+    test "returns  ♚  for Kings" do
+      assert " ♚ " == to_string(%Piece{type: King})
     end
   end
 end
