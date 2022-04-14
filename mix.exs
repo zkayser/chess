@@ -33,7 +33,7 @@ defmodule Chess.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:credo, "~> 1.6.1", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.6.4", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", runtime: false},
       {:ecto_sql, "~> 3.7.2"},
       {:esbuild, "~> 0.4.0", runtime: Mix.env() == :dev},
