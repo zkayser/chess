@@ -8,7 +8,7 @@ defmodule Chess.Moves.Generators.Perpendiculars do
   alias Chess.Board
   alias Chess.Moves.Generator
 
-  @typep section() :: list(Board.coordinates())
+  @type section() :: list(Board.coordinates())
   @type t() :: list(section())
 
   @behaviour Generator
