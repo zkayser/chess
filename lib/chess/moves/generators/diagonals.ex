@@ -47,9 +47,13 @@ defmodule Chess.Moves.Generators.Diagonals do
     |> List.flatten()
   end
 
-  @spec build_diagonal(integer(), {MapSet.t(Board.coordinates()), integer()}, :+ | :-) ::
-          {:halt, MapSet.t(Board.coordinates())}
-          | {:cont, {MapSet.t(Board.coordinates()), integer()}}
+  @spec build_diagonal(
+          integer(),
+          {%{coords: list(Board.coordinates(), sort: :asc | :desc)}, integer()},
+          :+ | :-
+        ) ::
+          {:halt, %{coords: list(Board.coordinates(), sort: :desc | :asc)}}
+          | {:cont, {%{coords: list(Board.coordinates()), sort: :desc | :asc}, integer()}}
   defp build_diagonal(column, {%{coords: coords} = acc, row}, operator) do
     case min(column, row) < 1 || max(column, row) > 8 do
       true ->
