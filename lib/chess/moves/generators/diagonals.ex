@@ -27,13 +27,16 @@ defmodule Chess.Moves.Generators.Diagonals do
     |> Enum.map(fn {quadrant, operator} ->
       Enum.reduce_while(
         quadrant,
-        {MapSet.new(), apply(Kernel, operator, [starting_row, 1])},
+        {%{coords: [], sort: sort_for(operator)}, apply(Kernel, operator, [starting_row, 1])},
         &build_diagonal(&1, &2, operator)
       )
     end)
     |> Enum.map(fn
-      {quadrant, _row} -> quadrant
-      quadrant -> quadrant
+      {%{coords: quadrant, sort: sort}, _row} ->
+        Enum.sort_by(quadrant, &Board.coordinates_to_index/1, sort)
+
+      %{coords: quadrant, sort: sort} ->
+        Enum.sort_by(quadrant, &Board.coordinates_to_index/1, sort)
     end)
   end
 
@@ -47,13 +50,18 @@ defmodule Chess.Moves.Generators.Diagonals do
   @spec build_diagonal(integer(), {MapSet.t(Board.coordinates()), integer()}, :+ | :-) ::
           {:halt, MapSet.t(Board.coordinates())}
           | {:cont, {MapSet.t(Board.coordinates()), integer()}}
-  defp build_diagonal(column, {coords, row}, operator) do
+  defp build_diagonal(column, {%{coords: coords} = acc, row}, operator) do
     case min(column, row) < 1 || max(column, row) > 8 do
       true ->
-        {:halt, coords}
+        {:halt, acc}
 
       false ->
-        {:cont, {MapSet.put(coords, {column, row}), apply(Kernel, operator, [row, 1])}}
+        {:cont,
+         {Map.put(acc, :coords, [{column, row} | coords]), apply(Kernel, operator, [row, 1])}}
     end
   end
+
+  @spec sort_for(:- | :+) :: :desc | :asc
+  defp sort_for(:-), do: :desc
+  defp sort_for(:+), do: :asc
 end
