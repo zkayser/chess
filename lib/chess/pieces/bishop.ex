@@ -2,9 +2,6 @@ defmodule Chess.Pieces.Bishop do
   @moduledoc """
   Represents a Bishop piece.
   """
-
-  use Nebulex.Caching
-
   @behaviour Chess.Piece
 
   alias Chess.Board
