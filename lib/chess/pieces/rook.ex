@@ -20,19 +20,12 @@ defmodule Chess.Pieces.Rook do
   end
 
   @spec filter_unreachable_coordinates(
-          list({list(Board.coordinates()), list(Board.coordinates())}),
+          Perpendiculars.t(),
           Piece.t(),
           Board.t()
         ) :: Enumerable.t()
   defp filter_unreachable_coordinates(moves, piece, board) do
-    moves
-    |> Stream.map(fn {lower, higher} ->
-      Enum.concat(
-        reduce_until_blocked_or_capture(lower, piece, board),
-        reduce_until_blocked_or_capture(higher, piece, board)
-      )
-    end)
-    |> Stream.concat()
+    Stream.flat_map(moves, &reduce_until_blocked_or_capture(&1, piece, board))
   end
 
   @spec reduce_until_blocked_or_capture(list(Board.coordinates()), Piece.t(), Board.t()) ::
