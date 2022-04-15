@@ -12,7 +12,7 @@ defmodule Chess.Moves.Generators.Diagonals do
 
   @operators ~w(- - + +)a
 
-  @type quadrant() :: MapSet.t(Board.coordinates())
+  @type quadrant() :: list(Board.coordinates())
   @type t() :: list(quadrant())
 
   @decorate cacheable(cache: Chess.Pieces.MoveCache, key: {__MODULE__, starting_index})
