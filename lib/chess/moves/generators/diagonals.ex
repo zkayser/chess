@@ -12,8 +12,12 @@ defmodule Chess.Moves.Generators.Diagonals do
 
   @operators ~w(- - + +)a
 
+  @type quadrant() :: MapSet.t(Board.coordinates())
+  @type t() :: list(quadrant())
+
   @decorate cacheable(cache: Chess.Pieces.MoveCache, key: {__MODULE__, starting_index})
   @impl Generator
+  @spec generate(Board.index()) :: t()
   def generate(starting_index) do
     {starting_col, starting_row} = Board.index_to_coordinates(starting_index)
 
