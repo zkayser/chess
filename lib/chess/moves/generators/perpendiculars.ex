@@ -8,10 +8,14 @@ defmodule Chess.Moves.Generators.Perpendiculars do
   alias Chess.Board
   alias Chess.Moves.Generator
 
+  @typep section() :: list(Board.coordinates())
+  @type t() :: list(section())
+
   @behaviour Generator
 
   @decorate cacheable(cache: Chess.Pieces.MoveCache, key: {__MODULE__, starting_index})
   @impl Generator
+  @spec generate(Board.index()) :: t()
   def generate(starting_index) do
     {starting_col, starting_row} = Board.index_to_coordinates(starting_index)
 
@@ -28,6 +32,6 @@ defmodule Chess.Moves.Generators.Perpendiculars do
     left = Enum.sort_by(left, &elem(&1, 0), :desc)
     below = Enum.sort_by(below, &elem(&1, 1), :desc)
 
-    [{left, right}, {below, above}]
+    [left, right, below, above]
   end
 end
