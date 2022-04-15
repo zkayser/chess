@@ -49,10 +49,10 @@ defmodule Chess.Moves.Generators.Diagonals do
 
   @spec build_diagonal(
           integer(),
-          {%{coords: list(Board.coordinates(), sort: :asc | :desc)}, integer()},
+          {%{coords: list(Board.coordinates()), sort: :asc | :desc}, integer()},
           :+ | :-
         ) ::
-          {:halt, %{coords: list(Board.coordinates(), sort: :desc | :asc)}}
+          {:halt, %{coords: list(Board.coordinates()), sort: :desc | :asc}}
           | {:cont, {%{coords: list(Board.coordinates()), sort: :desc | :asc}, integer()}}
   defp build_diagonal(column, {%{coords: coords} = acc, row}, operator) do
     case min(column, row) < 1 || max(column, row) > 8 do
