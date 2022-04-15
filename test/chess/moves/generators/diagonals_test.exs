@@ -10,10 +10,10 @@ defmodule Chess.Moves.Generators.DiagonalsTest do
 
       assert [quadrant_1, quadrant_2, quadrant_3, quadrant_4] = Diagonals.generate(starting_index)
 
-      assert MapSet.new([{3, 3}, {2, 2}, {1, 1}]) == quadrant_1
-      assert MapSet.new([{5, 3}, {6, 2}, {7, 1}]) == quadrant_2
-      assert MapSet.new([{3, 5}, {2, 6}, {1, 7}]) == quadrant_3
-      assert MapSet.new([{5, 5}, {6, 6}, {7, 7}, {8, 8}]) == quadrant_4
+      assert [{3, 3}, {2, 2}, {1, 1}] == quadrant_1
+      assert [{5, 3}, {6, 2}, {7, 1}] == quadrant_2
+      assert [{3, 5}, {2, 6}, {1, 7}] == quadrant_3
+      assert [{5, 5}, {6, 6}, {7, 7}, {8, 8}] == quadrant_4
     end
 
     test "given starting index at {1, 1}, returns only a single populated quadrant" do
@@ -21,7 +21,7 @@ defmodule Chess.Moves.Generators.DiagonalsTest do
 
       assert [quadrant] = Enum.reject(quadrants, fn quadrant -> Enum.empty?(quadrant) end)
 
-      expected = for position <- 2..8, into: MapSet.new(), do: {position, position}
+      expected = for position <- 2..8, do: {position, position}
 
       assert expected == quadrant
     end
@@ -31,7 +31,7 @@ defmodule Chess.Moves.Generators.DiagonalsTest do
 
       assert [quadrant] = Enum.reject(quadrants, fn quadrant -> Enum.empty?(quadrant) end)
 
-      expected = for position <- 1..7, into: MapSet.new(), do: {position, position}
+      expected = Enum.sort(for(position <- 1..7, do: {position, position}), :desc)
 
       assert expected == quadrant
     end
@@ -41,7 +41,7 @@ defmodule Chess.Moves.Generators.DiagonalsTest do
 
       assert [quadrant] = Enum.reject(quadrants, fn quadrant -> Enum.empty?(quadrant) end)
 
-      assert MapSet.new([{2, 7}, {3, 6}, {4, 5}, {5, 4}, {6, 3}, {7, 2}, {8, 1}]) == quadrant
+      assert [{2, 7}, {3, 6}, {4, 5}, {5, 4}, {6, 3}, {7, 2}, {8, 1}] == quadrant
     end
 
     test "given starting index at {8, 1}, returns only a single populated quadrant" do
@@ -49,7 +49,7 @@ defmodule Chess.Moves.Generators.DiagonalsTest do
 
       assert [quadrant] = Enum.reject(quadrants, fn quadrant -> Enum.empty?(quadrant) end)
 
-      assert MapSet.new([{7, 2}, {6, 3}, {5, 4}, {4, 5}, {3, 6}, {2, 7}, {1, 8}]) == quadrant
+      assert [{7, 2}, {6, 3}, {5, 4}, {4, 5}, {3, 6}, {2, 7}, {1, 8}] == quadrant
     end
   end
 end
