@@ -2,7 +2,7 @@ defmodule Chess.Pieces.QueenTest do
   use ExUnit.Case
 
   alias Chess.Board
-  alias Chess.Moves.Generators.Perpendiculars
+  alias Chess.Moves.Generators.{Diagonals, Perpendiculars}
   alias Chess.Piece
   alias Chess.Pieces.Queen
   alias Chess.Test.BoardHelpers
@@ -12,7 +12,7 @@ defmodule Chess.Pieces.QueenTest do
       {:ok, board: BoardHelpers.empty_board()}
     end
 
-    test "given starting position at {4, 4}, can move in to any perpendicular spot", %{
+    test "given starting position at {4, 4}, can move to any perpendicular spot", %{
       board: board
     } do
       starting_index = Board.coordinates_to_index({4, 4})
@@ -25,6 +25,19 @@ defmodule Chess.Pieces.QueenTest do
 
       assert Enum.all?(perpendiculars, fn move -> move in potential_moves end),
              "Expected all moves in list:\n#{inspect(perpendiculars)}}\n to be included in potential_moves:\n#{inspect(potential_moves)}"
+    end
+
+    test "given starting position at {4, 4}, can move to any diagonal spot", %{board: board} do
+      starting_index = Board.coordinates_to_index({4, 4})
+      queen = %Piece{type: Queen, color: :white}
+
+      board = %Board{board | grid: :array.set(starting_index, queen, board.grid)}
+
+      diagonals = List.flatten(Diagonals.generate(starting_index))
+      potential_moves = Queen.potential_moves(queen, starting_index, board)
+
+      assert Enum.all?(diagonals, fn move -> move in potential_moves end),
+             "Expected all moves in list:\n#{inspect(diagonals)}}\n to be included in potential_moves:\n#{inspect(potential_moves)}"
     end
   end
 end
