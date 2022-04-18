@@ -17,6 +17,7 @@ defmodule Chess.Pieces.Queen do
     end)
     |> Task.await_many()
     |> Enum.flat_map(&Enum.to_list/1)
+    |> MapSet.new()
   end
 
   @spec fetch_task(Diagonals | Perpendiculars, Board.index(), Piece.t(), Board.t()) :: Task.t()
