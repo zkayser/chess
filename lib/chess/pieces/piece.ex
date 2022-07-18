@@ -46,6 +46,14 @@ defmodule Chess.Piece do
     }
   end
 
+  @doc """
+  Updates the move history on a piece when a play is made.
+  """
+  @spec play(t(), Board.index()) :: t()
+  def play(%__MODULE__{moves: moves} = piece, target) do
+    %__MODULE__{piece | moves: MapSet.put(moves, target)}
+  end
+
   @callback potential_moves(t(), Board.index(), Board.t()) :: MapSet.t(Board.index())
 
   @doc """
