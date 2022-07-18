@@ -69,6 +69,25 @@ defmodule Chess.PieceTest do
     end
   end
 
+  describe "play/2" do
+    test "updates the piece's move history with the target position" do
+      piece = %Piece{type: Pawn}
+      target = Enum.random(Chess.Board.bounds())
+
+      assert %Piece{type: Pawn, moves: move_history} = Piece.play(piece, target)
+
+      assert MapSet.member?(move_history, target),
+             "Expected #{target} to be included in piece's move history"
+    end
+
+    test "is a no-op if the move has previously been made" do
+      target = Enum.random(Chess.Board.bounds())
+      piece = %Piece{type: Pawn, moves: MapSet.new([target])}
+
+      assert ^piece = Piece.play(piece, target)
+    end
+  end
+
   describe "String.Chars" do
     test "returns ♝ for Bishops" do
       assert " ♝ " == to_string(%Piece{type: Bishop})
