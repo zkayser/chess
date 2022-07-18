@@ -30,7 +30,7 @@ defmodule Chess.Pieces.PawnTest do
             false -> {:white, -1}
           end
 
-        pawn = %Piece{type: Pawn, color: color, moves: []}
+        pawn = %Piece{type: Pawn, color: color, moves: MapSet.new()}
 
         assert MapSet.new([
                  unquote(starting_index) + 8 * orientation,

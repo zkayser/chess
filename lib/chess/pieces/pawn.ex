@@ -21,8 +21,8 @@ defmodule Chess.Pieces.Pawn do
   @spec list_of_potential_moves(list(Board.index()), Board.index(), Piece.color()) ::
           list(Board.index())
   defp list_of_potential_moves(moves, starting_position, color) do
-    case moves do
-      [] ->
+    case Enum.empty?(moves) do
+      true ->
         [
           starting_position + 8 * direction_for(color),
           starting_position + 1 + 8 * direction_for(color),
@@ -30,7 +30,7 @@ defmodule Chess.Pieces.Pawn do
           starting_position + 16 * direction_for(color)
         ]
 
-      _ ->
+      false ->
         [
           starting_position + 8 * direction_for(color),
           starting_position + 1 + 8 * direction_for(color),
