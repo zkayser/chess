@@ -65,7 +65,7 @@ defmodule Chess.BoardTest do
 
   describe "square_at/2" do
     test "returns the square at the given index" do
-      assert %Piece{type: Chess.Pieces.Rook, color: :black, moves: []} ==
+      assert %Piece{type: Chess.Pieces.Rook, color: :black, moves: MapSet.new()} ==
                Board.square_at(Board.layout(), 0)
     end
   end
@@ -135,9 +135,9 @@ defmodule Chess.BoardTest do
     end
 
     test "get_and_update/3 allows squares to be updated", %{board: board} do
-      new_square = %Piece{type: Chess.Pieces.King, color: :white, moves: []}
+      new_square = %Piece{type: Chess.Pieces.King, color: :white, moves: MapSet.new()}
 
-      current_square = %Piece{type: Chess.Pieces.Rook, color: :black, moves: []}
+      current_square = %Piece{type: Chess.Pieces.Rook, color: :black, moves: MapSet.new()}
 
       assert {^current_square, new_board} =
                Board.get_and_update(board, 0, fn current -> {current, new_square} end)
@@ -148,7 +148,7 @@ defmodule Chess.BoardTest do
     test "pop/2 returns the square at the given index but is a no-op on the board", %{
       board: board
     } do
-      square = %Piece{type: Chess.Pieces.Rook, color: :black, moves: []}
+      square = %Piece{type: Chess.Pieces.Rook, color: :black, moves: MapSet.new()}
 
       assert {^square, ^board} = Board.pop(board, 0)
     end

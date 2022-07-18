@@ -18,7 +18,7 @@ defmodule Chess.Piece do
 
   defstruct type: nil,
             color: nil,
-            moves: []
+            moves: MapSet.new()
 
   # Starting Positions
   @pawn_indices Enum.concat(8..15, 48..55)
