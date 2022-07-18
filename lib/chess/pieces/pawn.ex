@@ -18,7 +18,7 @@ defmodule Chess.Pieces.Pawn do
     |> MapSet.new()
   end
 
-  @spec list_of_potential_moves(list(Board.index()), Board.index(), Piece.color()) ::
+  @spec list_of_potential_moves(MapSet.t(Board.index()), Board.index(), Piece.color()) ::
           list(Board.index())
   defp list_of_potential_moves(moves, starting_position, color) do
     case Enum.empty?(moves) do

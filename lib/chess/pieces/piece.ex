@@ -10,7 +10,7 @@ defmodule Chess.Piece do
           %__MODULE__{
             type: type(),
             color: color(),
-            moves: list(non_neg_integer())
+            moves: MapSet.t(non_neg_integer())
           }
           | nil
   @type type() :: Pawn | Rook | Knight | Bishop | Queen | King
