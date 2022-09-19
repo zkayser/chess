@@ -8,14 +8,26 @@ defimpl Inspect, for: Chess.Board do
 
     grid =
       as_list
-      |> Enum.reduce([], fn piece, grid ->
+      |> Stream.with_index()
+      |> Enum.reduce([], fn {piece, index}, grid ->
         doc =
           case piece do
             nil ->
-              string(" x ")
+              "   "
+              |> string()
+              |> color(
+                :binary,
+                Inspect.Opts.new(syntax_colors: [binary: background_color(rem(index, 2))])
+              )
 
             %Piece{} ->
-              string(inspect(piece))
+              piece
+              |> inspect()
+              |> string()
+              |> color(
+                :binary,
+                Inspect.Opts.new(syntax_colors: [binary: background_color(rem(index, 2))])
+              )
           end
 
         [doc | grid]
@@ -34,4 +46,7 @@ defimpl Inspect, for: Chess.Board do
       break: :strict
     )
   end
+
+  defp background_color(0), do: :light_black_background
+  defp background_color(_), do: :light_blue_background
 end
