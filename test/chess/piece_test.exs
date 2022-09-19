@@ -139,8 +139,8 @@ defmodule Chess.PieceTest do
   end
 
   describe "Inspect protocol" do
-    @opening_ansi_code_white "\e[1;47;37m"
-    @opening_ansi_code_black "\e[1;40;37m"
+    @opening_ansi_code_white "\e[37m"
+    @opening_ansi_code_black "\e[30m"
     @closing_ansi_code "\e[0m"
     test "returns custom representation of chess pieces with white color" do
       piece = %Piece{type: Enum.random([Bishop, Pawn, Rook, Knight, Queen, King]), color: :white}
