@@ -89,28 +89,52 @@ defmodule Chess.PieceTest do
   end
 
   describe "String.Chars" do
-    test "returns ♝ for Bishops" do
-      assert " ♝ " == to_string(%Piece{type: Bishop})
+    test "returns ♝ for black Bishops" do
+      assert " ♝ " == to_string(%Piece{type: Bishop, color: :black})
     end
 
-    test "returns  ♟️  for Pawns" do
-      assert " ♟️ " == to_string(%Piece{type: Pawn})
+    test "returns  ♟  for black Pawns" do
+      assert " ♟ " == to_string(%Piece{type: Pawn, color: :black})
     end
 
-    test "returns  ♜  for Rooks" do
-      assert " ♜ " == to_string(%Piece{type: Rook})
+    test "returns  ♜  for black Rooks" do
+      assert " ♜ " == to_string(%Piece{type: Rook, color: :black})
     end
 
-    test "returns  ♞  for Knights" do
-      assert " ♞ " == to_string(%Piece{type: Knight})
+    test "returns  ♞  for black Knights" do
+      assert " ♞ " == to_string(%Piece{type: Knight, color: :black})
     end
 
-    test "returns  ♛  for Queens" do
-      assert " ♛ " == to_string(%Piece{type: Queen})
+    test "returns  ♛  for black Queens" do
+      assert " ♛ " == to_string(%Piece{type: Queen, color: :black})
     end
 
-    test "returns  ♚  for Kings" do
-      assert " ♚ " == to_string(%Piece{type: King})
+    test "returns  ♚  for black Kings" do
+      assert " ♚ " == to_string(%Piece{type: King, color: :black})
+    end
+
+    test "returns ♗ for white Bishops" do
+      assert " ♗ " == to_string(%Piece{type: Bishop, color: :white})
+    end
+
+    test "returns  ♙  for white Pawns" do
+      assert " ♙ " == to_string(%Piece{type: Pawn, color: :white})
+    end
+
+    test "returns  ♖  for white Rooks" do
+      assert " ♖ " == to_string(%Piece{type: Rook, color: :white})
+    end
+
+    test "returns  ♘  for white Knights" do
+      assert " ♘ " == to_string(%Piece{type: Knight, color: :white})
+    end
+
+    test "returns  ♕  for white Queens" do
+      assert " ♕ " == to_string(%Piece{type: Queen, color: :white})
+    end
+
+    test "returns  ♔  for white Kings" do
+      assert " ♔ " == to_string(%Piece{type: King, color: :white})
     end
   end
 
