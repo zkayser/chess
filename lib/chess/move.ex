@@ -28,5 +28,15 @@ defmodule Chess.Move do
     |> Changeset.cast(attrs, [:player, :from, :to])
     |> Changeset.validate_inclusion(:from, Board.bounds())
     |> Changeset.validate_inclusion(:to, Board.bounds())
+    |> then(fn changeset ->
+      if changeset.changes[:from] == changeset.changes[:to] do
+        Changeset.add_error(changeset, :to, "value '%{to}' must be different from '%{from}'",
+          to: changeset.changes[:to],
+          from: changeset.changes[:from]
+        )
+      else
+        changeset
+      end
+    end)
   end
 end
