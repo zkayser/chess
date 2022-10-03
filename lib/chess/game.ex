@@ -12,4 +12,12 @@ defmodule Chess.Game do
           board: Board.t(),
           active_player: :white | :black
         }
+
+  @doc """
+  Initializes a new game instance.
+  """
+  @spec new() :: t()
+  def new do
+    %__MODULE__{}
+  end
 end
