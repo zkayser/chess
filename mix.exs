@@ -35,6 +35,7 @@ defmodule Chess.MixProject do
     [
       {:credo, "~> 1.6.4", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", runtime: false},
+      {:ecto, "~> 3.7.0"},
       {:ecto_sql, "~> 3.7.2"},
       {:esbuild, "~> 0.4.0", runtime: Mix.env() == :dev},
       {:ex_doc, "~> 0.28.3", only: :dev, runtime: false},
