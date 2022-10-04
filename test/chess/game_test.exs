@@ -32,5 +32,16 @@ defmodule Chess.GameTest do
         end
       end
     end
+
+    test "returns an error tuple if a move is attempted by the player who is not currently active" do
+      game = Game.new()
+
+      potential_moves = Piece.potential_moves(game.board[1], 1, game.board)
+
+      assert {:error, message} =
+               Game.play(game, %{player: :black, from: 1, to: Enum.random(potential_moves)})
+
+      assert message =~ "Player mismatch"
+    end
   end
 end
