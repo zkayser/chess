@@ -42,11 +42,14 @@ defmodule Chess.Pieces.King do
   @spec reject_capturable_indices(Enumerable.t(), Piece.t(), Board.t()) :: Enumerable.t()
   defp reject_capturable_indices(stream, %Piece{color: king_color}, board) do
     capturable_index_set_reducer = fn
-      index, %Piece{color: color} = piece, capturable_index_set when color != king_color ->
-        MapSet.union(capturable_index_set, Piece.potential_moves(piece, index, board))
-
-      _index, _same_color, capturable_index_set ->
+      _index, %Piece{color: ^king_color}, capturable_index_set ->
         capturable_index_set
+
+      index, %Piece{type: __MODULE__}, capturable_index_set ->
+        MapSet.union(capturable_index_set, MapSet.new(list_of_potential_moves(index)))
+
+      index, piece, capturable_index_set ->
+        MapSet.union(capturable_index_set, Piece.potential_moves(piece, index, board))
     end
 
     capturable_index_set =
