@@ -2,6 +2,7 @@ defmodule Chess.Pieces.KingTest do
   use ExUnit.Case
 
   alias Chess.Board
+  alias Chess.Game
   alias Chess.Piece
   alias Chess.Pieces.King
   alias Chess.Test.BoardHelpers
@@ -69,6 +70,15 @@ defmodule Chess.Pieces.KingTest do
       # included in the list of potential moves for the king.
       potential_moves = King.potential_moves(king, starting_index, board)
       refute MapSet.member?(potential_moves, 12)
+    end
+
+    test "does not allow a king to move itself into check default board" do
+      game = Game.new()
+
+      assert MapSet.new([51, 52, 53, 59, 61]) ==
+               King.potential_moves(white_king, 60, game.board)
+
+      assert MapSet.new([3, 5, 11, 12, 13]) == King.potential_moves(black_king, 4, game.board)
     end
   end
 end
