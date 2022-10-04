@@ -4,6 +4,7 @@ defmodule Chess.Board do
   """
   @behaviour Access
 
+  alias Chess.Move
   alias Chess.Piece
 
   @opaque board :: :array.array(Piece.t())
@@ -27,6 +28,12 @@ defmodule Chess.Board do
   def layout do
     board = :array.new(size: 64, fixed: true, default: nil)
     %__MODULE__{grid: :array.map(fn index, _ -> Piece.for_starting_position(index) end, board)}
+  end
+
+  @spec apply_move(t(), Move.t()) :: t()
+  def apply_move(%__MODULE__{grid: starting_grid} = board, move) do
+    grid = :array.set(move.from, nil, starting_grid)
+    %__MODULE__{board | grid: :array.set(move.to, board[move.from], grid)}
   end
 
   @spec bounds() :: Range.t(0, 63)
