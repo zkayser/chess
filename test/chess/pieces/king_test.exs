@@ -74,6 +74,8 @@ defmodule Chess.Pieces.KingTest do
 
     test "does not allow a king to move itself into check default board" do
       game = Game.new()
+      white_king = game.board[60]
+      black_king = game.board[4]
 
       assert MapSet.new([51, 52, 53, 59, 61]) ==
                King.potential_moves(white_king, 60, game.board)
