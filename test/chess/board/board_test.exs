@@ -3,6 +3,7 @@ defmodule Chess.BoardTest do
   use ExUnitProperties
 
   alias Chess.Board
+  alias Chess.Move
   alias Chess.Piece
 
   @occupied_indices Enum.concat(0..15, 48..63)
@@ -101,6 +102,21 @@ defmodule Chess.BoardTest do
         {column, row} = Board.index_to_coordinates(index)
         assert index == Board.coordinates_to_index({column, row})
       end
+    end
+  end
+
+  describe "apply_move/2" do
+    test "sets the from position to nil and the to position as the piece occupying the position being moved from" do
+      board = Board.layout()
+      move = %Move{player: :white, from: 48, to: 40}
+
+      new_board = Board.apply_move(board, move)
+
+      assert is_nil(new_board[move.from]),
+             "Expected moved from position to now be empty, but it was not"
+
+      assert new_board[move.to] == board[move.from],
+             "Expected piece to be moved from the from position on the old board to the to position on the new board, but it was not"
     end
   end
 
