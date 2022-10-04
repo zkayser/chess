@@ -22,6 +22,12 @@ defmodule Chess.Move do
           to: non_neg_integer()
         }
 
+  @type attributes() :: %{
+          player: String.t() | :white | :black,
+          from: integer(),
+          to: integer()
+        }
+
   @spec changeset(map()) :: Changeset.t(t())
   def changeset(attrs) do
     %__MODULE__{}
