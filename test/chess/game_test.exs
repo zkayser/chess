@@ -43,5 +43,21 @@ defmodule Chess.GameTest do
 
       assert message =~ "Player mismatch"
     end
+
+    test "returns an error tuple with invalid changeset when given bad move inputs" do
+      game = Game.new()
+
+      assert {:error, %Ecto.Changeset{valid?: false, errors: errors}} =
+               Game.play(game, %{player: :invalid, from: 1, to: 1})
+
+      actual_error_keys = Keyword.keys(errors)
+
+      for expected_error_key <- [:to, :player] do
+        assert expected_error_key in actual_error_keys,
+               "Expected #{expected_error_key} to be in list of actual error keys, but it was not"
+      end
+
+      assert length(errors) == 2
+    end
   end
 end
