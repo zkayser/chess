@@ -30,14 +30,12 @@ defmodule Chess.Game do
          %Move{} = move <- Ecto.Changeset.apply_changes(changeset),
          :player_matches <-
            if(move.player == game.active_player, do: :player_matches, else: :player_mismatch),
-         true <- Enum.member?(Piece.potential_moves(board[move.from], move.from, board), move.to) do
-      grid = :array.set(move.to, board[move.from], board.grid)
-      grid = :array.set(move.from, nil, grid)
-
+         true <- Enum.member?(Piece.potential_moves(board[move.from], move.from, board), move.to),
+         %Board{} = new_board <- Board.apply_move(board, move) do
       {:ok,
        %__MODULE__{
          game
-         | board: %Board{game.board | grid: grid},
+         | board: new_board,
            active_player: if(game.active_player == :white, do: :black, else: :white)
        }}
     else
