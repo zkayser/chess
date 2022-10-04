@@ -59,5 +59,24 @@ defmodule Chess.GameTest do
 
       assert length(errors) == 2
     end
+
+    property "returns an error tuple when player attempts an illegal move" do
+      check all(index <- StreamData.integer(48..63)) do
+        game = Game.new()
+        piece = game.board[index]
+        potential_moves = Piece.potential_moves(piece, index, game.board)
+
+        invalid_move =
+          Board.bounds()
+          |> Enum.reject(&(&1 in potential_moves))
+          |> Enum.reject(&(&1 == index))
+          |> Enum.random()
+
+        assert {:error, message} =
+                 Game.play(game, %{player: :white, from: index, to: invalid_move})
+
+        assert message =~ "Invalid move"
+      end
+    end
   end
 end
