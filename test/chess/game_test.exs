@@ -68,8 +68,7 @@ defmodule Chess.GameTest do
 
         invalid_move =
           Board.bounds()
-          |> Enum.reject(&(&1 in potential_moves))
-          |> Enum.reject(&(&1 == index))
+          |> Enum.reject(&(&1 in potential_moves || &1 == index))
           |> Enum.random()
 
         assert {:error, message} =
