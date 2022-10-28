@@ -11,4 +11,21 @@ defmodule Chess.Boards.BitBoardTest do
              "Expected new bitboard to contain a reference, but contained #{inspect(ref)} instead."
     end
   end
+
+  describe "to_list/2" do
+    test "returns an 8x8 list representation of the bitboard" do
+      bitboard = BitBoard.new()
+
+      assert [
+               [1, 1, 1, 1, 1, 1, 1, 1],
+               [1, 1, 1, 1, 1, 1, 1, 1],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [1, 1, 1, 1, 1, 1, 1, 1],
+               [1, 1, 1, 1, 1, 1, 1, 1]
+             ] == BitBoard.to_list(bitboard, :positions)
+    end
+  end
 end
