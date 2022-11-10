@@ -13,7 +13,7 @@ defmodule Chess.Boards.BitBoardTest do
   end
 
   describe "to_list/2" do
-    test "returns an 8x8 list representation of the bitboard" do
+    test "returns an 8x8 list representation of the composite bitboard" do
       bitboard = BitBoard.new()
 
       assert [
@@ -25,7 +25,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [1, 1, 1, 1, 1, 1, 1, 1],
                [1, 1, 1, 1, 1, 1, 1, 1]
-             ] == BitBoard.to_list(bitboard, :positions)
+             ] == BitBoard.to_list(bitboard, :composite)
     end
   end
 end
