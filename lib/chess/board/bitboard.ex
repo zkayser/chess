@@ -69,8 +69,8 @@ defmodule Chess.Boards.BitBoard do
   mainly for inspecting the state of a bitboard in
   a way that is human-readable at a glance.
   """
-  @spec to_list(t(), bitboard()) :: list(list(0 | 1))
-  def to_list(bitboard, bitboard_type \\ :composite) do
+  @spec to_grid(t(), bitboard()) :: list(list(0 | 1))
+  def to_grid(bitboard, bitboard_type \\ :composite) do
     bitboard.ref
     |> :atomics.get(@bitboards[bitboard_type])
     |> Integer.digits(2)
