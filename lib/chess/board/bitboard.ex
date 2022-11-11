@@ -39,11 +39,11 @@ defmodule Chess.Boards.BitBoard do
     {:white_bishops, 36},
     {:white_king, 8},
     {:white_knights, 66},
-    {:white_pawns, 65280},
+    {:white_pawns, 65_280},
     {:white_queens, 16},
     {:white_rooks, 129},
     {:black_composite, 18_446_462_598_732_840_960},
-    {:white_composite, 65535}
+    {:white_composite, 65_535}
   ]
 
   @atomics_offset 1
