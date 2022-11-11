@@ -207,5 +207,35 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 1, 0, 0, 0]
              ] == BitBoard.to_grid(bitboard, :white_king)
     end
+
+    test "returns an 8x8 representation of the bitboard for the black composite position" do
+      bitboard = BitBoard.new()
+
+      assert [
+               [1, 1, 1, 1, 1, 1, 1, 1],
+               [1, 1, 1, 1, 1, 1, 1, 1],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0]
+             ] == BitBoard.to_grid(bitboard, :black_composite)
+    end
+
+    test "returns an 8x8 representation of the bitboard for the white composite position" do
+      bitboard = BitBoard.new()
+
+      assert [
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [0, 0, 0, 0, 0, 0, 0, 0],
+               [1, 1, 1, 1, 1, 1, 1, 1],
+               [1, 1, 1, 1, 1, 1, 1, 1]
+             ] == BitBoard.to_grid(bitboard, :white_composite)
+    end
   end
 end
