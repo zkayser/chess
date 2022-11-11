@@ -66,8 +66,8 @@ defmodule Chess.Boards.BitBoard do
   bitboard. If the bitboard does not take up a full
   64 bits, the representation is padded with 0s to
   create a full 8x8 grid. This function is intended
-  mainly for inspecting the state of a bitboard in
-  a way that is human-readable at a glance.
+  mainly for debugging and inspecting the state of
+  a bitboard in a way that is human-readable at a glance.
   """
   @spec to_grid(t(), bitboard()) :: list(list(0 | 1))
   def to_grid(bitboard, bitboard_type \\ :composite) do
