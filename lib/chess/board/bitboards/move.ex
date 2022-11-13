@@ -57,6 +57,9 @@ defmodule Chess.Bitboards.Move do
     queen_promotion_capture: 15
   }
 
+  @typedoc """
+  The set of all possible move flags.
+  """
   @type flag() ::
           :quiet
           | :double_pawn_push
@@ -72,6 +75,22 @@ defmodule Chess.Bitboards.Move do
           | :bishop_promotion_capture
           | :rook_promotion_capture
           | :queen_promotion_capture
+
+  @typedoc """
+  An encoded move is a 16-bit integer, which means it has
+  a decimal-based integer value of 0..256.
+
+  The first 6 bits of the integer represent the origin square
+  from which a move is made.
+
+  The second 6 bits of the integer represent the destination square
+  to which a move is made.
+
+  The remaining 4 bits of the integer represent a flag denoting
+  the type of move, captures, promotions, etc. See the docs on
+  `t:flag/0` for more information.
+  """
+  @type encoded() :: 0..256
 
   @spec flags() :: list(flag())
   def flags, do: Map.keys(@flag_codes)
