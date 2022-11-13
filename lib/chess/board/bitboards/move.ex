@@ -40,6 +40,8 @@ defmodule Chess.Bitboards.Move do
   15 -> queen promotion capture
   """
 
+  defstruct [:from, :to, :flag]
+
   @flag_codes %{
     quiet: 0,
     double_pawn_push: 1,
@@ -56,6 +58,23 @@ defmodule Chess.Bitboards.Move do
     rook_promotion_capture: 14,
     queen_promotion_capture: 15
   }
+
+  @typedoc """
+  A `coordinate` is a tuple representing the
+  file (the first element of the tuple), which is
+  a string in the range from "a" to "h", and the
+  rank, which is an integer in the range 1..8.
+
+  In chess, a file represents a column along the board,
+  while a rank represent rows on the board.
+  """
+  @type coordinate() :: {String.t(), 1..8}
+
+  @type t() :: %__MODULE__{
+          from: coordinate(),
+          to: coordinate(),
+          flag: flag()
+        }
 
   @typedoc """
   The set of all possible move flags.
@@ -94,4 +113,9 @@ defmodule Chess.Bitboards.Move do
 
   @spec flags() :: list(flag())
   def flags, do: Map.keys(@flag_codes)
+
+  @spec encode(t()) :: encoded()
+  def encode(move) do
+    :nope
+  end
 end
