@@ -1,5 +1,6 @@
 defmodule Chess.Bitboards.MoveTest do
   use ExUnit.Case, async: true
+  use ExUnitProperties
 
   alias Chess.Bitboards.Move
 
@@ -30,6 +31,35 @@ defmodule Chess.Bitboards.MoveTest do
 
              #{inspect(Move.flags())}
              """
+    end
+  end
+
+  describe "encode/1" do
+    property "returns an integer between 0 and 256 for any valid move" do
+      check all(move <- move_generator()) do
+        assert Move.encode(move) in 0..256
+      end
+    end
+  end
+
+  def move_generator() do
+    gen all(
+          from <-
+            StreamData.tuple(
+              {StreamData.string(?a..?h, min_length: 1, max_length: 1), StreamData.integer(1..8)}
+            ),
+          to <-
+            StreamData.tuple(
+              {StreamData.string(?a..?h, min_length: 1, max_length: 1), StreamData.integer(1..8)}
+            ),
+          flag <- StreamData.one_of(Move.flags()),
+          from != to
+        ) do
+      %Move{
+        from: from,
+        to: to,
+        flag: flag
+      }
     end
   end
 end
