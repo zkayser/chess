@@ -39,4 +39,40 @@ defmodule Chess.Bitboards.Move do
   14 -> rook promotion capture
   15 -> queen promotion capture
   """
+
+  @flag_codes %{
+    quiet: 0,
+    double_pawn_push: 1,
+    king_castle: 2,
+    queen_castle: 3,
+    captures: 4,
+    en_passant_captures: 5,
+    knight_promotion: 8,
+    bishop_promotion: 9,
+    rook_promotion: 10,
+    queen_promotion: 11,
+    knight_promotion_capture: 12,
+    bishop_promotion_capture: 13,
+    rook_promotion_capture: 14,
+    queen_promotion_capture: 15
+  }
+
+  @type flag() ::
+          :quiet
+          | :double_pawn_push
+          | :king_castle
+          | :queen_castle
+          | :captures
+          | :en_passant_captures
+          | :knight_promotion
+          | :bishop_promotion
+          | :rook_promotion
+          | :queen_promotion
+          | :knight_promotion_capture
+          | :bishop_promotion_capture
+          | :rook_promotion_capture
+          | :queen_promotion_capture
+
+  @spec flags() :: list(flag())
+  def flags, do: Map.keys(@flag_codes)
 end
