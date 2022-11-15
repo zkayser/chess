@@ -39,6 +39,7 @@ defmodule Chess.Bitboards.Move do
   14 -> rook promotion capture
   15 -> queen promotion capture
   """
+  use Bitwise
 
   defstruct [:from, :to, :flag]
 
@@ -97,7 +98,7 @@ defmodule Chess.Bitboards.Move do
 
   @typedoc """
   An encoded move is a 16-bit integer, which means it has
-  a decimal-based integer value of 0..256.
+  a decimal-based integer value of 0..65536.
 
   The first 6 bits of the integer represent the origin square
   from which a move is made.
@@ -109,13 +110,19 @@ defmodule Chess.Bitboards.Move do
   the type of move, captures, promotions, etc. See the docs on
   `t:flag/0` for more information.
   """
-  @type encoded() :: 0..256
+  @type encoded() :: 0..65536
 
   @spec flags() :: list(flag())
   def flags, do: Map.keys(@flag_codes)
 
+  @file_to_value ?a..?h |> Enum.with_index() |> Map.new(fn {k, v} -> {<<k>>, v} end)
+
   @spec encode(t()) :: encoded()
-  def encode(move) do
-    :nope
+  def encode(%__MODULE__{from: {from_file, from_rank}, to: {to_file, to_rank}, flag: flag}) do
+    @file_to_value[from_file]
+    |> bor((from_rank - 1) <<< 3)
+    |> bor(@file_to_value[to_file] <<< 6)
+    |> bor((to_rank - 1) <<< 9)
+    |> bor(@flag_codes[flag] <<< 12)
   end
 end
