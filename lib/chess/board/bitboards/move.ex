@@ -110,7 +110,7 @@ defmodule Chess.Bitboards.Move do
   the type of move, captures, promotions, etc. See the docs on
   `t:flag/0` for more information.
   """
-  @type encoded() :: 0..65536
+  @type encoded() :: 0..65_536
 
   @spec flags() :: list(flag())
   def flags, do: Map.keys(@flag_codes)

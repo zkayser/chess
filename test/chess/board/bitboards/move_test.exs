@@ -37,12 +37,12 @@ defmodule Chess.Bitboards.MoveTest do
   describe "encode/1" do
     property "returns an integer between 0 and 65536 for any valid move" do
       check all(move <- move_generator()) do
-        assert Move.encode(move) in 0..65536
+        assert Move.encode(move) in 0..65_536
       end
     end
   end
 
-  def move_generator() do
+  def move_generator do
     gen all(
           from <-
             StreamData.tuple(
