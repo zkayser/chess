@@ -117,12 +117,21 @@ defmodule Chess.Bitboards.Move do
 
   @file_to_value ?a..?h |> Enum.with_index() |> Map.new(fn {k, v} -> {<<k>>, v} end)
 
+  ####################################
+  # The 0-indexed starting bits for  #
+  # each part of an encoded move     #
+  ####################################
+  @from_rank_starting_bit 3
+  @to_file_starting_bit 6
+  @to_rank_starting_bit 9
+  @flags_starting_bit 12
+
   @spec encode(t()) :: encoded()
   def encode(%__MODULE__{from: {from_file, from_rank}, to: {to_file, to_rank}, flag: flag}) do
     @file_to_value[from_file]
-    |> bor((from_rank - 1) <<< 3)
-    |> bor(@file_to_value[to_file] <<< 6)
-    |> bor((to_rank - 1) <<< 9)
-    |> bor(@flag_codes[flag] <<< 12)
+    |> bor((from_rank - 1) <<< @from_rank_starting_bit)
+    |> bor(@file_to_value[to_file] <<< @to_file_starting_bit)
+    |> bor((to_rank - 1) <<< @to_rank_starting_bit)
+    |> bor(@flag_codes[flag] <<< @flags_starting_bit)
   end
 end
