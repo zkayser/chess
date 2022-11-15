@@ -35,9 +35,9 @@ defmodule Chess.Bitboards.MoveTest do
   end
 
   describe "encode/1" do
-    property "returns an integer between 0 and 256 for any valid move" do
+    property "returns an integer between 0 and 65536 for any valid move" do
       check all(move <- move_generator()) do
-        assert Move.encode(move) in 0..256
+        assert Move.encode(move) in 0..65536
       end
     end
   end
@@ -52,8 +52,7 @@ defmodule Chess.Bitboards.MoveTest do
             StreamData.tuple(
               {StreamData.string(?a..?h, min_length: 1, max_length: 1), StreamData.integer(1..8)}
             ),
-          flag <- StreamData.one_of(Move.flags()),
-          from != to
+          flag <- StreamData.one_of(Move.flags())
         ) do
       %Move{
         from: from,
