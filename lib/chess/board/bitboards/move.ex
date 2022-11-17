@@ -126,6 +126,9 @@ defmodule Chess.Bitboards.Move do
   @to_rank_starting_bit 9
   @flags_starting_bit 12
 
+  @doc """
+  Takes a `Move.t()` struct and encodes it into a 16-bit integer.
+  """
   @spec encode(t()) :: encoded()
   def encode(%__MODULE__{from: {from_file, from_rank}, to: {to_file, to_rank}, flag: flag}) do
     @file_to_value[from_file]
