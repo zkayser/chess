@@ -45,7 +45,9 @@ defmodule Chess.Bitboards.MoveTest do
       check all(move <- move_generator()) do
         encoded = Move.encode(move)
 
-        assert move == Move.decode(encoded), """
+        assert {:ok, decoded_move} = Move.decode(encoded)
+
+        assert move == decoded_move, """
         Expected initial move #{inspect(move)}
         to be recovered by decoding the encoding #{inspect(Integer.digits(encoded, 2))},
         but this process failed.
