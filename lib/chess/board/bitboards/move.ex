@@ -60,6 +60,8 @@ defmodule Chess.Bitboards.Move do
     queen_promotion_capture: 15
   }
 
+  @code_to_flag Map.new(@flag_codes, fn {flag, code} -> {code, flag} end)
+
   @typedoc """
   A `coordinate` is a tuple representing the
   file (the first element of the tuple), which is
@@ -116,6 +118,7 @@ defmodule Chess.Bitboards.Move do
   def flags, do: Map.keys(@flag_codes)
 
   @file_to_value ?a..?h |> Enum.with_index() |> Map.new(fn {k, v} -> {<<k>>, v} end)
+  @value_to_file Map.new(@file_to_value, fn {file, value} -> {value, file} end)
 
   ####################################
   # The 0-indexed starting bits for  #
@@ -125,6 +128,15 @@ defmodule Chess.Bitboards.Move do
   @to_file_starting_bit 6
   @to_rank_starting_bit 9
   @flags_starting_bit 12
+
+  #############
+  # BIT MASKS #
+  #############
+  @from_file_mask 7
+  @from_rank_mask 7 <<< @from_rank_starting_bit
+  @to_file_mask 7 <<< @to_file_starting_bit
+  @to_rank_mask 7 <<< @to_rank_starting_bit
+  @flag_mask 15 <<< @flags_starting_bit
 
   @doc """
   Takes a `Move.t()` struct and encodes it into a 16-bit integer.
@@ -136,5 +148,18 @@ defmodule Chess.Bitboards.Move do
     |> bor(@file_to_value[to_file] <<< @to_file_starting_bit)
     |> bor((to_rank - 1) <<< @to_rank_starting_bit)
     |> bor(@flag_codes[flag] <<< @flags_starting_bit)
+  end
+
+  @spec decode(encoded()) :: t()
+  def decode(encoded) do
+    %__MODULE__{
+      from:
+        {@value_to_file[encoded &&& @from_file_mask],
+         ((encoded &&& @from_rank_mask) >>> @from_rank_starting_bit) + 1},
+      to:
+        {@value_to_file[(encoded &&& @to_file_mask) >>> @to_file_starting_bit],
+         ((encoded &&& @to_rank_mask) >>> @to_rank_starting_bit) + 1},
+      flag: @code_to_flag[(encoded &&& @flag_mask) >>> @flags_starting_bit]
+    }
   end
 end
