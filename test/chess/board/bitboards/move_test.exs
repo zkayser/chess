@@ -34,10 +34,22 @@ defmodule Chess.Bitboards.MoveTest do
     end
   end
 
-  describe "encode/1" do
+  describe "encode/1 and decode/1" do
     property "returns an integer between 0 and 65536 for any valid move" do
       check all(move <- move_generator()) do
         assert Move.encode(move) in 0..65_536
+      end
+    end
+
+    property "all encoded moves can be reversed by decoding" do
+      check all(move <- move_generator()) do
+        encoded = Move.encode(move)
+
+        assert move == Move.decode(encoded), """
+        Expected initial move #{inspect(move)}
+        to be recovered by decoding the encoding #{inspect(Integer.digits(encoded, 2))},
+        but this process failed.
+        """
       end
     end
   end
