@@ -150,16 +150,54 @@ defmodule Chess.Bitboards.Move do
     |> bor(@flag_codes[flag] <<< @flags_starting_bit)
   end
 
-  @spec decode(encoded()) :: t()
+  @spec decode(encoded()) :: {:ok, t()} | :error
   def decode(encoded) do
-    %__MODULE__{
-      from:
-        {@value_to_file[encoded &&& @from_file_mask],
-         ((encoded &&& @from_rank_mask) >>> @from_rank_starting_bit) + 1},
-      to:
-        {@value_to_file[(encoded &&& @to_file_mask) >>> @to_file_starting_bit],
-         ((encoded &&& @to_rank_mask) >>> @to_rank_starting_bit) + 1},
-      flag: @code_to_flag[(encoded &&& @flag_mask) >>> @flags_starting_bit]
-    }
+    with {:ok, from_file} <- decode_from_file(encoded),
+         {:ok, from_rank} <- decode_from_rank(encoded),
+         {:ok, to_file} <- decode_to_file(encoded),
+         {:ok, to_rank} <- decode_to_rank(encoded),
+         {:ok, flag} <- decode_flag(encoded) do
+      {:ok, %__MODULE__{from: {from_file, from_rank}, to: {to_file, to_rank}, flag: flag}}
+    end
+  end
+
+  @spec decode_from_file(encoded()) :: :error | {:ok, String.t()}
+  defp decode_from_file(encoded) do
+    case Map.get(@value_to_file, encoded &&& @from_file_mask) do
+      nil -> :error
+      file -> {:ok, file}
+    end
+  end
+
+  @spec decode_from_rank(encoded()) :: :error | {:ok, pos_integer()}
+  defp decode_from_rank(encoded) do
+    case ((encoded &&& @from_rank_mask) >>> @from_rank_starting_bit) + 1 do
+      rank when rank >= 1 and rank <= 8 -> {:ok, rank}
+      _ -> :error
+    end
+  end
+
+  @spec decode_to_file(encoded()) :: :error | {:ok, String.t()}
+  defp decode_to_file(encoded) do
+    case Map.get(@value_to_file, (encoded &&& @to_file_mask) >>> @to_file_starting_bit) do
+      nil -> :error
+      file -> {:ok, file}
+    end
+  end
+
+  @spec decode_to_rank(encoded()) :: :error | {:ok, pos_integer()}
+  defp decode_to_rank(encoded) do
+    case ((encoded &&& @to_rank_mask) >>> @to_rank_starting_bit) + 1 do
+      rank when rank >= 1 and rank <= 8 -> {:ok, rank}
+      _ -> :error
+    end
+  end
+
+  @spec decode_flag(encoded()) :: :error | {:ok, non_neg_integer()}
+  defp decode_flag(encoded) do
+    case Map.get(@code_to_flag, (encoded &&& @flag_mask) >>> @flags_starting_bit) do
+      nil -> :error
+      flag -> {:ok, flag}
+    end
   end
 end
