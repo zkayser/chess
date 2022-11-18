@@ -29,6 +29,15 @@ defmodule Chess.Boards.BitBoardTest do
     end
   end
 
+  describe "get/2" do
+    for bitboard_type <- BitBoard.list_types() do
+      test "returns bitboard when given #{bitboard_type}" do
+        assert BitBoard.initial_states()[unquote(bitboard_type)] ==
+                 BitBoard.get(BitBoard.new(), unquote(bitboard_type))
+      end
+    end
+  end
+
   describe "to_grid/2" do
     test "returns an 8x8 list representation of the composite bitboard" do
       bitboard = BitBoard.new()
