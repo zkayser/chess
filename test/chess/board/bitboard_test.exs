@@ -12,6 +12,23 @@ defmodule Chess.Boards.BitBoardTest do
     end
   end
 
+  describe "list_types/0" do
+    test "returns the list of all bitboard types" do
+      expected_type_set =
+        MapSet.new(
+          ~w(composite black_composite white_composite white_pawns white_rooks white_knights white_bishops white_queens white_king black_pawns black_rooks black_knights black_bishops black_queens black_king)a
+        )
+
+      actual_set = MapSet.new(BitBoard.list_types())
+
+      assert MapSet.equal?(actual_set, expected_type_set), """
+      Expected set of Bitboard types to equal expected set.
+      Actual: #{inspect(actual_set)}
+      Expected: #{inspect(expected_type_set)}
+      """
+    end
+  end
+
   describe "to_grid/2" do
     test "returns an 8x8 list representation of the composite bitboard" do
       bitboard = BitBoard.new()
