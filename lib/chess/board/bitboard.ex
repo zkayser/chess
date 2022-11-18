@@ -75,6 +75,23 @@ defmodule Chess.Boards.BitBoard do
   def list_types, do: @bitboard_types
 
   @doc """
+  Returns a keyword list that gives the initial state of each individual
+  bitboard type. Keys are the type of bitboards, values are the initial state
+  as an integer.
+  """
+  @spec initial_states() :: Keyword.t()
+  def initial_states, do: @initial_boards
+
+  @doc """
+  Returns the specific bitboard denoted by `bitboard_type`
+  stored within the `BitBoard.t/0` struct.
+  """
+  @spec get(t(), bitboard()) :: non_neg_integer()
+  def get(bitboard, type) do
+    :atomics.get(bitboard.ref, @bitboards[type])
+  end
+
+  @doc """
   Returns an 8x8 grid representation of a given
   bitboard. If the bitboard does not take up a full
   64 bits, the representation is padded with 0s to
