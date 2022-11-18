@@ -27,6 +27,8 @@ defmodule Chess.Boards.BitBoard do
           | :black_bishops
           | :black_queens
           | :black_king
+          | :black_composite
+          | :white_composite
 
   @initial_boards [
     {:composite, 18_446_462_598_732_906_495},
@@ -52,6 +54,8 @@ defmodule Chess.Boards.BitBoard do
              |> Enum.with_index(@atomics_offset)
              |> Enum.map(fn {{key, _}, index} -> {key, index} end)
 
+  @bitboard_types Enum.map(@bitboards, fn {type, _} -> type end)
+
   @spec new() :: t()
   def new do
     bitboards = :atomics.new(length(@bitboards), signed: false)
@@ -62,6 +66,13 @@ defmodule Chess.Boards.BitBoard do
 
     %__MODULE__{ref: bitboards}
   end
+
+  @doc """
+  Returns the list off all different bitboard types that are
+  stored in a Bitboard.t() representation.
+  """
+  @spec list_types() :: list(bitboard())
+  def list_types, do: @bitboard_types
 
   @doc """
   Returns an 8x8 grid representation of a given
