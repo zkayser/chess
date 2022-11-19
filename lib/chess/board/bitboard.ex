@@ -13,6 +13,12 @@ defmodule Chess.Boards.BitBoard do
   @opaque bitboards() :: :atomics.atomics_ref()
   @type position() :: non_neg_integer()
   @type t() :: %__MODULE__{ref: bitboards()}
+  @typedoc """
+  A t:bitboard/0 is specifically a 64-bit integer
+  that represents one component or composite of
+  an entire chess game bitboard representation.
+  """
+  @type bitboard() :: non_neg_integer()
   @type bitboard_type() ::
           :composite
           | :white_pawns
