@@ -13,7 +13,7 @@ defmodule Chess.Boards.BitBoard do
   @opaque bitboards() :: :atomics.atomics_ref()
   @type position() :: non_neg_integer()
   @type t() :: %__MODULE__{ref: bitboards()}
-  @type bitboard() ::
+  @type bitboard_type() ::
           :composite
           | :white_pawns
           | :white_rooks
@@ -71,7 +71,7 @@ defmodule Chess.Boards.BitBoard do
   Returns the list off all different bitboard types that are
   stored in a Bitboard.t() representation.
   """
-  @spec list_types() :: list(bitboard())
+  @spec list_types() :: list(bitboard_type())
   def list_types, do: @bitboard_types
 
   @doc """
@@ -86,7 +86,7 @@ defmodule Chess.Boards.BitBoard do
   Returns the specific bitboard denoted by `bitboard_type`
   stored within the `BitBoard.t/0` struct.
   """
-  @spec get(t(), bitboard()) :: non_neg_integer()
+  @spec get(t(), bitboard_type()) :: non_neg_integer()
   def get(bitboard, type) do
     :atomics.get(bitboard.ref, @bitboards[type])
   end
