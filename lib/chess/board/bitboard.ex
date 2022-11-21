@@ -4,21 +4,55 @@ defmodule Chess.Boards.BitBoard do
   of a chess game, which can be composed together to
   compute current game state and possible moves.
 
-  This module uses the `:atomics` module for efficient
-  concurrent access into an array of 64-bit integers.
-  https://www.erlang.org/doc/man/atomics.html
+  This module uses a series of 8-byte binaries to
+  represent the state of a bitboard.
   """
-  defstruct [:ref]
+  @full_row 0b11111111
+  @rooks 0b10000001
+  @knights 0b01000010
+  @bishops 0b00100100
+  @queen 0b00010000
+  @king 0b00001000
 
-  @opaque bitboards() :: :atomics.atomics_ref()
-  @type position() :: non_neg_integer()
-  @type t() :: %__MODULE__{ref: bitboards()}
+  defstruct composite: <<@full_row, @full_row, 0, 0, 0, 0, @full_row, @full_row>>,
+            white_pawns: <<0, 0, 0, 0, 0, 0, @full_row, 0>>,
+            white_rooks: <<0, 0, 0, 0, 0, 0, 0, @rooks>>,
+            white_knights: <<0, 0, 0, 0, 0, 0, 0, @knights>>,
+            white_bishops: <<0, 0, 0, 0, 0, 0, 0, @bishops>>,
+            white_queens: <<0, 0, 0, 0, 0, 0, 0, @queen>>,
+            white_king: <<0, 0, 0, 0, 0, 0, 0, @king>>,
+            black_pawns: <<0, @full_row, 0, 0, 0, 0, 0, 0>>,
+            black_rooks: <<@rooks, 0, 0, 0, 0, 0, 0, 0>>,
+            black_knights: <<@knights, 0, 0, 0, 0, 0, 0, 0>>,
+            black_bishops: <<@bishops, 0, 0, 0, 0, 0, 0, 0>>,
+            black_queens: <<@queen, 0, 0, 0, 0, 0, 0, 0>>,
+            black_king: <<@king, 0, 0, 0, 0, 0, 0, 0>>,
+            black_composite: <<@full_row, @full_row, 0, 0, 0, 0, 0, 0>>,
+            white_composite: <<0, 0, 0, 0, 0, 0, @full_row, @full_row>>
+
   @typedoc """
-  A t:bitboard/0 is specifically a 64-bit integer
+  A t:bitboard/0 is specifically a 64-bit bitstring
   that represents one component or composite of
   an entire chess game bitboard representation.
   """
-  @type bitboard() :: non_neg_integer()
+  @type bitboard() :: binary()
+  @type position() :: non_neg_integer()
+  @type t() :: %__MODULE__{
+          composite: bitboard(),
+          white_pawns: bitboard(),
+          white_rooks: bitboard(),
+          white_knights: bitboard(),
+          white_queens: bitboard(),
+          white_king: bitboard(),
+          black_pawns: bitboard(),
+          black_rooks: bitboard(),
+          black_knights: bitboard(),
+          black_bishops: bitboard(),
+          black_queens: bitboard(),
+          black_king: bitboard(),
+          black_composite: bitboard(),
+          white_composite: bitboard()
+        }
   @type bitboard_type() ::
           :composite
           | :white_pawns
@@ -36,57 +70,19 @@ defmodule Chess.Boards.BitBoard do
           | :black_composite
           | :white_composite
 
-  @initial_boards [
-    {:composite, 18_446_462_598_732_906_495},
-    {:black_bishops, 2_594_073_385_365_405_696},
-    {:black_king, 576_460_752_303_423_488},
-    {:black_knights, 4_755_801_206_503_243_776},
-    {:black_pawns, 71_776_119_061_217_280},
-    {:black_queens, 1_152_921_504_606_846_976},
-    {:black_rooks, 9_295_429_630_892_703_744},
-    {:white_bishops, 36},
-    {:white_king, 8},
-    {:white_knights, 66},
-    {:white_pawns, 65_280},
-    {:white_queens, 16},
-    {:white_rooks, 129},
-    {:black_composite, 18_446_462_598_732_840_960},
-    {:white_composite, 65_535}
-  ]
-
-  @atomics_offset 1
-
-  @bitboards @initial_boards
-             |> Enum.with_index(@atomics_offset)
-             |> Enum.map(fn {{key, _}, index} -> {key, index} end)
-
-  @bitboard_types Enum.map(@bitboards, fn {type, _} -> type end)
-
   @spec new() :: t()
-  def new do
-    bitboards = :atomics.new(length(@bitboards), signed: false)
-
-    for {bitboard_type, bitboard_index} <- @bitboards do
-      :atomics.put(bitboards, bitboard_index, @initial_boards[bitboard_type])
-    end
-
-    %__MODULE__{ref: bitboards}
-  end
+  def new, do: %__MODULE__{}
 
   @doc """
   Returns the list off all different bitboard types that are
   stored in a Bitboard.t() representation.
   """
   @spec list_types() :: list(bitboard_type())
-  def list_types, do: @bitboard_types
-
-  @doc """
-  Returns a keyword list that gives the initial state of each individual
-  bitboard type. Keys are the type of bitboards, values are the initial state
-  as an integer.
-  """
-  @spec initial_states() :: Keyword.t()
-  def initial_states, do: @initial_boards
+  def list_types do
+    %__MODULE__{}
+    |> Map.from_struct()
+    |> Map.keys()
+  end
 
   @doc """
   Returns the specific bitboard denoted by `bitboard_type`
@@ -94,7 +90,7 @@ defmodule Chess.Boards.BitBoard do
   """
   @spec get(t(), bitboard_type()) :: non_neg_integer()
   def get(bitboard, type) do
-    :atomics.get(bitboard.ref, @bitboards[type])
+    Map.fetch!(bitboard, type)
   end
 
   @doc """
@@ -105,8 +101,8 @@ defmodule Chess.Boards.BitBoard do
   mainly for debugging and inspecting the state of
   a bitboard in a way that is human-readable at a glance.
   """
-  @spec to_grid(non_neg_integer()) :: list(list(0 | 1))
-  def to_grid(bitboard) do
+  @spec to_grid(bitboard()) :: list(list(0 | 1))
+  def to_grid(<<bitboard::integer-size(64)>>) do
     bitboard
     |> Integer.digits(2)
     |> then(&with_padding/1)
