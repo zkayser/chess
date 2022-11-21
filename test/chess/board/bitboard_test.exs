@@ -4,11 +4,16 @@ defmodule Chess.Boards.BitBoardTest do
   alias Chess.Boards.BitBoard
 
   describe "new/0" do
-    test "creates a BitBoard struct with an atomics ref" do
-      assert %BitBoard{ref: ref} = BitBoard.new()
+    test "creates a BitBoard struct" do
+      assert %BitBoard{} = bitboard = BitBoard.new()
 
-      assert is_reference(ref),
-             "Expected new bitboard to contain a reference, but contained #{inspect(ref)} instead."
+      bitboard
+      |> Map.from_struct()
+      |> Map.values()
+      |> Enum.each(fn board ->
+        assert match?(<<_::integer-size(64)>>, board),
+               "Expected a 64-bit integer wrapped as a bytestring to represent bitboard state. Got: #{inspect(board)}"
+      end)
     end
   end
 
@@ -32,8 +37,10 @@ defmodule Chess.Boards.BitBoardTest do
   describe "get/2" do
     for bitboard_type <- BitBoard.list_types() do
       test "returns bitboard when given #{bitboard_type}" do
-        assert BitBoard.initial_states()[unquote(bitboard_type)] ==
-                 BitBoard.get(BitBoard.new(), unquote(bitboard_type))
+        bitboard = BitBoard.new()
+
+        assert Map.get(bitboard, unquote(bitboard_type)) ==
+                 BitBoard.get(bitboard, unquote(bitboard_type))
       end
     end
   end
