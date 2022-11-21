@@ -45,6 +45,14 @@ defmodule Chess.Boards.BitBoardTest do
     end
   end
 
+  describe "get_raw/2" do
+    test "returns the integer-encoded value of the bitboard representation" do
+      bitboard = BitBoard.new()
+
+      assert 0b1111111100000000 = BitBoard.get_raw(bitboard, :white_pawns)
+    end
+  end
+
   describe "to_grid/2" do
     test "returns an 8x8 list representation of the composite bitboard" do
       bitboard = BitBoard.new()
