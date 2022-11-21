@@ -104,6 +104,13 @@ defmodule Chess.Boards.BitBoard do
   end
 
   @doc """
+  Takes in an integer value and encodes it as a bitstring
+  representation of a bitboard.
+  """
+  @spec from_integer(integer()) :: bitboard()
+  def from_integer(bitboard), do: <<bitboard::integer-size(64)>>
+
+  @doc """
   Returns an 8x8 grid representation of a given
   bitboard. If the bitboard does not take up a full
   64 bits, the representation is padded with 0s to
