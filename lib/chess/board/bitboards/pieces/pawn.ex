@@ -14,14 +14,14 @@ defmodule Chess.BitBoards.Pieces.Pawn do
   @spec single_pushes(BitBoard.t(), Color.t()) :: BitBoard.bitboard()
   def single_pushes(bitboard, color) do
     bitboard
-    |> BitBoard.get(:"#{color}_pawns")
+    |> BitBoard.get(String.to_existing_atom("#{color}_pawns"))
     |> operation(color).(@single_push)
   end
 
   @spec double_pushes(BitBoard.t(), Color.t()) :: BitBoard.bitboard()
   def double_pushes(bitboard, color) do
     bitboard
-    |> BitBoard.get(:"#{color}_pawns")
+    |> BitBoard.get(String.to_existing_atom("#{color}_pawns"))
     |> operation(color).(@double_push)
   end
 
