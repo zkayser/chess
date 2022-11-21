@@ -8,7 +8,7 @@ defmodule Chess.BitBoards.Pieces.PawnTest do
   describe "single_pushes/2" do
     test "given an initial state Bitboard.t/0 and white color, pushes all pawns up one rank" do
       bitboard = BitBoard.new()
-      single_pushes = Pawn.single_pushes(bitboard, :white)
+      single_pushes = Pawn.single_pushes(bitboard, Color.white())
 
       assert [
                [0, 0, 0, 0, 0, 0, 0, 0],
@@ -24,7 +24,7 @@ defmodule Chess.BitBoards.Pieces.PawnTest do
 
     test "given an initial state Bitboard.t/0 and black color, pushes all pawns down one rank" do
       bitboard = BitBoard.new()
-      single_pushes = Pawn.single_pushes(bitboard, :black)
+      single_pushes = Pawn.single_pushes(bitboard, Color.black())
 
       assert [
                [0, 0, 0, 0, 0, 0, 0, 0],
