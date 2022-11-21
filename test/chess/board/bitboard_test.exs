@@ -53,6 +53,12 @@ defmodule Chess.Boards.BitBoardTest do
     end
   end
 
+  describe "from_integer/1" do
+    test "returns the bitstring representation of an integer value" do
+      assert <<0, 0, 0, 0, 0, 0, 255, 255>> = BitBoard.from_integer(0b1111111111111111)
+    end
+  end
+
   describe "to_grid/2" do
     test "returns an 8x8 list representation of the composite bitboard" do
       bitboard = BitBoard.new()
