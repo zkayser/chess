@@ -53,7 +53,7 @@ defmodule Chess.BitBoards.Pieces.PawnTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(single_pushes)
+             ] == BitBoard.to_grid(double_pushes)
     end
 
     test "given an initial state Bitboard.t/0 and black color, pushes all pawns down two ranks" do
@@ -69,7 +69,7 @@ defmodule Chess.BitBoards.Pieces.PawnTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(single_pushes)
+             ] == BitBoard.to_grid(double_pushes)
     end
   end
 end
