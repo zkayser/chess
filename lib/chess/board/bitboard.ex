@@ -88,9 +88,19 @@ defmodule Chess.Boards.BitBoard do
   Returns the specific bitboard denoted by `bitboard_type`
   stored within the `BitBoard.t/0` struct.
   """
-  @spec get(t(), bitboard_type()) :: non_neg_integer()
+  @spec get(t(), bitboard_type()) :: bitboard()
   def get(bitboard, type) do
     Map.fetch!(bitboard, type)
+  end
+
+  @doc """
+  Returns the integer-encoded value of the underlying
+  bitstring for the bitboard.
+  """
+  @spec get_raw(t(), bitboard_type()) :: integer()
+  def get_raw(bitboard, type) do
+    <<value::integer-size(64)>> = get(bitboard, type)
+    value
   end
 
   @doc """
