@@ -1,8 +1,8 @@
 defmodule Chess.BitBoards.Pieces.PawnTest do
   use ExUnit.Case, async: true
 
-  alias Chess.Boards.BitBoard
   alias Chess.BitBoards.Pieces.Pawn
+  alias Chess.Boards.BitBoard
   alias Chess.Color
 
   describe "single_pushes/2" do
