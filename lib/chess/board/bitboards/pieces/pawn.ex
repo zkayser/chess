@@ -14,15 +14,17 @@ defmodule Chess.BitBoards.Pieces.Pawn do
   @spec single_pushes(BitBoard.t(), Color.t()) :: BitBoard.bitboard()
   def single_pushes(bitboard, color) do
     bitboard
-    |> BitBoard.get(String.to_existing_atom("#{color}_pawns"))
+    |> BitBoard.get_raw(String.to_existing_atom("#{color}_pawns"))
     |> operation(color).(@single_push)
+    |> BitBoard.from_integer()
   end
 
   @spec double_pushes(BitBoard.t(), Color.t()) :: BitBoard.bitboard()
   def double_pushes(bitboard, color) do
     bitboard
-    |> BitBoard.get(String.to_existing_atom("#{color}_pawns"))
+    |> BitBoard.get_raw(String.to_existing_atom("#{color}_pawns"))
     |> operation(color).(@double_push)
+    |> BitBoard.from_integer()
   end
 
   defp operation(:black), do: &Bitwise.>>>/2
