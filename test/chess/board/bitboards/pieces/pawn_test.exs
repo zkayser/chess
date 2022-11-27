@@ -72,4 +72,38 @@ defmodule Chess.BitBoards.Pieces.PawnTest do
              ] == BitBoard.to_grid(double_pushes)
     end
   end
+
+  describe "potential_attacks/2" do
+    test "given an initial state bitboard and white's turn, masks the existing pawns on file A and H when presenting attacks" do
+      bitboard = BitBoard.new()
+      potential_attacks = Pawn.potential_attacks(bitboard, Color.white())
+
+      assert assert [
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [1, 1, 1, 1, 1, 1, 1, 1],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0]
+                    ] == BitBoard.to_grid(potential_attacks)
+    end
+
+    test "given an initial state bitboard and black's turn, masks the existing pawns on files A and H when presenting attacks" do
+      bitboard = BitBoard.new()
+      potential_attacks = Pawn.potential_attacks(bitboard, Color.black())
+
+      assert assert [
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [1, 1, 1, 1, 1, 1, 1, 1],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0]
+                    ] == BitBoard.to_grid(potential_attacks)
+    end
+  end
 end
