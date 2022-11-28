@@ -12,12 +12,8 @@ defmodule Chess.BitBoards.Pieces.Pawn do
   @double_push 16
   @far_attack 9
   @near_attack 7
-  @file_a_mask 0b01111111
-  @file_h_mask 0b11111110
-  @full_file_a_mask <<@file_a_mask, @file_a_mask, @file_a_mask, @file_a_mask, @file_a_mask,
-                      @file_a_mask, @file_a_mask, @file_a_mask>>
-  @full_file_h_mask <<@file_h_mask, @file_h_mask, @file_h_mask, @file_h_mask, @file_h_mask,
-                      @file_h_mask, @file_h_mask, @file_h_mask>>
+  @file_a_mask 0b0111111101111111011111110111111101111111011111110111111101111111
+  @file_h_mask 0b1111111011111110111111101111111011111110111111101111111011111110
 
   @spec single_pushes(BitBoard.t(), Color.t()) :: BitBoard.bitboard()
   def single_pushes(bitboard, color) do
@@ -39,11 +35,8 @@ defmodule Chess.BitBoards.Pieces.Pawn do
   def potential_attacks(bitboard, color) do
     bitboard = BitBoard.get_raw(bitboard, String.to_existing_atom("#{color}_pawns"))
 
-    <<file_a_mask::integer-size(64)>> = @full_file_a_mask
-    <<file_h_mask::integer-size(64)>> = @full_file_h_mask
-
-    north_west_or_south_west = bitboard &&& file_a_mask
-    north_east_or_south_east = bitboard &&& file_h_mask
+    north_west_or_south_west = bitboard &&& @file_a_mask
+    north_east_or_south_east = bitboard &&& @file_h_mask
 
     case color do
       :white ->
