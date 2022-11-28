@@ -33,24 +33,25 @@ defmodule Chess.BitBoards.Pieces.Pawn do
 
   @spec potential_attacks(BitBoard.t(), Color.t()) :: BitBoard.bitboard()
   def potential_attacks(bitboard, color) do
-    bitboard = BitBoard.get_raw(bitboard, String.to_existing_atom("#{color}_pawns"))
-
-    north_west_or_south_west = bitboard &&& @file_a_mask
-    north_east_or_south_east = bitboard &&& @file_h_mask
-
-    case color do
-      :white ->
-        BitBoard.from_integer(
-          north_west_or_south_west <<< @far_attack ||| north_east_or_south_east <<< @near_attack
-        )
-
-      :black ->
-        BitBoard.from_integer(
-          north_west_or_south_west >>> @near_attack ||| north_east_or_south_east >>> @far_attack
-        )
-    end
+    bitboard
+    |> BitBoard.get_raw(String.to_existing_atom("#{color}_pawns"))
+    |> then(fn b -> {b &&& @file_a_mask, b &&& @file_h_mask} end)
+    |> attack_quadrants(color).()
+    |> BitBoard.from_integer()
   end
 
   defp operation(:black), do: &Bitwise.>>>/2
   defp operation(:white), do: &Bitwise.<<</2
+
+  defp attack_quadrants(:white) do
+    fn {north_west, north_east} ->
+      north_west <<< @far_attack ||| north_east <<< @near_attack
+    end
+  end
+
+  defp attack_quadrants(:black) do
+    fn {south_west, south_east} ->
+      south_west >>> @near_attack ||| south_east >>> @far_attack
+    end
+  end
 end
