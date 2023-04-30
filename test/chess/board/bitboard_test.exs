@@ -17,14 +17,18 @@ defmodule Chess.Boards.BitBoardTest do
     end
   end
 
-  describe "list_types/0" do
+  describe "accessors/0" do
     test "returns the list of all bitboard types" do
-      expected_type_set =
-        MapSet.new(
-          ~w(composite black_composite white_composite white_pawns white_rooks white_knights white_bishops white_queens white_king black_pawns black_rooks black_knights black_bishops black_queens black_king)a
-        )
+      pieces_by_color =
+        for color <- ~w(white black)a, piece <- ~w(pawns knights rooks bishops queens king)a do
+          {color, piece}
+        end
 
-      actual_set = MapSet.new(BitBoard.list_types())
+      composites = ~w(full white black)a
+
+      expected_type_set = MapSet.new(Enum.concat(pieces_by_color, composites))
+
+      actual_set = MapSet.new(BitBoard.accessors())
 
       assert MapSet.equal?(actual_set, expected_type_set), """
       Expected set of Bitboard types to equal expected set.
