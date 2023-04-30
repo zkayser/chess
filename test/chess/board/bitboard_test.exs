@@ -35,12 +35,30 @@ defmodule Chess.Boards.BitBoardTest do
   end
 
   describe "get/2" do
-    for bitboard_type <- BitBoard.list_types() do
-      test "returns bitboard when given #{bitboard_type}" do
+    for bitboard_type <- BitBoard.accessors() do
+      test "returns bitboard when given #{inspect(bitboard_type)}" do
         bitboard = BitBoard.new()
+        full_row = 0b11111111
 
-        assert Map.get(bitboard, unquote(bitboard_type)) ==
-                 BitBoard.get(bitboard, unquote(bitboard_type))
+        expected_full_composite = <<full_row, full_row, 0, 0, 0, 0, full_row, full_row>>
+        expected_white_composite = <<0, 0, 0, 0, 0, 0, full_row, full_row>>
+        expected_black_composite = <<full_row, full_row, 0, 0, 0, 0, 0, 0>>
+
+        case unquote(bitboard_type) do
+          {color, piece_type} ->
+            assert get_in(Map.from_struct(bitboard), [color, piece_type]) ==
+                     BitBoard.get(bitboard, unquote(bitboard_type))
+
+          :full ->
+            assert BitBoard.get(bitboard, unquote(bitboard_type)) ==
+                     expected_full_composite
+
+          :white ->
+            assert BitBoard.get(bitboard, unquote(bitboard_type)) == expected_white_composite
+
+          :black ->
+            assert BitBoard.get(bitboard, unquote(bitboard_type)) == expected_black_composite
+        end
       end
     end
   end
