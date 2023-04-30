@@ -18,7 +18,7 @@ defmodule Chess.BitBoards.Pieces.Pawn do
   @spec single_pushes(BitBoard.t(), Color.t()) :: BitBoard.bitboard()
   def single_pushes(bitboard, color) do
     bitboard
-    |> BitBoard.get_raw(String.to_existing_atom("#{color}_pawns"))
+    |> BitBoard.get_raw({color, :pawns})
     |> operation(color).(@single_push)
     |> BitBoard.from_integer()
   end
@@ -26,7 +26,7 @@ defmodule Chess.BitBoards.Pieces.Pawn do
   @spec double_pushes(BitBoard.t(), Color.t()) :: BitBoard.bitboard()
   def double_pushes(bitboard, color) do
     bitboard
-    |> BitBoard.get_raw(String.to_existing_atom("#{color}_pawns"))
+    |> BitBoard.get_raw({color, :pawns})
     |> operation(color).(@double_push)
     |> BitBoard.from_integer()
   end
@@ -34,7 +34,7 @@ defmodule Chess.BitBoards.Pieces.Pawn do
   @spec potential_attacks(BitBoard.t(), Color.t()) :: BitBoard.bitboard()
   def potential_attacks(bitboard, color) do
     bitboard
-    |> BitBoard.get_raw(String.to_existing_atom("#{color}_pawns"))
+    |> BitBoard.get_raw({color, :pawns})
     |> then(fn b -> {b &&& @file_a_mask, b &&& @file_h_mask} end)
     |> attack_quadrants(color).()
     |> BitBoard.from_integer()
