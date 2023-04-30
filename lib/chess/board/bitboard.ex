@@ -120,7 +120,7 @@ defmodule Chess.Boards.BitBoard do
   Returns the integer-encoded value of the underlying
   bitstring for the bitboard.
   """
-  @spec get_raw(t(), bitboard_type()) :: integer()
+  @spec get_raw(t(), {Color.t(), piece_keys()} | composites()) :: integer()
   def get_raw(bitboard, type) do
     <<value::integer-size(64)>> = get(bitboard, type)
     value
