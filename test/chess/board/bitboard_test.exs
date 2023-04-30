@@ -72,7 +72,7 @@ defmodule Chess.Boards.BitBoardTest do
     test "returns the integer-encoded value of the bitboard representation" do
       bitboard = BitBoard.new()
 
-      assert 0b1111111100000000 = BitBoard.get_raw(bitboard, :white_pawns)
+      assert 0b1111111100000000 = BitBoard.get_raw(bitboard, {:white, :pawns})
     end
   end
 
