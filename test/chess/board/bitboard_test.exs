@@ -10,6 +10,7 @@ defmodule Chess.Boards.BitBoardTest do
       bitboard
       |> Map.from_struct()
       |> Map.values()
+      |> Enum.flat_map(&Map.values/1)
       |> Enum.each(fn board ->
         assert match?(<<_::integer-size(64)>>, board),
                "Expected a 64-bit integer wrapped as a bytestring to represent bitboard state. Got: #{inspect(board)}"
@@ -94,7 +95,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [1, 1, 1, 1, 1, 1, 1, 1],
                [1, 1, 1, 1, 1, 1, 1, 1]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :composite))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, :full))
     end
 
     test "returns an 8x8 representation of the bitboard for black pawns" do
@@ -109,7 +110,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_pawns))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :pawns}))
     end
 
     test "returns an 8x8 representation of the bitboard for black knights" do
@@ -124,7 +125,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_knights))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :knights}))
     end
 
     test "returns an 8x8 representation of the bitboard for black rooks" do
@@ -139,7 +140,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_rooks))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :rooks}))
     end
 
     test "returns an 8x8 representation of the bitboard for black bishops" do
@@ -154,7 +155,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_bishops))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :bishops}))
     end
 
     test "returns an 8x8 representation of the bitboard for the black queen" do
@@ -169,7 +170,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_queens))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :queens}))
     end
 
     test "returns an 8x8 representation of the bitboard for the black king" do
@@ -184,7 +185,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_king))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :king}))
     end
 
     test "returns an 8x8 representation of the bitboard for white pawns" do
@@ -199,7 +200,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [1, 1, 1, 1, 1, 1, 1, 1],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_pawns))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :pawns}))
     end
 
     test "returns an 8x8 representation of the bitboard for white knights" do
@@ -214,7 +215,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 1, 0, 0, 0, 0, 1, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_knights))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :knights}))
     end
 
     test "returns an 8x8 representation of the bitboard for white rooks" do
@@ -229,7 +230,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [1, 0, 0, 0, 0, 0, 0, 1]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_rooks))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :rooks}))
     end
 
     test "returns an 8x8 representation of the bitboard for white bishops" do
@@ -244,7 +245,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 1, 0, 0, 1, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_bishops))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :bishops}))
     end
 
     test "returns an 8x8 representation of the bitboard for the white queen" do
@@ -259,7 +260,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 1, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_queens))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :queens}))
     end
 
     test "returns an 8x8 representation of the bitboard for the white king" do
@@ -274,7 +275,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 1, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_king))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :king}))
     end
 
     test "returns an 8x8 representation of the bitboard for the black composite position" do
@@ -289,7 +290,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_composite))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black))
     end
 
     test "returns an 8x8 representation of the bitboard for the white composite position" do
@@ -304,7 +305,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [1, 1, 1, 1, 1, 1, 1, 1],
                [1, 1, 1, 1, 1, 1, 1, 1]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_composite))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white))
     end
   end
 end
