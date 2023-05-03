@@ -164,6 +164,11 @@ defmodule Chess.Boards.BitBoard do
     end
   end
 
+  @impl Access
+  def pop(_board, _key) do
+    raise "Pop not implemented for BitBoards"
+  end
+
   @spec with_padding(list(0 | 1)) :: list(0 | 1)
   defp with_padding(board) do
     board_length = Enum.count(board)
