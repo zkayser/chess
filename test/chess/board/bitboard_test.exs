@@ -313,7 +313,7 @@ defmodule Chess.Boards.BitBoardTest do
     test "fetch/2 accepts a valid {color, piece_type} tuple and returns {:ok, piece_bitboard}" do
       bitboard = BitBoard.new()
 
-      for color <- ~w(black white)a, pieces <- ~w(pawns rooks bishops knights queens king) do
+      for color <- ~w(black white)a, piece <- ~w(pawns rooks bishops knights queens king)a do
         assert {:ok, _board} = BitBoard.fetch(bitboard, {color, piece})
       end
     end
