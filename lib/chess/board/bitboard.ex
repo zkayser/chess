@@ -166,7 +166,7 @@ defmodule Chess.Boards.BitBoard do
 
   def get_and_update(_board, key, _update_fun) do
     raise """
-    BitBoard.get_and_update/3 only works with tuple keys, where first element is in #{@colors} and second is in #{@piece_types}.
+    BitBoard.get_and_update/3 only works with tuple keys, where first element is in #{inspect(@colors)} and second is in #{inspect(@piece_types)}.
     get_and_update/3 was invoked with key: #{inspect(key)}
     """
   end
