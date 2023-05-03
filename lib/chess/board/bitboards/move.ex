@@ -39,7 +39,7 @@ defmodule Chess.Bitboards.Move do
   14 -> rook promotion capture
   15 -> queen promotion capture
   """
-  use Bitwise
+  import Bitwise
 
   defstruct [:from, :to, :flag]
 

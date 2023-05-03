@@ -3,7 +3,7 @@ defmodule Chess.BitBoards.Pieces.Pawn do
   Functions for calculating pawn single and double pushes,
   attacks, pseudo-legal moves, and legal moves.
   """
-  use Bitwise
+  import Bitwise
 
   alias Chess.Boards.BitBoard
   alias Chess.Color
