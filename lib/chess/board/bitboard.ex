@@ -11,6 +11,8 @@ defmodule Chess.Boards.BitBoard do
 
   alias Chess.Color
 
+  @behaviour Access
+
   @full_row 0b11111111
   @rooks 0b10000001
   @knights 0b01000010
@@ -59,22 +61,10 @@ defmodule Chess.Boards.BitBoard do
           white: piece_positions(),
           black: piece_positions()
         }
-  @type bitboard_type() ::
-          :composite
-          | :white_pawns
-          | :white_rooks
-          | :white_knights
-          | :white_bishops
-          | :white_queens
-          | :white_king
-          | :black_pawns
-          | :black_rooks
-          | :black_knights
-          | :black_bishops
-          | :black_queens
-          | :black_king
-          | :black_composite
-          | :white_composite
+
+  @colors [Color.black(), Color.white()]
+  @piece_types ~w(pawns rooks knights bishops queens king)a
+  @composites [:full | @colors]
 
   @spec new() :: t()
   def new, do: %__MODULE__{}
@@ -83,7 +73,7 @@ defmodule Chess.Boards.BitBoard do
   Returns the list of all different bitboard types that are
   stored in a `#{__MODULE__}.t()` representation.
   """
-  @spec accessors() :: list(bitboard_type())
+  @spec accessors() :: list({:white | :black, piece_keys()} | composites())
   def accessors do
     for color <- ~w(white black)a, pieces <- ~w(pawns rooks knights bishops queens king)a do
       {color, pieces}
@@ -148,6 +138,17 @@ defmodule Chess.Boards.BitBoard do
     |> then(&with_padding/1)
     |> Enum.chunk_every(8)
   end
+
+  @impl Access
+  def fetch(bitboard, {color, piece_type}) when color in @colors and piece_type in @piece_types do
+    {:ok, get(bitboard, {color, piece_type})}
+  end
+
+  def fetch(bitboard, composite) when composite in @composites do
+    {:ok, get(bitboard, composite)}
+  end
+
+  def fetch(_, _), do: :error
 
   @spec with_padding(list(0 | 1)) :: list(0 | 1)
   defp with_padding(board) do
