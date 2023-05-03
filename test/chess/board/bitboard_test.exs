@@ -350,5 +350,15 @@ defmodule Chess.Boards.BitBoardTest do
     test "fetch/2 returns :error when given a single input that is not :black, :white, or :full" do
       assert :error = BitBoard.fetch(BitBoard.new(), :this_is_not_valid)
     end
+
+    test "enables Access-based lookup with {color, piece} tuples as keys" do
+      assert board = BitBoard.new()[{:white, :pawns}]
+      assert board == <<0, 0, 0, 0, 0, 0, 255, 0>>
+    end
+
+    test "enables Access-based lookup for composite keys" do
+      assert board = BitBoard.new()[:full]
+      assert board == <<255, 255, 0, 0, 0, 0, 255, 255>>
+    end
   end
 end
