@@ -376,6 +376,12 @@ defmodule Chess.Boards.BitBoardTest do
       assert new_board.white.pawns == updated_white_pawns
     end
 
+    test "get_and_update/3 raises if the callback function passed returns :pop" do
+      assert_raise RuntimeError, "Pop not implemented for BitBoards", fn ->
+        BitBoard.get_and_update(BitBoard.new(), {:white, :pawns}, fn _ -> :pop end)
+      end
+    end
+
     test "pop/2 raises" do
       assert_raise RuntimeError, "Pop not implemented for BitBoards", fn ->
         BitBoard.pop(BitBoard.new(), {:white, :pawns})
