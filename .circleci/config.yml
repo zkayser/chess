@@ -11,7 +11,7 @@ jobs:
   build:
     parallelism: 1
     docker:
-      - image: cimg/elixir:1.13.4
+      - image: cimg/elixir:1.14.2
         environment:
           MIX_ENV: test
       - image: circleci/postgres:11.14
