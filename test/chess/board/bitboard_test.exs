@@ -360,5 +360,20 @@ defmodule Chess.Boards.BitBoardTest do
       assert board = BitBoard.new()[:full]
       assert board == <<255, 255, 0, 0, 0, 0, 255, 255>>
     end
+
+    test "get_and_update/3 allows updates to the bitboard struct and also returns the current value" do
+      board = BitBoard.new()
+
+      initial_white_pawns = <<0, 0, 0, 0, 0, 0, 255, 0>>
+      updated_white_pawns = <<0, 0, 0, 0, 0, 255, 0, 0>>
+
+      assert {current_value, new_board} =
+               BitBoard.get_and_update(board, {:white, :pawns}, fn current_white_pawns ->
+                 {current_white_pawns, updated_white_pawns}
+               end)
+
+      assert current_value == initial_white_pawns
+      assert new_board.white.pawns == updated_white_pawns
+    end
   end
 end
