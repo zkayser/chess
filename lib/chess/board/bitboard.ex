@@ -150,6 +150,20 @@ defmodule Chess.Boards.BitBoard do
 
   def fetch(_, _), do: :error
 
+  @impl Access
+  def get_and_update(board, {color, piece_type} = key, update_fun) do
+    case update_fun.(board[key]) do
+      {current, updates} ->
+        updated_board =
+          Map.update!(board, color, fn boards -> Map.put(boards, piece_type, updates) end)
+
+        {current, updated_board}
+
+      :pop ->
+        raise "Pop not implemented for BitBoards"
+    end
+  end
+
   @spec with_padding(list(0 | 1)) :: list(0 | 1)
   defp with_padding(board) do
     board_length = Enum.count(board)
