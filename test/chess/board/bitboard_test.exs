@@ -308,4 +308,47 @@ defmodule Chess.Boards.BitBoardTest do
              ] == BitBoard.to_grid(BitBoard.get(bitboard, :white))
     end
   end
+
+  describe "Access Behaviour" do
+    test "fetch/2 accepts a valid {color, piece_type} tuple and returns {:ok, piece_bitboard}" do
+      bitboard = BitBoard.new()
+
+      for color <- ~w(black white)a, pieces <- ~w(pawns rooks bishops knights queens king) do
+        assert {:ok, _board} = BitBoard.fetch(bitboard, {color, piece})
+      end
+    end
+
+    test "fetch/2 returns :error when given an invalid color in tuple passed as parameter" do
+      assert :error = BitBoard.fetch(BitBoard.new(), {:green, :knights})
+    end
+
+    test "fetch/2 returns :error when passed an invalid piece type in tuple passed as parameter" do
+      assert :error = BitBoard.fetch(BitBoard.new(), {:white, :wizards})
+    end
+
+    test "fetch/2 accepts :white as an input and returns the composite white bitboard representation" do
+      bitboard = BitBoard.new()
+
+      assert {:ok, white_composite} = BitBoard.fetch(bitboard, :white)
+      assert white_composite == BitBoard.get(bitboard, :white)
+    end
+
+    test "fetch/2 accepts :black as an input and returns the composite black bitboard representation" do
+      bitboard = BitBoard.new()
+
+      assert {:ok, black_composite} = BitBoard.fetch(bitboard, :black)
+      assert black_composite == BitBoard.get(bitboard, :black)
+    end
+
+    test "fetch/2 accepts :full as an input and returns the entire composite bitboard representation" do
+      bitboard = BitBoard.new()
+
+      assert {:ok, composite} = BitBoard.fetch(bitboard, :full)
+      assert composite == BitBoard.get(bitboard, :full)
+    end
+
+    test "fetch/2 returns :error when given a single input that is not :black, :white, or :full" do
+      assert :error = BitBoard.fetch(BitBoard.new(), :this_is_not_valid)
+    end
+  end
 end
