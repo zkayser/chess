@@ -382,6 +382,12 @@ defmodule Chess.Boards.BitBoardTest do
       end
     end
 
+    test "get_and_update/3 raises on keys that are not valid color/piece combinations" do
+      assert_raise RuntimeError, fn ->
+        BitBoard.get_and_update(BitBoard.new(), :full, fn current -> {current, BitBoard.new()} end)
+      end
+    end
+
     test "pop/2 raises" do
       assert_raise RuntimeError, "Pop not implemented for BitBoards", fn ->
         BitBoard.pop(BitBoard.new(), {:white, :pawns})
