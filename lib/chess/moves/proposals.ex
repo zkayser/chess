@@ -30,6 +30,11 @@ defmodule Chess.Moves.Proposals do
         }
   @type t() :: %__MODULE__{source: coordinates(), destination: coordinates()}
 
+  @doc """
+  Takes in a map of inputs representing a proposed move to be made, and converts the
+  raw input representation (presumably passed from user-land) into a valid `__MODULE__.t()`
+  struct if the inputs are valid.
+  """
   @spec from_inputs(inputs() | any()) ::
           {:ok, t()}
           | {:error, {:invalid_inputs, term()}}
