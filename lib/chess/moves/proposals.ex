@@ -4,8 +4,9 @@ defmodule Chess.Moves.Proposals do
   the state of a game, and exposes functions for converting
   proposed moves into concrete moves.
   """
-  alias Chess.Bitboards.Move
-  alias Chess.Game
+
+  # alias Chess.Bitboards.Move
+  # alias Chess.Game
 
   @valid_file_range ?a..?h
   @valid_rank_range ?1..?8
