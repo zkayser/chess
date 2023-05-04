@@ -21,4 +21,21 @@ defmodule Chess.Game do
   Creates a new Game instance.
   """
   def new, do: %__MODULE__{}
+
+  def play(game, proposal) do
+    case Proposals.validate(game, proposal) do
+      {:valid, move_type} -> {:ok, apply_move(game, proposal, move_type)}
+      {:invalid, reason} -> {:error, {"Invalid move proposed", reason}}
+    end
+  end
+
+  defp apply_move(game, proposal, move_type) do
+    move = Proposals.accept(proposal, move_type)
+
+    %__MODULE__{
+      board: BitBoard.update(game.board, move),
+      move_list: [move | game.move_list],
+      current_player: Players.alternate(game.player)
+    }
+  end
 end
