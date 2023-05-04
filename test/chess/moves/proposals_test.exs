@@ -10,6 +10,16 @@ defmodule Chess.Moves.ProposalsTest do
         assert {:ok, %Proposals{}} = Proposals.from_inputs(inputs)
       end
     end
+
+    test "returns an error tuple when source and destination are equal" do
+      assert {:error, :source_and_destination_equal} =
+               Proposals.from_inputs(%{source: "a1", destination: "a1"})
+    end
+
+    test "returns an error tuple when source or destination is an invalid rank/file combination" do
+      inputs = %{source: "f9", destination: "z64"}
+      assert {:error, {:invalid_inputs, inputs}} == Proposals.from_inputs(inputs)
+    end
   end
 
   def input_generator do
