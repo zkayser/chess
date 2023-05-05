@@ -14,7 +14,7 @@ defmodule Chess.Moves.Proposals do
   defstruct source: nil,
             destination: nil
 
-  @opaque coordinates() :: {file :: String.t(), rank :: integer()}
+  @type coordinates() :: {file :: String.t(), rank :: integer()}
 
   @typedoc """
   An `input_string` is a 16-bit (2-byte) string
