@@ -19,7 +19,9 @@ defmodule Chess.PiecesTest do
   @rank_2_mappings Map.new(Enum.map(?a..?h, fn file -> {{<<file>>, 2}, Pawn} end))
   @rank_7_mappings Map.new(Enum.map(?a..?h, fn file -> {{<<file>>, 7}, Pawn} end))
   @rank_8_mappings Map.new(
-                     Enum.map(@rank_1_mappings, fn {{file, rank}, piece} -> {{file, 8}, piece} end)
+                     Enum.map(@rank_1_mappings, fn {{file, _rank}, piece} ->
+                       {{file, 8}, piece}
+                     end)
                    )
 
   @coordinate_to_piece_mappings @rank_1_mappings
@@ -39,9 +41,10 @@ defmodule Chess.PiecesTest do
       end
     end
 
-    for black_rank <- [1, 2], file <- ?a..?h do
+    for black_rank <- [7, 8], file <- ?a..?h do
       test "returns an ok tuple with the correct piece type for black starting coordinates at #{<<file>>}#{black_rank}" do
         game = Game.new()
+        game = %Game{game | current_player: Chess.Color.black()}
         source_coordinate = {<<unquote(file)>>, unquote(black_rank)}
 
         assert {:ok, piece} = Pieces.classify(game, source_coordinate)
