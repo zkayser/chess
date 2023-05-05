@@ -1,53 +1,46 @@
 defmodule Chess.Game do
   @moduledoc """
-  A struct representing the state of a chess game
-  and functions for operating on the game instance.
+  A struct and related functions for working with a
+  single chess game instance.
   """
-  alias Chess.Board
-  alias Chess.Move
-  alias Chess.Piece
+  alias Chess.Bitboards.Move
+  alias Chess.Boards.BitBoard
+  alias Chess.Color
 
-  defstruct board: Board.layout(),
-            active_player: :white
+  defstruct board: BitBoard.new(),
+            move_list: [],
+            current_player: Color.white()
 
   @type t() :: %__MODULE__{
-          board: Board.t(),
-          active_player: :white | :black
+          board: BitBoard.t(),
+          move_list: list(Move.t()),
+          current_player: Chess.player()
         }
 
   @doc """
-  Initializes a new game instance.
+  Creates a new Game instance.
   """
-  @spec new() :: t()
-  def new do
-    %__MODULE__{}
-  end
+  def new, do: %__MODULE__{}
 
-  @spec play(t(), Move.attributes()) ::
-          {:ok, t()} | {:error, Ecto.Changeset.t(Move.t()) | String.t()}
-  def play(%__MODULE__{board: board} = game, move) do
-    with %{valid?: true} = changeset <- Move.changeset(move),
-         %Move{} = move <- Ecto.Changeset.apply_changes(changeset),
-         :player_matches <-
-           if(move.player == game.active_player, do: :player_matches, else: :player_mismatch),
-         true <- Enum.member?(Piece.potential_moves(board[move.from], move.from, board), move.to),
-         %Board{} = new_board <- Board.apply_move(board, move) do
-      {:ok,
-       %__MODULE__{
-         game
-         | board: new_board,
-           active_player: if(game.active_player == :white, do: :black, else: :white)
-       }}
-    else
-      %Ecto.Changeset{} = changeset ->
-        {:error, changeset}
+  ##########################################
+  # Tentative interface for game play here #
+  # Let's start implementing the Proposals #
+  # module and see how this goes.          #
+  ##########################################
+  # def play(game, proposal) do
+  #   case Proposals.validate(game, proposal) do
+  #     {:valid, move_type} -> {:ok, apply_move(game, proposal, move_type)}
+  #     {:invalid, reason} -> {:error, {"Invalid move proposed", reason}}
+  #   end
+  # end
 
-      :player_mismatch ->
-        {:error,
-         "Player mismatch: Active Player #{inspect(game.active_player)}\nMoving player: #{move.player}"}
+  # defp apply_move(game, proposal, move_type) do
+  #   move = Proposals.accept(proposal, move_type)
 
-      _ ->
-        {:error, "Invalid move -- From: #{move.from} to #{move.to} for player #{move.player}"}
-    end
-  end
+  #   %__MODULE__{
+  #     board: BitBoard.update(game.board, move),
+  #     move_list: [move | game.move_list],
+  #     current_player: Players.alternate(game.player)
+  #   }
+  # end
 end

@@ -2,6 +2,7 @@ defmodule Chess.Boards.BitBoardTest do
   use ExUnit.Case, async: true
 
   alias Chess.Boards.BitBoard
+  alias Chess.Color
 
   describe "new/0" do
     test "creates a BitBoard struct" do
@@ -10,6 +11,7 @@ defmodule Chess.Boards.BitBoardTest do
       bitboard
       |> Map.from_struct()
       |> Map.values()
+      |> Enum.flat_map(&Map.values/1)
       |> Enum.each(fn board ->
         assert match?(<<_::integer-size(64)>>, board),
                "Expected a 64-bit integer wrapped as a bytestring to represent bitboard state. Got: #{inspect(board)}"
@@ -17,14 +19,18 @@ defmodule Chess.Boards.BitBoardTest do
     end
   end
 
-  describe "list_types/0" do
+  describe "accessors/0" do
     test "returns the list of all bitboard types" do
-      expected_type_set =
-        MapSet.new(
-          ~w(composite black_composite white_composite white_pawns white_rooks white_knights white_bishops white_queens white_king black_pawns black_rooks black_knights black_bishops black_queens black_king)a
-        )
+      pieces_by_color =
+        for color <- ~w(white black)a, piece <- ~w(pawns knights rooks bishops queens king)a do
+          {color, piece}
+        end
 
-      actual_set = MapSet.new(BitBoard.list_types())
+      composites = ~w(full white black)a
+
+      expected_type_set = MapSet.new(Enum.concat(pieces_by_color, composites))
+
+      actual_set = MapSet.new(BitBoard.accessors())
 
       assert MapSet.equal?(actual_set, expected_type_set), """
       Expected set of Bitboard types to equal expected set.
@@ -35,12 +41,30 @@ defmodule Chess.Boards.BitBoardTest do
   end
 
   describe "get/2" do
-    for bitboard_type <- BitBoard.list_types() do
-      test "returns bitboard when given #{bitboard_type}" do
+    for bitboard_type <- BitBoard.accessors() do
+      test "returns bitboard when given #{inspect(bitboard_type)}" do
         bitboard = BitBoard.new()
+        full_row = 0b11111111
 
-        assert Map.get(bitboard, unquote(bitboard_type)) ==
-                 BitBoard.get(bitboard, unquote(bitboard_type))
+        expected_full_composite = <<full_row, full_row, 0, 0, 0, 0, full_row, full_row>>
+        expected_white_composite = <<0, 0, 0, 0, 0, 0, full_row, full_row>>
+        expected_black_composite = <<full_row, full_row, 0, 0, 0, 0, 0, 0>>
+
+        case unquote(bitboard_type) do
+          {color, piece_type} ->
+            assert get_in(Map.from_struct(bitboard), [color, piece_type]) ==
+                     BitBoard.get(bitboard, unquote(bitboard_type))
+
+          :full ->
+            assert BitBoard.get(bitboard, unquote(bitboard_type)) ==
+                     expected_full_composite
+
+          :white ->
+            assert BitBoard.get(bitboard, unquote(bitboard_type)) == expected_white_composite
+
+          :black ->
+            assert BitBoard.get(bitboard, unquote(bitboard_type)) == expected_black_composite
+        end
       end
     end
   end
@@ -49,7 +73,7 @@ defmodule Chess.Boards.BitBoardTest do
     test "returns the integer-encoded value of the bitboard representation" do
       bitboard = BitBoard.new()
 
-      assert 0b1111111100000000 = BitBoard.get_raw(bitboard, :white_pawns)
+      assert 0b1111111100000000 = BitBoard.get_raw(bitboard, {:white, :pawns})
     end
   end
 
@@ -72,7 +96,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [1, 1, 1, 1, 1, 1, 1, 1],
                [1, 1, 1, 1, 1, 1, 1, 1]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :composite))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, :full))
     end
 
     test "returns an 8x8 representation of the bitboard for black pawns" do
@@ -87,7 +111,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_pawns))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :pawns}))
     end
 
     test "returns an 8x8 representation of the bitboard for black knights" do
@@ -102,7 +126,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_knights))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :knights}))
     end
 
     test "returns an 8x8 representation of the bitboard for black rooks" do
@@ -117,7 +141,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_rooks))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :rooks}))
     end
 
     test "returns an 8x8 representation of the bitboard for black bishops" do
@@ -132,7 +156,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_bishops))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :bishops}))
     end
 
     test "returns an 8x8 representation of the bitboard for the black queen" do
@@ -147,7 +171,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_queens))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :queens}))
     end
 
     test "returns an 8x8 representation of the bitboard for the black king" do
@@ -162,7 +186,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_king))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:black, :king}))
     end
 
     test "returns an 8x8 representation of the bitboard for white pawns" do
@@ -177,7 +201,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [1, 1, 1, 1, 1, 1, 1, 1],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_pawns))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :pawns}))
     end
 
     test "returns an 8x8 representation of the bitboard for white knights" do
@@ -192,7 +216,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 1, 0, 0, 0, 0, 1, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_knights))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :knights}))
     end
 
     test "returns an 8x8 representation of the bitboard for white rooks" do
@@ -207,7 +231,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [1, 0, 0, 0, 0, 0, 0, 1]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_rooks))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :rooks}))
     end
 
     test "returns an 8x8 representation of the bitboard for white bishops" do
@@ -222,7 +246,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 1, 0, 0, 1, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_bishops))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :bishops}))
     end
 
     test "returns an 8x8 representation of the bitboard for the white queen" do
@@ -237,7 +261,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 1, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_queens))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :queens}))
     end
 
     test "returns an 8x8 representation of the bitboard for the white king" do
@@ -252,7 +276,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 1, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_king))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, {:white, :king}))
     end
 
     test "returns an 8x8 representation of the bitboard for the black composite position" do
@@ -267,7 +291,7 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0],
                [0, 0, 0, 0, 0, 0, 0, 0]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black_composite))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, :black))
     end
 
     test "returns an 8x8 representation of the bitboard for the white composite position" do
@@ -282,7 +306,117 @@ defmodule Chess.Boards.BitBoardTest do
                [0, 0, 0, 0, 0, 0, 0, 0],
                [1, 1, 1, 1, 1, 1, 1, 1],
                [1, 1, 1, 1, 1, 1, 1, 1]
-             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white_composite))
+             ] == BitBoard.to_grid(BitBoard.get(bitboard, :white))
+    end
+  end
+
+  describe "get_boards_by_color/2" do
+    test "returns all the white piece boards when given :white" do
+      assert %{
+               pawns: <<0, 0, 0, 0, 0, 0, 0b11111111, 0>>,
+               rooks: _,
+               bishops: _,
+               queens: _,
+               knights: _,
+               king: _
+             } = BitBoard.get_boards_by_color(BitBoard.new(), Color.white())
+    end
+
+    test "returns all the black piece boards when given :black" do
+      assert %{
+               pawns: <<0, 0b11111111, 0, 0, 0, 0, 0, 0>>,
+               rooks: _,
+               bishops: _,
+               queens: _,
+               knights: _,
+               king: _
+             } = BitBoard.get_boards_by_color(BitBoard.new(), Color.black())
+    end
+  end
+
+  describe "Access Behaviour" do
+    test "fetch/2 accepts a valid {color, piece_type} tuple and returns {:ok, piece_bitboard}" do
+      bitboard = BitBoard.new()
+
+      for color <- ~w(black white)a, piece <- ~w(pawns rooks bishops knights queens king)a do
+        assert {:ok, _board} = BitBoard.fetch(bitboard, {color, piece})
+      end
+    end
+
+    test "fetch/2 returns :error when given an invalid color in tuple passed as parameter" do
+      assert :error = BitBoard.fetch(BitBoard.new(), {:green, :knights})
+    end
+
+    test "fetch/2 returns :error when passed an invalid piece type in tuple passed as parameter" do
+      assert :error = BitBoard.fetch(BitBoard.new(), {:white, :wizards})
+    end
+
+    test "fetch/2 accepts :white as an input and returns the composite white bitboard representation" do
+      bitboard = BitBoard.new()
+
+      assert {:ok, white_composite} = BitBoard.fetch(bitboard, :white)
+      assert white_composite == BitBoard.get(bitboard, :white)
+    end
+
+    test "fetch/2 accepts :black as an input and returns the composite black bitboard representation" do
+      bitboard = BitBoard.new()
+
+      assert {:ok, black_composite} = BitBoard.fetch(bitboard, :black)
+      assert black_composite == BitBoard.get(bitboard, :black)
+    end
+
+    test "fetch/2 accepts :full as an input and returns the entire composite bitboard representation" do
+      bitboard = BitBoard.new()
+
+      assert {:ok, composite} = BitBoard.fetch(bitboard, :full)
+      assert composite == BitBoard.get(bitboard, :full)
+    end
+
+    test "fetch/2 returns :error when given a single input that is not :black, :white, or :full" do
+      assert :error = BitBoard.fetch(BitBoard.new(), :this_is_not_valid)
+    end
+
+    test "enables Access-based lookup with {color, piece} tuples as keys" do
+      assert board = BitBoard.new()[{:white, :pawns}]
+      assert board == <<0, 0, 0, 0, 0, 0, 255, 0>>
+    end
+
+    test "enables Access-based lookup for composite keys" do
+      assert board = BitBoard.new()[:full]
+      assert board == <<255, 255, 0, 0, 0, 0, 255, 255>>
+    end
+
+    test "get_and_update/3 allows updates to the bitboard struct and also returns the current value" do
+      board = BitBoard.new()
+
+      initial_white_pawns = <<0, 0, 0, 0, 0, 0, 255, 0>>
+      updated_white_pawns = <<0, 0, 0, 0, 0, 255, 0, 0>>
+
+      assert {current_value, new_board} =
+               BitBoard.get_and_update(board, {:white, :pawns}, fn current_white_pawns ->
+                 {current_white_pawns, updated_white_pawns}
+               end)
+
+      assert current_value == initial_white_pawns
+      assert new_board.white.pawns == updated_white_pawns
+    end
+
+    test "get_and_update/3 raises if the callback function passed returns :pop" do
+      assert_raise RuntimeError, "Pop not implemented for BitBoards", fn ->
+        BitBoard.get_and_update(BitBoard.new(), {:white, :pawns}, fn _ -> :pop end)
+      end
+    end
+
+    test "get_and_update/3 raises on keys that are not valid color/piece combinations" do
+      assert_raise RuntimeError, fn ->
+        BitBoard.get_and_update(BitBoard.new(), :full, fn current -> {current, BitBoard.new()} end)
+      end
+    end
+
+    test "pop/2 raises" do
+      assert_raise RuntimeError, "Pop not implemented for BitBoards", fn ->
+        BitBoard.pop(BitBoard.new(), {:white, :pawns})
+      end
     end
   end
 end

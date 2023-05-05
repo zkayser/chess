@@ -7,6 +7,12 @@ defmodule Chess.Boards.BitBoard do
   This module uses a series of 8-byte binaries to
   represent the state of a bitboard.
   """
+  import Bitwise
+
+  alias Chess.Color
+
+  @behaviour Access
+
   @full_row 0b11111111
   @rooks 0b10000001
   @knights 0b01000010
@@ -14,90 +20,104 @@ defmodule Chess.Boards.BitBoard do
   @queen 0b00010000
   @king 0b00001000
 
-  defstruct composite: <<@full_row, @full_row, 0, 0, 0, 0, @full_row, @full_row>>,
-            white_pawns: <<0, 0, 0, 0, 0, 0, @full_row, 0>>,
-            white_rooks: <<0, 0, 0, 0, 0, 0, 0, @rooks>>,
-            white_knights: <<0, 0, 0, 0, 0, 0, 0, @knights>>,
-            white_bishops: <<0, 0, 0, 0, 0, 0, 0, @bishops>>,
-            white_queens: <<0, 0, 0, 0, 0, 0, 0, @queen>>,
-            white_king: <<0, 0, 0, 0, 0, 0, 0, @king>>,
-            black_pawns: <<0, @full_row, 0, 0, 0, 0, 0, 0>>,
-            black_rooks: <<@rooks, 0, 0, 0, 0, 0, 0, 0>>,
-            black_knights: <<@knights, 0, 0, 0, 0, 0, 0, 0>>,
-            black_bishops: <<@bishops, 0, 0, 0, 0, 0, 0, 0>>,
-            black_queens: <<@queen, 0, 0, 0, 0, 0, 0, 0>>,
-            black_king: <<@king, 0, 0, 0, 0, 0, 0, 0>>,
-            black_composite: <<@full_row, @full_row, 0, 0, 0, 0, 0, 0>>,
-            white_composite: <<0, 0, 0, 0, 0, 0, @full_row, @full_row>>
+  defstruct white: %{
+              pawns: <<0, 0, 0, 0, 0, 0, @full_row, 0>>,
+              rooks: <<0, 0, 0, 0, 0, 0, 0, @rooks>>,
+              knights: <<0, 0, 0, 0, 0, 0, 0, @knights>>,
+              bishops: <<0, 0, 0, 0, 0, 0, 0, @bishops>>,
+              queens: <<0, 0, 0, 0, 0, 0, 0, @queen>>,
+              king: <<0, 0, 0, 0, 0, 0, 0, @king>>
+            },
+            black: %{
+              pawns: <<0, @full_row, 0, 0, 0, 0, 0, 0>>,
+              rooks: <<@rooks, 0, 0, 0, 0, 0, 0, 0>>,
+              knights: <<@knights, 0, 0, 0, 0, 0, 0, 0>>,
+              bishops: <<@bishops, 0, 0, 0, 0, 0, 0, 0>>,
+              queens: <<@queen, 0, 0, 0, 0, 0, 0, 0>>,
+              king: <<@king, 0, 0, 0, 0, 0, 0, 0>>
+            }
 
   @typedoc """
-  A t:bitboard/0 is specifically a 64-bit bitstring
-  that represents one component or composite of
+  A t:bitboard/0 is a 64-bit bitstring
+  representation of one component (or composite) of
   an entire chess game bitboard representation.
   """
   @type bitboard() :: binary()
-  @type position() :: non_neg_integer()
+
+  @typep composites() :: :full | :white | :black
+
+  @typep piece_keys() :: :pawns | :rooks | :knights | :bishops | :queens | :king
+
+  @typep piece_positions() :: %{
+           pawns: bitboard(),
+           rooks: bitboard(),
+           knights: bitboard(),
+           bishops: bitboard(),
+           queens: bitboard(),
+           king: bitboard()
+         }
+
   @type t() :: %__MODULE__{
-          composite: bitboard(),
-          white_pawns: bitboard(),
-          white_rooks: bitboard(),
-          white_knights: bitboard(),
-          white_queens: bitboard(),
-          white_king: bitboard(),
-          black_pawns: bitboard(),
-          black_rooks: bitboard(),
-          black_knights: bitboard(),
-          black_bishops: bitboard(),
-          black_queens: bitboard(),
-          black_king: bitboard(),
-          black_composite: bitboard(),
-          white_composite: bitboard()
+          white: piece_positions(),
+          black: piece_positions()
         }
-  @type bitboard_type() ::
-          :composite
-          | :white_pawns
-          | :white_rooks
-          | :white_knights
-          | :white_bishops
-          | :white_queens
-          | :white_king
-          | :black_pawns
-          | :black_rooks
-          | :black_knights
-          | :black_bishops
-          | :black_queens
-          | :black_king
-          | :black_composite
-          | :white_composite
+
+  @colors [Color.black(), Color.white()]
+  @piece_types ~w(pawns rooks knights bishops queens king)a
+  @composites [:full | @colors]
 
   @spec new() :: t()
   def new, do: %__MODULE__{}
 
   @doc """
-  Returns the list off all different bitboard types that are
-  stored in a Bitboard.t() representation.
+  Returns the list of all different bitboard types that are
+  stored in a `#{__MODULE__}.t()` representation.
   """
-  @spec list_types() :: list(bitboard_type())
-  def list_types do
-    %__MODULE__{}
-    |> Map.from_struct()
-    |> Map.keys()
+  @spec accessors() :: list({:white | :black, piece_keys()} | composites())
+  def accessors do
+    for color <- ~w(white black)a, pieces <- ~w(pawns rooks knights bishops queens king)a do
+      {color, pieces}
+    end
+    |> Enum.concat(~w(full white black)a)
   end
 
   @doc """
   Returns the specific bitboard denoted by `bitboard_type`
   stored within the `BitBoard.t/0` struct.
   """
-  @spec get(t(), bitboard_type()) :: bitboard()
-  def get(bitboard, type) do
-    Map.fetch!(bitboard, type)
+  @spec get(t(), {Color.t(), piece_keys()} | composites()) :: bitboard()
+  def get(bitboard, {color, pieces}) do
+    bitboard
+    |> Map.from_struct()
+    |> get_in([color, pieces])
   end
+
+  def get(bitboard, composite_type) do
+    boards =
+      case composite_type do
+        :full -> bitboard.black |> Enum.concat(bitboard.white) |> Keyword.values()
+        color -> bitboard |> Map.get(color) |> Map.values()
+      end
+
+    boards
+    |> Enum.reduce(0, fn <<board::integer-size(64)>>, composite ->
+      board ||| composite
+    end)
+    |> from_integer()
+  end
+
+  @doc """
+  Returns the map of boards for each piece by the given color.
+  """
+  @spec get_boards_by_color(t(), Color.t()) :: piece_positions()
+  def get_boards_by_color(%__MODULE__{white: white}, :white), do: white
+  def get_boards_by_color(%__MODULE__{black: black}, :black), do: black
 
   @doc """
   Returns the integer-encoded value of the underlying
   bitstring for the bitboard.
   """
-  @spec get_raw(t(), bitboard_type()) :: integer()
+  @spec get_raw(t(), {Color.t(), piece_keys()} | composites()) :: integer()
   def get_raw(bitboard, type) do
     <<value::integer-size(64)>> = get(bitboard, type)
     value
@@ -124,6 +144,43 @@ defmodule Chess.Boards.BitBoard do
     |> Integer.digits(2)
     |> then(&with_padding/1)
     |> Enum.chunk_every(8)
+  end
+
+  @impl Access
+  def fetch(bitboard, {color, piece_type}) when color in @colors and piece_type in @piece_types do
+    {:ok, get(bitboard, {color, piece_type})}
+  end
+
+  def fetch(bitboard, composite) when composite in @composites do
+    {:ok, get(bitboard, composite)}
+  end
+
+  def fetch(_, _), do: :error
+
+  @impl Access
+  def get_and_update(board, {color, piece_type} = key, update_fun) do
+    case update_fun.(board[key]) do
+      {current, updates} ->
+        updated_board =
+          Map.update!(board, color, fn boards -> Map.put(boards, piece_type, updates) end)
+
+        {current, updated_board}
+
+      :pop ->
+        raise "Pop not implemented for BitBoards"
+    end
+  end
+
+  def get_and_update(_board, key, _update_fun) do
+    raise """
+    BitBoard.get_and_update/3 only works with tuple keys, where first element is in #{inspect(@colors)} and second is in #{inspect(@piece_types)}.
+    get_and_update/3 was invoked with key: #{inspect(key)}
+    """
+  end
+
+  @impl Access
+  def pop(_board, _key) do
+    raise "Pop not implemented for BitBoards"
   end
 
   @spec with_padding(list(0 | 1)) :: list(0 | 1)
