@@ -3,8 +3,8 @@ defmodule Chess.Game do
   A struct and related functions for working with a
   single chess game instance.
   """
-  alias Chess.Boards.BitBoard
   alias Chess.Bitboards.Move
+  alias Chess.Boards.BitBoard
   alias Chess.Color
 
   defstruct board: BitBoard.new(),
