@@ -48,5 +48,9 @@ defmodule Chess.PiecesTest do
         assert piece == @coordinate_to_piece_mappings[{<<unquote(file)>>, unquote(black_rank)}]
       end
     end
+
+    test "returns {:error, :unoccupied} for blank squares" do
+      assert {:error, :unoccupied} = Pieces.classify(Game.new(), {"c", 6})
+    end
   end
 end
