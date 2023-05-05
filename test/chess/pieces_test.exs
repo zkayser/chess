@@ -1,5 +1,6 @@
 defmodule Chess.PiecesTest do
   use ExUnit.Case
+  use ExUnitProperties
 
   alias Chess.BitBoards.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
   alias Chess.Game
@@ -49,8 +50,19 @@ defmodule Chess.PiecesTest do
       end
     end
 
-    test "returns {:error, :unoccupied} for blank squares" do
-      assert {:error, :unoccupied} = Pieces.classify(Game.new(), {"c", 6})
+    property "returns {:error, :unoccupied} for blank squares" do
+      check all(unoccupied_coordinates <- unoccupied_coordinate_generator()) do
+        assert {:error, :unoccupied} = Pieces.classify(Game.new(), unoccupied_coordinates)
+      end
+    end
+  end
+
+  def unoccupied_coordinate_generator do
+    gen all(
+          file <- StreamData.string(?a..?h, min_length: 1, max_length: 1),
+          rank <- StreamData.integer(3..6)
+        ) do
+      {file, rank}
     end
   end
 end
