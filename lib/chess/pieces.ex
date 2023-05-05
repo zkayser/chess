@@ -5,6 +5,7 @@ defmodule Chess.Pieces do
   """
   import Bitwise
 
+  alias Chess.Boards.BitBoard
   alias Chess.BitBoards.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
   alias Chess.Game
   alias Chess.Moves.Proposals
@@ -31,11 +32,11 @@ defmodule Chess.Pieces do
   If the source position is not occupied, returns an error tuple instead.
   """
   @spec classify(Game.t(), Proposals.coordinates()) :: {:ok, piece()} | {:error, :unoccupied}
-  def classify(game, {file, rank} = _source) do
-    bitboards = Map.get(game.board, game.current_player)
+  def classify(%Game{} = game, {file, rank} = _source) do
+    bitboards = BitBoard.get_boards_by_color(game.board, game.current_player)
 
-    Enum.reduce_while(bitboards, :unoccupied, fn {piece, <<bitboard::integer-size(64)>>},
-                                                 _result ->
+    Enum.reduce_while(bitboards, {:error, :unoccupied}, fn {piece, <<bitboard::integer-size(64)>>},
+                                                           _result ->
       rank_shift = (rank - 1) * 8
       file_shift = @file_masks[file]
       bitmask = 1 <<< (file_shift + rank_shift)
@@ -48,7 +49,7 @@ defmodule Chess.Pieces do
     end)
   end
 
-  @spec modularize(atom()) :: module()
+  @spec modularize(atom()) :: piece()
   defp modularize(:pawns), do: Pawn
   defp modularize(:bishops), do: Bishop
   defp modularize(:rooks), do: Rook
