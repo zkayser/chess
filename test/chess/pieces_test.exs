@@ -53,6 +53,10 @@ defmodule Chess.PiecesTest do
       end
     end
 
+    test "returns {:error, :unoccupied} for squares occupied by the player of the other color" do
+      assert {:error, :unoccupied} = Pieces.classify(Game.new(), {"a", 8})
+    end
+
     property "returns {:error, :unoccupied} for blank squares" do
       check all(unoccupied_coordinates <- unoccupied_coordinate_generator()) do
         assert {:error, :unoccupied} = Pieces.classify(Game.new(), unoccupied_coordinates)
