@@ -4,8 +4,8 @@ defmodule Chess.Game do
   single chess game instance.
   """
   alias Chess.Boards.BitBoard
-  alias Chess.Color
   alias Chess.Bitboards.Move
+  alias Chess.Color
 
   defstruct board: BitBoard.new(),
             move_list: [],
