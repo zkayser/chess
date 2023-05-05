@@ -107,6 +107,13 @@ defmodule Chess.Boards.BitBoard do
   end
 
   @doc """
+  Returns the map of boards for each piece by the given color.
+  """
+  @spec get_boards_by_color(t(), Color.t()) :: piece_positions()
+  def get_boards_by_color(%__MODULE__{white: white}, :white), do: white
+  def get_boards_by_color(%__MODULE__{black: black}, :black), do: black
+
+  @doc """
   Returns the integer-encoded value of the underlying
   bitstring for the bitboard.
   """
