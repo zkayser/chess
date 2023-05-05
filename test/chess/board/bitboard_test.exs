@@ -2,6 +2,7 @@ defmodule Chess.Boards.BitBoardTest do
   use ExUnit.Case, async: true
 
   alias Chess.Boards.BitBoard
+  alias Chess.Color
 
   describe "new/0" do
     test "creates a BitBoard struct" do
@@ -306,6 +307,30 @@ defmodule Chess.Boards.BitBoardTest do
                [1, 1, 1, 1, 1, 1, 1, 1],
                [1, 1, 1, 1, 1, 1, 1, 1]
              ] == BitBoard.to_grid(BitBoard.get(bitboard, :white))
+    end
+  end
+
+  describe "get_boards_by_color/2" do
+    test "returns all the white piece boards when given :white" do
+      assert %{
+               pawns: <<0, 0, 0, 0, 0, 0, 0b11111111, 0>>,
+               rooks: _,
+               bishops: _,
+               queens: _,
+               knights: _,
+               king: _
+             } = BitBoard.get_boards_by_color(BitBoard.new(), Color.white())
+    end
+
+    test "returns all the black piece boards when given :black" do
+      assert %{
+               pawns: <<0, 0b11111111, 0, 0, 0, 0, 0, 0>>,
+               rooks: _,
+               bishops: _,
+               queens: _,
+               knights: _,
+               king: _
+             } = BitBoard.get_boards_by_color(BitBoard.new(), Color.black())
     end
   end
 
