@@ -78,7 +78,7 @@ jobs:
       - <<: *install_hex_rebar
       - run:
           name: Compile Checks
-          command: mix compile --warnings-as-errors
+          command: mix do clean, compile --warnings-as-errors
 
   test:
     docker:
