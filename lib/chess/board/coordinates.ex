@@ -31,17 +31,6 @@ defmodule Chess.Board.Coordinates do
   @bit_indices Map.new(Enum.with_index(~w(h g f e d c b a)))
 
   @doc """
-  Takes a `__MODULE__.t()` coordinate (`{file, rank}`) and
-  returns the coordinate as a bit representation.
-  """
-  @spec to_bitboard(t()) :: integer()
-  def to_bitboard({file, rank}) do
-    rank_shift = (rank - 1) * 8
-    file_shift = @bit_indices[file]
-    1 <<< (file_shift + rank_shift)
-  end
-
-  @doc """
   Returns the bit index for the given file within
   an 8-bit binary.
   """
