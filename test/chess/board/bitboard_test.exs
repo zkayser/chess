@@ -334,6 +334,18 @@ defmodule Chess.Boards.BitBoardTest do
     end
   end
 
+  describe "square_occupied?/2" do
+    test "returns true when a given square is occupied inside of a bitboard" do
+      black_pawns = BitBoard.get(BitBoard.new(), {Color.black(), :pawns})
+      assert BitBoard.square_occupied?(black_pawns, {"a", 7})
+    end
+
+    test "returns false when a given square is not occupied inside of a bitboard" do
+      white_pawns = BitBoard.get(BitBoard.new(), {Color.white(), :pawns})
+      refute BitBoard.square_occupied?(white_pawns, {"a", 7})
+    end
+  end
+
   describe "Access Behaviour" do
     test "fetch/2 accepts a valid {color, piece_type} tuple and returns {:ok, piece_bitboard}" do
       bitboard = BitBoard.new()
