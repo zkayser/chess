@@ -28,7 +28,7 @@ defmodule Chess.Board.Coordinates do
   # from file h to file a.
   # This is used to create a bit mask that allows us to determine if
   # a position is occupied on the bitboard, and by which piece type.
-  @file_masks Map.new(Enum.with_index(~w(h g f e d c b a)))
+  @bit_indices Map.new(Enum.with_index(~w(h g f e d c b a)))
 
   @doc """
   Takes a `__MODULE__.t()` coordinate (`{file, rank}`) and
@@ -37,7 +37,14 @@ defmodule Chess.Board.Coordinates do
   @spec to_bitboard(t()) :: integer()
   def to_bitboard({file, rank}) do
     rank_shift = (rank - 1) * 8
-    file_shift = @file_masks[file]
+    file_shift = @bit_indices[file]
     1 <<< (file_shift + rank_shift)
   end
+
+  @doc """
+  Returns the bit index for the given file within
+  an 8-bit binary.
+  """
+  @spec file_bit_index(file()) :: 0..7
+  def file_bit_index(file), do: @bit_indices[file]
 end
