@@ -4,7 +4,6 @@ defmodule Chess.Board.Coordinates do
   coordinate system, and exposes functions for converting back
   and forth between different representations.
   """
-  import Bitwise
 
   @typedoc """
   A `t:file/0` is a 1-byte (8-bit) string,
