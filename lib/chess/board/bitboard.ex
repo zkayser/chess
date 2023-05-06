@@ -9,6 +9,7 @@ defmodule Chess.Boards.BitBoard do
   """
   import Bitwise
 
+  alias Chess.Board.Coordinates
   alias Chess.Color
 
   @behaviour Access
@@ -38,11 +39,15 @@ defmodule Chess.Boards.BitBoard do
             }
 
   @typedoc """
-  A t:bitboard/0 is a 64-bit bitstring
+  A t:bitboard/0 is a 64-bit (8-byte) bitstring
   representation of one component (or composite) of
   an entire chess game bitboard representation.
+
+  Each 8-bit part of the binary represents a rank (row)
+  on the chessboard; the 8 bits of each part represent
+  the files (columns) of the chessboard.
   """
-  @type bitboard() :: binary()
+  @type bitboard() :: <<_::8, _::_*8>>
 
   @typep composites() :: :full | :white | :black
 
@@ -121,6 +126,23 @@ defmodule Chess.Boards.BitBoard do
   def get_raw(bitboard, type) do
     <<value::integer-size(64)>> = get(bitboard, type)
     value
+  end
+
+  @doc """
+  Returns true if the given `coordinate` (representing a square)
+  is occupied in the `bitboard` binary.
+
+  Note that in a bitboard binary, each part of the binary
+  represents a rank (row) on the chessboard; however, the
+  order of ranks in the binary goes from 8 to 1, so we need
+  to reverse the ranks. Same with the files (columns) within
+  each part of the binary, going from h to a.
+  """
+  @spec square_occupied?(bitboard(), Coordinates.t()) :: boolean()
+  def square_occupied?(bitboard, {file, rank}) do
+    <<rank_byte::integer-size(8)>> = :binary.part(bitboard, {8 - rank, 1})
+    mask = 1 <<< Coordinates.file_bit_index(file)
+    (rank_byte &&& mask) != 0
   end
 
   @doc """
