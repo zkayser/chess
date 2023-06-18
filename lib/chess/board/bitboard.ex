@@ -119,6 +119,12 @@ defmodule Chess.Boards.BitBoard do
   def get_boards_by_color(%__MODULE__{black: black}, :black), do: black
 
   @doc """
+  Returns the empty bitboard.
+  """
+  @spec empty() :: bitboard()
+  def empty, do: <<0::integer-size(64)>>
+
+  @doc """
   Returns the integer-encoded value of the underlying
   bitstring for the bitboard.
   """
