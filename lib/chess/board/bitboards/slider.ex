@@ -10,4 +10,10 @@ defmodule Chess.Bitboards.Slider do
   @type t() :: %__MODULE__{
           deltas: list({delta(), delta()})
         }
+
+  @doc """
+  Creates the slider deltas for a rook piece
+  """
+  @spec rook() :: t()
+  def rook, do: %__MODULE__{deltas: [{1, 0}, {0, -1}, {-1, 0}, {0, 1}]}
 end
