@@ -12,8 +12,14 @@ defmodule Chess.Bitboards.Slider do
         }
 
   @doc """
-  Creates the slider deltas for a rook piece
+  Creates the slider deltas for a rook piece.
   """
   @spec rook() :: t()
   def rook, do: %__MODULE__{deltas: [{1, 0}, {0, -1}, {-1, 0}, {0, 1}]}
+
+  @doc """
+  Creates the slider deltas for a bishop piece.
+  """
+  @spec bishop() :: t()
+  def bishop, do: %__MODULE__{deltas: [{1, 1}, {1, -1}, {-1, -1}, {-1, 1}]}
 end
