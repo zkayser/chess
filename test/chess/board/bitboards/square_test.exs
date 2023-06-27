@@ -2,6 +2,8 @@ defmodule Chess.Boards.Bitboards.SquareTest do
   use ExUnit.Case
   use ExUnitProperties
 
+  import Bitwise
+
   alias Chess.Boards.Bitboards.Square
 
   describe "try_delta/2" do
@@ -37,9 +39,16 @@ defmodule Chess.Boards.Bitboards.SquareTest do
     end
   end
 
-  # describe "bitboard/1" do
-  #   test "returns the bitboard representation of the given square" do
-  #     flunk("TODO")
-  #   end
-  # end
+  describe "bitboard/1" do
+    squares =
+      for rank <- 1..8, file <- ?h..?a do
+        {<<file>>, rank}
+      end
+
+    for {square, index} <- Enum.with_index(squares) do
+      test "returns the bitboard representation of #{inspect(square)}" do
+        assert Square.bitboard(unquote(square)) == 1 <<< unquote(index)
+      end
+    end
+  end
 end
