@@ -346,6 +346,12 @@ defmodule Chess.Boards.BitBoardTest do
     end
   end
 
+  describe "empty/0" do
+    test "returns an empty bitboard" do
+      assert <<0, 0, 0, 0, 0, 0, 0, 0>> == BitBoard.empty()
+    end
+  end
+
   describe "Access Behaviour" do
     test "fetch/2 accepts a valid {color, piece_type} tuple and returns {:ok, piece_bitboard}" do
       bitboard = BitBoard.new()
