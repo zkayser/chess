@@ -7,7 +7,6 @@ defmodule Chess.Boards.Bitboards.Square do
 
   alias Chess.Bitboards.Slider
   alias Chess.Board.Coordinates
-  alias Chess.Boards.BitBoard
 
   @type t() :: Coordinates.t()
 
