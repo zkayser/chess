@@ -3,6 +3,8 @@ defmodule Chess.Boards.Bitboards.Square do
   Conveniences for working with bitboard representations of
   squares on the Chess board.
   """
+  import Bitwise
+
   alias Chess.Bitboards.Slider
   alias Chess.Board.Coordinates
   alias Chess.Boards.BitBoard
@@ -31,8 +33,11 @@ defmodule Chess.Boards.Bitboards.Square do
   that is, a 64-bit binary with a single bit set at the index
   representing the square.
   """
-  @spec bitboard(t()) :: BitBoard.bitboard()
-  def bitboard(_square) do
-    raise "not yet implemented"
+  @spec bitboard(t()) :: integer()
+  def bitboard({file, rank}) do
+    file_index = Coordinates.file_bit_index(file)
+    rank_offset = (rank - 1) * 8
+
+    1 <<< (rank_offset + file_index)
   end
 end
