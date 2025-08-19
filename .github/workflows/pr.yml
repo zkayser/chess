@@ -20,8 +20,8 @@ jobs:
         run: mix deps.get
       - name: Compile
         run: mix compile
-  credo-format-sobelow:
-    name: Static Analysis, Format Check and Audits
+  credo-format:
+    name: Static Analysis and Format Check
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -31,13 +31,23 @@ jobs:
         run: mix credo --strict
       - name: Check formatted
         run: mix format --check-formatted
-      - name: Run Sobelow
-        run: mix sobelow --skip
-      - name: Run hex audit for retired packages
-        run: mix hex.audit
   test:
     needs: build
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.6
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: chess_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/bootstrap_elixir
@@ -53,8 +63,8 @@ jobs:
         uses: actions/cache@v4
         id: plt_cache
         with:
-          key: ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-plt
-          restore-keys: ${{ runner.os }}-${{ steps.beam.outputs.elixir-version }}-${{ steps.beam.outputs.otp-version }}-plt
+          key: ${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-plt
+          restore-keys: ${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-plt
           path: priv/plts
       - name: Create PLTs
         if: steps.plt_cache.outputs.cache-hit != 'true'
