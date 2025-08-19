@@ -10,16 +10,13 @@ concurrency:
 
 env:
   MIX_ENV: test
-  DOCKER_COMPOSE_FILE: .devcontainer/docker-compose.yml
+  DOCKER_COMPOSE_FILE: .devcontainer/docker compose.yml
 
 jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install Docker Compose
-        run: sudo pip install docker-compose
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -42,12 +39,12 @@ jobs:
             ${{ runner.os }}-plt-
 
       - name: Start services
-        run: docker-compose -f $DOCKER_COMPOSE_FILE up -d --build
+        run: docker compose -f $DOCKER_COMPOSE_FILE up -d --build
 
       - name: Wait for database
         run: |
           for i in {1..10}; do
-            if docker-compose -f $DOCKER_COMPOSE_FILE exec db pg_isready -U postgres; then
+            if docker compose -f $DOCKER_COMPOSE_FILE exec db pg_isready -U postgres; then
               echo "Database is ready!"
               break
             fi
@@ -56,22 +53,22 @@ jobs:
           done
 
       - name: Install dependencies
-        run: docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix deps.get
+        run: docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix deps.get
 
       - name: Compile
-        run: docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix compile
+        run: docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix compile
 
       - name: Static Analysis and Format Check
         run: |
-          docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix credo --strict
-          docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix format --check-formatted
+          docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix credo --strict
+          docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix format --check-formatted
 
       - name: Run tests
-        run: docker-compose -f $DOCKER_COMPOSE_FILE exec -T -e DATABASE_HOSTNAME=db app mix test
+        run: docker compose -f $DOCKER_COMPOSE_FILE exec -T -e DATABASE_HOSTNAME=db app mix test
 
       - name: Run dialyzer
         run: |
           if [ "${{ steps.plt_cache.outputs.cache-hit }}" != 'true' ]; then
-            docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix dialyzer --plt
+            docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix dialyzer --plt
           fi
-          docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix dialyzer --format github
+          docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix dialyzer --format github
