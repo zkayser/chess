@@ -80,11 +80,6 @@ jobs:
           name: build-artifacts
           path: .
 
-      - name: Install hex and rebar
-        run: |
-          mix local.hex --force
-          mix local.rebar --force
-
       - name: Run tests
         run: mix test
 
@@ -102,11 +97,6 @@ jobs:
         with:
           name: build-artifacts
           path: .
-
-      - name: Install hex and rebar
-        run: |
-          mix local.hex --force
-          mix local.rebar --force
 
       - name: Check format
         run: mix format --check-formatted
@@ -126,11 +116,6 @@ jobs:
           name: build-artifacts
           path: .
 
-      - name: Install hex and rebar
-        run: |
-          mix local.hex --force
-          mix local.rebar --force
-
       - name: Run Credo
         run: mix credo --strict
 
@@ -148,11 +133,6 @@ jobs:
         with:
           name: build-artifacts
           path: .
-
-      - name: Install hex and rebar
-        run: |
-          mix local.hex --force
-          mix local.rebar --force
 
       - name: Run Dialyzer
         run: mix dialyzer
