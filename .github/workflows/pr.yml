@@ -1,73 +1,74 @@
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
 env:
   MIX_ENV: test
+  DOCKER_COMPOSE_FILE: .devcontainer/docker-compose.yml
+
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/bootstrap_elixir
-      - name: Install dependencies
-        run: mix deps.get
-      - name: Compile
-        run: mix compile
-  credo-format:
-    name: Static Analysis and Format Check
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/bootstrap_elixir
-      - name: Run Credo
-        run: mix credo --strict
-      - name: Check formatted
-        run: mix format --check-formatted
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:17.6
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: chess_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/bootstrap_elixir
-      - name: Run tests
-        run: mix test
-  dialyzer:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/bootstrap_elixir
-      - name: Restore PLT cache
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        id: deps-cache
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('''**/mix.lock''') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Cache PLT
         uses: actions/cache@v4
         id: plt_cache
         with:
-          key: ${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-plt
-          restore-keys: ${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-plt
           path: priv/plts
-      - name: Create PLTs
-        if: steps.plt_cache.outputs.cache-hit != 'true'
-        run: mix dialyzer --plt
+          key: ${{ runner.os }}-plt-${{ hashFiles('''**/mix.lock''') }}
+          restore-keys: |
+            ${{ runner.os }}-plt-
+
+      - name: Start services
+        run: docker-compose -f $DOCKER_COMPOSE_FILE up -d --build
+
+      - name: Wait for database
+        run: |
+          for i in {1..10}; do
+            if docker-compose -f $DOCKER_COMPOSE_FILE exec db pg_isready -U postgres; then
+              echo "Database is ready!"
+              break
+            fi
+            echo "Waiting for database..."
+            sleep 2
+          done
+
+      - name: Install dependencies
+        run: docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix deps.get
+
+      - name: Compile
+        run: docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix compile --warnings-as-errors
+
+      - name: Static Analysis and Format Check
+        run: |
+          docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix credo --strict
+          docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix format --check-formatted
+
+      - name: Run tests
+        run: docker-compose -f $DOCKER_COMPOSE_FILE exec -T -e DATABASE_HOSTNAME=db app mix test
+
       - name: Run dialyzer
-        run: mix dialyzer --format github
+        run: |
+          if [ "${{ steps.plt_cache.outputs.cache-hit }}" != 'true' ]; then
+            docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix dialyzer --plt
+          fi
+          docker-compose -f $DOCKER_COMPOSE_FILE exec -T app mix dialyzer --format github
