@@ -1,5 +1,5 @@
 {
-  "name": "Elixir Devcontainer",
+  "name": "Elixir Chess Devcontainer",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
