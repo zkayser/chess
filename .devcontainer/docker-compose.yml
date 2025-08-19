@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  app:
+    image: elixir:1.18.4-otp-28
+    volumes:
+      - ..:/workspaces/${localWorkspaceFolderBasename}:cached
+    working_dir: /workspaces/${localWorkspaceFolderBasename}
+    command: sleep infinity
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=ecto://postgres:postgres@db:5432/chess_dev
+      - MIX_ENV=dev
+  db:
+    image: postgres:17.6
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=chess_dev
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres-data:
