@@ -95,6 +95,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: setup
+    env:
+      MIX_ENV: test
     steps:
       - uses: actions/checkout@v4
 
