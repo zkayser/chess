@@ -10,7 +10,7 @@ services:
       - db
     environment:
       - DATABASE_URL=ecto://postgres:postgres@db:5432/chess_dev
-      - MIX_ENV=dev
+      
   db:
     image: postgres:17.6
     restart: unless-stopped
