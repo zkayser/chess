@@ -3,8 +3,8 @@ services:
   app:
     image: elixir:1.18.4-otp-28
     volumes:
-      - ..:/workspace:cached
-    working_dir: /workspace
+      - ..:/workspaces/${localWorkspaceFolderBasename}:cached
+    working_dir: /workspaces/${localWorkspaceFolderBasename}
     command: sleep infinity
     depends_on:
       - db

@@ -97,6 +97,7 @@ jobs:
     needs: setup
     env:
       MIX_ENV: test
+      localWorkspaceFolderBasename: "chess"
     steps:
       - uses: actions/checkout@v4
 
