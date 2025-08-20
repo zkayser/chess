@@ -10,10 +10,9 @@ concurrency:
 
 env:
   MIX_ENV: test
-  DOCKER_COMPOSE_FILE: .devcontainer/docker compose.yml
 
 jobs:
-  ci:
+  setup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,6 +20,52 @@ jobs:
       - name: Cache dependencies
         uses: actions/cache@v4
         id: deps-cache
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('''**/mix.lock''') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Install dependencies and compile
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd: |
+            mix deps.get
+            mix compile
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('''**/mix.lock''') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+
+      - name: Run credo and format check
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd: |
+            mix credo --strict
+            mix format --check-formatted
+
+  dialyzer:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore dependencies
+        uses: actions/cache@v4
         with:
           path: |
             deps
@@ -38,37 +83,32 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-plt-
 
-      - name: Start services
-        run: docker compose -f $DOCKER_COMPOSE_FILE up -d --build
-
-      - name: Wait for database
-        run: |
-          for i in {1..10}; do
-            if docker compose -f $DOCKER_COMPOSE_FILE exec db pg_isready -U postgres; then
-              echo "Database is ready!"
-              break
+      - name: Run dialyzer
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd: |
+            if [ "${{ steps.plt_cache.outputs.cache-hit }}" != 'true' ]; then
+              mix dialyzer --plt
             fi
-            echo "Waiting for database..."
-            sleep 2
-          done
+            mix dialyzer --format github
 
-      - name: Install dependencies
-        run: docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix deps.get
+  test:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Compile
-        run: docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix compile
-
-      - name: Static Analysis and Format Check
-        run: |
-          docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix credo --strict
-          docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix format --check-formatted
+      - name: Restore dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: ${{ runner.os }}-mix-${{ hashFiles('''**/mix.lock''') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
 
       - name: Run tests
-        run: docker compose -f $DOCKER_COMPOSE_FILE exec -T -e DATABASE_HOSTNAME=db app mix test
-
-      - name: Run dialyzer
-        run: |
-          if [ "${{ steps.plt_cache.outputs.cache-hit }}" != 'true' ]; then
-            docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix dialyzer --plt
-          fi
-          docker compose -f $DOCKER_COMPOSE_FILE exec -T app mix dialyzer --format github
+        uses: devcontainers/ci@v0.3
+        with:
+          runCmd: mix test
