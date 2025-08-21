@@ -55,7 +55,7 @@ defmodule Chess.MixProject do
       {:plug_cowboy, "~> 2.7"},
       {:postgrex, "~> 0.21"},
       {:sobelow, "~> 0.11.1", only: :dev},
-      {:stream_data, "~> 0.5.0"},
+      {:stream_data, "~> 1.2"},
       {:swoosh, "~> 1.6.4"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"}
