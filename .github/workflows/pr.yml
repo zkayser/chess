@@ -74,7 +74,7 @@ jobs:
       - name: Run dialyzer
         uses: devcontainers/ci@v0.3
         with:
-          runCmd: mix dialyzer --plt-path priv/plts
+          runCmd: mix ci.dialyzer
 
   test:
     runs-on: ubuntu-latest
