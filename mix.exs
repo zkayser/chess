@@ -5,12 +5,13 @@ defmodule Chess.MixProject do
     [
       app: :chess,
       version: "0.1.0",
-      elixir: "1.14.2",
+      elixir: "1.18.4",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      dialyzer: [plt_path: "priv/plts"]
     ]
   end
 
@@ -33,10 +34,10 @@ defmodule Chess.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:credo, "~> 1.6.4", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", runtime: false},
-      {:ecto, "~> 3.7.0"},
-      {:ecto_sql, "~> 3.7.2"},
+      {:ecto, "~> 3.13"},
+      {:ecto_sql, "~> 3.13"},
       {:esbuild, "~> 0.4.0", runtime: Mix.env() == :dev},
       {:ex_doc, "~> 0.28.3", only: :dev, runtime: false},
       {:floki, "~> 0.32.1", only: :test},
@@ -44,14 +45,15 @@ defmodule Chess.MixProject do
       {:jason, "~> 1.3"},
       {:nebulex, "~> 2.3.2"},
       {:oath, "~> 0.1.1", only: [:dev, :test]},
-      {:phoenix, "~> 1.6.6"},
+      {:phoenix, "~> 1.8"},
       {:phoenix_ecto, "~> 4.4"},
-      {:phoenix_html, "~> 3.2.0"},
-      {:phoenix_live_dashboard, "~> 0.6.5"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.17.5"},
-      {:plug_cowboy, "~> 2.5"},
-      {:postgrex, "~> 0.15"},
+      {:phoenix_html, "~> 3.3"},
+      {:phoenix_live_dashboard, "~> 0.8"},
+      {:phoenix_live_reload, "~> 1.6", only: :dev},
+      {:phoenix_live_view, "~> 1.0"},
+      {:phoenix_view, "~> 2.0"},
+      {:plug_cowboy, "~> 2.7"},
+      {:postgrex, "~> 0.21"},
       {:sobelow, "~> 0.11.1", only: :dev},
       {:stream_data, "~> 0.5.0"},
       {:swoosh, "~> 1.6.4"},
