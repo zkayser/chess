@@ -71,10 +71,23 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-mix-
 
+      - name: Cache PLT
+        uses: actions/cache@v4
+        id: plt_cache
+        with:
+          path: /root/.mix
+          key: plt-root-${{ runner.os }}-${{ hashFiles('''**/mix.lock''') }}
+          restore-keys: |
+            plt-root-${{ runner.os }}-
+
       - name: Run dialyzer
         uses: devcontainers/ci@v0.3
         with:
-          runCmd: mix ci.dialyzer
+          runCmd: |
+            if [ "${{ steps.plt_cache.outputs.cache-hit }}" != 'true' ]; then
+              mix dialyzer --plt
+            fi
+            mix dialyzer --format github
 
   test:
     runs-on: ubuntu-latest
