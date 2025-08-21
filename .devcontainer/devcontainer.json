@@ -2,6 +2,6 @@
   "name": "Elixir Chess Devcontainer",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "workspaceFolder": "/workspace",
   "postCreateCommand": "mix deps.get && mix ecto.setup"
 }

@@ -3,14 +3,13 @@ services:
   app:
     image: elixir:1.18.4-otp-28
     volumes:
-      - ..:/workspaces/${localWorkspaceFolderBasename}:cached
-    working_dir: /workspaces/${localWorkspaceFolderBasename}
+      - ..:/workspace:cached
+    working_dir: /workspace
     command: sleep infinity
     depends_on:
       - db
     environment:
       - DATABASE_URL=ecto://postgres:postgres@db:5432/chess_dev
-      
   db:
     image: postgres:17.6
     restart: unless-stopped
@@ -22,6 +21,5 @@ services:
       - POSTGRES_DB=chess_dev
     ports:
       - "5432:5432"
-
 volumes:
   postgres-data:
