@@ -1,0 +1,4 @@
+#!/bin/bash
+# A helper script to execute commands inside the devcontainer's 'app' service.
+set -e
+sudo docker compose -f .devcontainer/docker-compose.yml exec app "$@"
