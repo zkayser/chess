@@ -68,7 +68,7 @@ defmodule Chess.Pieces.KnightTest do
       end
     end
 
-    for middle <- for(x <- 3..6, y <- 6..3, do: {x, y}) do
+    for middle <- for(x <- 3..6, y <- 6..3//-1, do: {x, y}) do
       test "lists eight potential moves for knights in middle position #{inspect(middle)}" do
         board = BoardHelpers.empty_board()
         starting_index = Board.coordinates_to_index(unquote(middle))

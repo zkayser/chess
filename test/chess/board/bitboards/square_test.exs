@@ -41,7 +41,7 @@ defmodule Chess.Boards.Bitboards.SquareTest do
 
   describe "bitboard/1" do
     squares =
-      for rank <- 1..8, file <- ?h..?a do
+      for rank <- 1..8, file <- ?h..?a//-1 do
         {<<file>>, rank}
       end
 

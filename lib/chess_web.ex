@@ -22,7 +22,7 @@ defmodule ChessWeb do
       use Phoenix.Controller, namespace: ChessWeb
 
       import Plug.Conn
-      import ChessWeb.Gettext
+      use Gettext, backend: ChessWeb.Gettext
       alias ChessWeb.Router.Helpers, as: Routes
     end
   end
@@ -72,14 +72,16 @@ defmodule ChessWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import ChessWeb.Gettext
+      use Gettext, backend: ChessWeb.Gettext
     end
   end
 
   defp view_helpers do
     quote do
       # Use all HTML functionality (forms, tags, etc)
-      use Phoenix.HTML
+      import Phoenix.HTML
+      import Phoenix.HTML.Form
+      use PhoenixHTMLHelpers
 
       # Import LiveView and .heex helpers (live_render, live_patch, <.form>, etc)
       import Phoenix.LiveView.Helpers
@@ -88,7 +90,7 @@ defmodule ChessWeb do
       import Phoenix.View
 
       import ChessWeb.ErrorHelpers
-      import ChessWeb.Gettext
+      use Gettext, backend: ChessWeb.Gettext
       alias ChessWeb.Router.Helpers, as: Routes
     end
   end
