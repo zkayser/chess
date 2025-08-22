@@ -24,7 +24,7 @@ config :chess, ChessWeb.Endpoint,
 config :chess, Chess.Mailer, adapter: Swoosh.Adapters.Test
 
 # Print only warnings and errors during test
-config :logger, level: :warn
+config :logger, level: :warning
 
 # Oath
 config :oath, enable_contracts: true

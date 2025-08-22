@@ -32,7 +32,7 @@ defmodule Chess.Moves.Generators.PerpendicularsTest do
 
       assert [left, [], [], above] = Perpendiculars.generate(starting_index)
 
-      expected_left = for column <- 7..1, do: {column, 1}
+      expected_left = for column <- 7..1//-1, do: {column, 1}
       expected_above = for row <- 2..8, do: {8, row}
       assert expected_left == left
       assert expected_above == above
@@ -44,7 +44,7 @@ defmodule Chess.Moves.Generators.PerpendicularsTest do
       assert [[], right, below, []] = Perpendiculars.generate(starting_index)
 
       expected_right = for column <- 2..8, do: {column, 8}
-      expected_below = for row <- 7..1, do: {1, row}
+      expected_below = for row <- 7..1//-1, do: {1, row}
       assert expected_right == right
       assert expected_below == below
     end
@@ -54,8 +54,8 @@ defmodule Chess.Moves.Generators.PerpendicularsTest do
 
       assert [left, [], below, []] = Perpendiculars.generate(starting_index)
 
-      expected_left = for column <- 7..1, do: {column, 8}
-      expected_below = for row <- 7..1, do: {8, row}
+      expected_left = for column <- 7..1//-1, do: {column, 8}
+      expected_below = for row <- 7..1//-1, do: {8, row}
       assert expected_left == left
       assert expected_below == below
     end
