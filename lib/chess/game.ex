@@ -9,12 +9,14 @@ defmodule Chess.Game do
 
   defstruct board: BitBoard.new(),
             move_list: [],
-            current_player: Color.white()
+            current_player: Color.white(),
+            en_passant_target: nil
 
   @type t() :: %__MODULE__{
           board: BitBoard.t(),
           move_list: list(Move.t()),
-          current_player: Chess.player()
+          current_player: Chess.player(),
+          en_passant_target: Board.index() | nil
         }
 
   @doc """
@@ -27,20 +29,66 @@ defmodule Chess.Game do
   # Let's start implementing the Proposals #
   # module and see how this goes.          #
   ##########################################
-  # def play(game, proposal) do
-  #   case Proposals.validate(game, proposal) do
-  #     {:valid, move_type} -> {:ok, apply_move(game, proposal, move_type)}
-  #     {:invalid, reason} -> {:error, {"Invalid move proposed", reason}}
-  #   end
-  # end
+  alias Chess.Board.Coordinates
+  alias Chess.Boards.BitBoard
+  alias Chess.Move
+  alias Chess.Moves.Proposals
+  alias Chess.Pieces
+  alias Chess.Players
 
-  # defp apply_move(game, proposal, move_type) do
-  #   move = Proposals.accept(proposal, move_type)
+  def play(game, proposal) do
+    case Proposals.validate(game, proposal) do
+      {:valid, move} -> {:ok, apply_move(game, move)}
+      {:invalid, reason} -> {:error, {"Invalid move proposed", reason}}
+    end
+  end
 
-  #   %__MODULE__{
-  #     board: BitBoard.update(game.board, move),
-  #     move_list: [move | game.move_list],
-  #     current_player: Players.alternate(game.player)
-  #   }
-  # end
+  def apply_move(game, move) do
+    new_board = BitBoard.update(game.board, move, game.current_player)
+
+    # Handle en passant capture
+    final_board =
+      if is_en_passant_capture(game, move) do
+        captured_pawn_index =
+          if game.current_player == :white do
+            game.en_passant_target + 8
+          else
+            game.en_passant_target - 8
+          end
+
+        opponent_color = Players.alternate(game.current_player)
+        BitBoard.remove(new_board, captured_pawn_index, opponent_color)
+      else
+        new_board
+      end
+
+    en_passant_target = en_passant_target(game, move)
+
+    %__MODULE__{
+      board: final_board,
+      move_list: [move | game.move_list],
+      current_player: Players.alternate(game.current_player),
+      en_passant_target: en_passant_target
+    }
+  end
+
+  defp is_en_passant_capture(game, %Move{from: from, to: to}) do
+    with {:ok, piece} <- Pieces.classify(game, Coordinates.index_to_coordinates(from)) do
+      piece.type == Chess.Pieces.Pawn && to == game.en_passant_target
+    else
+      _ -> false
+    end
+  end
+
+  defp en_passant_target(game, %Move{from: from, to: to}) do
+    with {:ok, piece} <- Pieces.classify(game, from |> Coordinates.index_to_coordinates()) do
+      if piece.type == Chess.Pieces.Pawn && abs(to - from) == 16 do
+        (from + to) |> div(2)
+      else
+        nil
+      end
+    else
+      _ -> nil
+    end
+  end
 end

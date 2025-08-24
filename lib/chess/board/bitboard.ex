@@ -11,6 +11,7 @@ defmodule Chess.Boards.BitBoard do
 
   alias Chess.Board.Coordinates
   alias Chess.Color
+  alias Chess.Move
 
   @behaviour Access
 
@@ -220,6 +221,49 @@ defmodule Chess.Boards.BitBoard do
     case board_length < 64 do
       true -> Enum.concat(Enum.map(board_length..63, zeros), board)
       false -> board
+    end
+  end
+
+  defp find_piece_type_at(board, color, coordinates) do
+    boards = get_boards_by_color(board, color)
+    Enum.reduce_while(boards, :error, fn {piece_type, bitboard}, _ ->
+      if square_occupied?(bitboard, coordinates) do
+        {:halt, {:ok, piece_type}}
+      else
+        {:cont, :error}
+      end
+    end)
+  end
+
+  def remove(board, index, color) do
+    coordinates = Coordinates.index_to_coordinates(index)
+    case find_piece_type_at(board, color, coordinates) do
+      {:ok, piece_type} ->
+        <<raw_bitboard::integer-size(64)>> = get(board, {color, piece_type})
+        mask = 1 <<< (63 - index)
+        new_raw_bitboard = raw_bitboard &&& (bnot(mask))
+        new_bitboard = from_integer(new_raw_bitboard)
+        put_in(board, [color, piece_type], new_bitboard)
+      _ -> board
+    end
+  end
+
+  def add(board, index, color, piece_type) do
+    <<raw_bitboard::integer-size(64)>> = get(board, {color, piece_type})
+    mask = 1 <<< (63 - index)
+    new_raw_bitboard = raw_bitboard ||| mask
+    new_bitboard = from_integer(new_raw_bitboard)
+    put_in(board, [color, piece_type], new_bitboard)
+  end
+
+  def update(board, %Move{from: from, to: to}, color) do
+    coordinates = Coordinates.index_to_coordinates(from)
+    case find_piece_type_at(board, color, coordinates) do
+      {:ok, piece_type} ->
+        board
+        |> remove(from, color)
+        |> add(to, color, piece_type)
+      _ -> board
     end
   end
 end

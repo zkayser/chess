@@ -54,16 +54,17 @@ defmodule Chess.Piece do
     %__MODULE__{piece | moves: MapSet.put(moves, target)}
   end
 
-  @callback potential_moves(t(), Board.index(), Board.t()) :: MapSet.t(Board.index())
+  @callback potential_moves(t(), Board.index(), Game.t()) :: MapSet.t(Board.index())
+  @callback validate_move(Game.t(), Chess.Moves.Proposals.t()) :: {:ok, Move.t()} | {:error, any()}
 
   @doc """
   Returns a set of squares that a piece could potentially
   move to.
   """
-  @spec potential_moves(t(), starting_position :: Board.index(), Board.t()) ::
+  @spec potential_moves(t(), starting_position :: Board.index(), Game.t()) ::
           MapSet.t(Board.index())
-  def potential_moves(%__MODULE__{type: type_module} = piece, starting_position, board) do
-    type_module.potential_moves(piece, starting_position, board)
+  def potential_moves(%__MODULE__{type: type_module} = piece, starting_position, game) do
+    type_module.potential_moves(piece, starting_position, game)
   end
 
   @spec type_at_starting_position(Board.index()) :: type()

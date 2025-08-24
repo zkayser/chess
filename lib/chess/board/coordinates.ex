@@ -35,4 +35,17 @@ defmodule Chess.Board.Coordinates do
   """
   @spec file_bit_index(file()) :: 0..7
   def file_bit_index(file), do: @bit_indices[file]
+
+  @files ~w(h g f e d c b a)
+
+  @doc """
+  Converts a board index (0-63) to a `{file, rank}` tuple.
+  """
+  @spec index_to_coordinates(0..63) :: t()
+  def index_to_coordinates(index) do
+    rank = 8 - div(index, 8)
+    file_index = rem(index, 8)
+    file = Enum.at(@files, file_index)
+    {file, rank}
+  end
 end

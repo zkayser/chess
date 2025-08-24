@@ -64,21 +64,25 @@ defmodule Chess.Moves.Proposals do
   # Just templating this for now as I think through how #
   # to make this interface work nicely.                 #
   #######################################################
-  # @spec validate(Game.t(), t() | inputs()) :: {:valid, Move.t()} | {:invalid, reason}
-  #       when reason: any()
-  # def validate(game, %__MODULE__{} = proposal) do
-  #   with {:ok, piece} <- Pieces.classify(game, proposal.source),
-  #        {:ok, move} <- piece.validate_move(game, proposal) do
-  #     {:valid, move}
-  #   else
-  #     {:error, reason} -> {:invalid, reason}
-  #   end
-  # end
+  alias Chess.Game
+  alias Chess.Move
+  alias Chess.Pieces
 
-  # def validate(game, %{source: _, destination: _} = inputs) do
-  #   case from_inputs(inputs) do
-  #     {:ok, proposal} -> validate(game, proposal)
-  #     {:error, reason} -> {:invalid, reason}
-  #   end
-  # end
+  @spec validate(Game.t(), t() | inputs()) :: {:valid, Move.t()} | {:invalid, reason}
+        when reason: any()
+  def validate(game, %__MODULE__{} = proposal) do
+    with {:ok, piece} <- Pieces.classify(game, proposal.source),
+         {:ok, move} <- piece.type.validate_move(game, proposal) do
+      {:valid, move}
+    else
+      {:error, reason} -> {:invalid, reason}
+    end
+  end
+
+  def validate(game, %{source: _, destination: _} = inputs) do
+    case from_inputs(inputs) do
+      {:ok, proposal} -> validate(game, proposal)
+      {:error, reason} -> {:invalid, reason}
+    end
+  end
 end
