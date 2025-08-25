@@ -29,47 +29,50 @@ defmodule Chess.PiecesTest do
                                 |> Map.merge(@rank_7_mappings)
                                 |> Map.merge(@rank_8_mappings)
 
+  alias Chess.Boards.BitBoard
+
   describe "classify/1" do
-    for white_rank <- [1, 2], file <- ?a..?h do
-      test "returns an ok tuple with the correct piece type for white starting coordinates at #{<<file>>}#{white_rank}" do
-        game = Game.new()
-        source_coordinate = {<<unquote(file)>>, unquote(white_rank)}
+    for white_rank <- [1, 2], file <- Enum.map(?a..?h, &<<&1>>) do
+      test "returns an ok tuple with the correct piece type for white starting coordinates at #{file}#{white_rank}" do
+        game = %{Game.new() | board: BitBoard.new()}
+        source_coordinate = {unquote(file), unquote(white_rank)}
 
         assert {:ok, piece} = Pieces.classify(game, source_coordinate)
 
-        assert piece == @coordinate_to_piece_mappings[{<<unquote(file)>>, unquote(white_rank)}]
+        assert piece == @coordinate_to_piece_mappings[{unquote(file), unquote(white_rank)}]
       end
     end
 
-    for black_rank <- [7, 8], file <- ?a..?h do
-      test "returns an ok tuple with the correct piece type for black starting coordinates at #{<<file>>}#{black_rank}" do
-        game = Game.new()
-        game = %Game{game | current_player: Chess.Color.black()}
-        source_coordinate = {<<unquote(file)>>, unquote(black_rank)}
+    for black_rank <- [7, 8], file <- Enum.map(?a..?h, &<<&1>>) do
+      test "returns an ok tuple with the correct piece type for black starting coordinates at #{file}#{black_rank}" do
+        game = %{Game.new() | board: BitBoard.new(), current_player: Chess.Color.black()}
+        source_coordinate = {unquote(file), unquote(black_rank)}
 
         assert {:ok, piece} = Pieces.classify(game, source_coordinate)
 
-        assert piece == @coordinate_to_piece_mappings[{<<unquote(file)>>, unquote(black_rank)}]
+        assert piece == @coordinate_to_piece_mappings[{unquote(file), unquote(black_rank)}]
       end
     end
 
     test "returns {:error, :unoccupied} for squares occupied by the player of the other color" do
-      assert {:error, :unoccupied} = Pieces.classify(Game.new(), {"a", 8})
+      game = %{Game.new() | board: BitBoard.new()}
+      assert {:error, :unoccupied} = Pieces.classify(game, {"a", 8})
     end
 
     property "returns {:error, :unoccupied} for blank squares" do
       check all(unoccupied_coordinates <- unoccupied_coordinate_generator()) do
-        assert {:error, :unoccupied} = Pieces.classify(Game.new(), unoccupied_coordinates)
+        game = %{Game.new() | board: BitBoard.new()}
+        assert {:error, :unoccupied} = Pieces.classify(game, unoccupied_coordinates)
       end
     end
   end
 
   def unoccupied_coordinate_generator do
     gen all(
-          file <- StreamData.string(?a..?h, min_length: 1, max_length: 1),
+          file <- StreamData.member_of(?a..?h),
           rank <- StreamData.integer(3..6)
         ) do
-      {file, rank}
+      {<<file>>, rank}
     end
   end
 end
