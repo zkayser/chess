@@ -4,7 +4,7 @@ defmodule Chess.Pieces.Pawn do
   """
   @behaviour Chess.Piece
 
-alias Chess.Board.Coordinates
+  alias Chess.Board.Coordinates
   alias Chess.Boards.BitBoard
   alias Chess.Piece
 
@@ -31,7 +31,7 @@ alias Chess.Board.Coordinates
 
           if pawn_rank == en_passant_rank &&
                (abs(target - (starting_position + 8 * direction_for(color) + 1)) == 0 ||
-                abs(target - (starting_position + 8 * direction_for(color) - 1)) == 0) do
+                  abs(target - (starting_position + 8 * direction_for(color) - 1)) == 0) do
             MapSet.new([target])
           else
             MapSet.new()

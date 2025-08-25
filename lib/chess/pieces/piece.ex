@@ -55,7 +55,8 @@ defmodule Chess.Piece do
   end
 
   @callback potential_moves(t(), Board.index(), Game.t()) :: MapSet.t(Board.index())
-  @callback validate_move(Game.t(), Chess.Moves.Proposals.t()) :: {:ok, Move.t()} | {:error, any()}
+  @callback validate_move(Game.t(), Chess.Moves.Proposals.t()) ::
+              {:ok, Move.t()} | {:error, any()}
 
   @doc """
   Returns a set of squares that a piece could potentially

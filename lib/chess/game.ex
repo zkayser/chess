@@ -48,7 +48,7 @@ defmodule Chess.Game do
 
     # Handle en passant capture
     final_board =
-      if is_en_passant_capture(game, move) do
+      if en_passant_capture?(game, move) do
         captured_pawn_index =
           if game.current_player == :white do
             game.en_passant_target + 8
@@ -72,23 +72,24 @@ defmodule Chess.Game do
     }
   end
 
-  defp is_en_passant_capture(game, %Move{from: from, to: to}) do
-    with {:ok, piece} <- Pieces.classify(game, Coordinates.index_to_coordinates(from)) do
-      piece.type == Chess.Pieces.Pawn && to == game.en_passant_target
-    else
+  defp en_passant_capture?(game, %Move{from: from, to: to}) do
+    case Pieces.classify(game, Coordinates.index_to_coordinates(from)) do
+      {:ok, piece} -> piece.type == Chess.Pieces.Pawn && to == game.en_passant_target
       _ -> false
     end
   end
 
   defp en_passant_target(game, %Move{from: from, to: to}) do
-    with {:ok, piece} <- Pieces.classify(game, from |> Coordinates.index_to_coordinates()) do
-      if piece.type == Chess.Pieces.Pawn && abs(to - from) == 16 do
-        (from + to) |> div(2)
-      else
+    case Pieces.classify(game, from |> Coordinates.index_to_coordinates()) do
+      {:ok, piece} ->
+        if piece.type == Chess.Pieces.Pawn && abs(to - from) == 16 do
+          (from + to) |> div(2)
+        else
+          nil
+        end
+
+      _ ->
         nil
-      end
-    else
-      _ -> nil
     end
   end
 end

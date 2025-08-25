@@ -17,12 +17,27 @@ defmodule Chess.GameTest do
     test "en passant capture removes the captured pawn" do
       # White pawn at c5 (29) captures en passant on d6 (20)
       # The captured black pawn is at d5 (28)
-      white_pawns = BitBoard.from_integer(1 <<< (63-29))
-      black_pawns = BitBoard.from_integer(1 <<< (63-28))
+      white_pawns = BitBoard.from_integer(1 <<< (63 - 29))
+      black_pawns = BitBoard.from_integer(1 <<< (63 - 28))
       empty_board = BitBoard.empty()
+
       board = %BitBoard{
-        white: %{pawns: white_pawns, rooks: empty_board, knights: empty_board, bishops: empty_board, queens: empty_board, king: empty_board},
-        black: %{pawns: black_pawns, rooks: empty_board, knights: empty_board, bishops: empty_board, queens: empty_board, king: empty_board}
+        white: %{
+          pawns: white_pawns,
+          rooks: empty_board,
+          knights: empty_board,
+          bishops: empty_board,
+          queens: empty_board,
+          king: empty_board
+        },
+        black: %{
+          pawns: black_pawns,
+          rooks: empty_board,
+          knights: empty_board,
+          bishops: empty_board,
+          queens: empty_board,
+          king: empty_board
+        }
       }
 
       game = %Game{

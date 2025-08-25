@@ -226,6 +226,7 @@ defmodule Chess.Boards.BitBoard do
 
   defp find_piece_type_at(board, color, coordinates) do
     boards = get_boards_by_color(board, color)
+
     Enum.reduce_while(boards, :error, fn {piece_type, bitboard}, _ ->
       if square_occupied?(bitboard, coordinates) do
         {:halt, {:ok, piece_type}}
@@ -237,14 +238,17 @@ defmodule Chess.Boards.BitBoard do
 
   def remove(board, index, color) do
     coordinates = Coordinates.index_to_coordinates(index)
+
     case find_piece_type_at(board, color, coordinates) do
       {:ok, piece_type} ->
         <<raw_bitboard::integer-size(64)>> = get(board, {color, piece_type})
         mask = 1 <<< (63 - index)
-        new_raw_bitboard = raw_bitboard &&& (bnot(mask))
+        new_raw_bitboard = raw_bitboard &&& bnot(mask)
         new_bitboard = from_integer(new_raw_bitboard)
         put_in(board, [color, piece_type], new_bitboard)
-      _ -> board
+
+      _ ->
+        board
     end
   end
 
@@ -258,12 +262,15 @@ defmodule Chess.Boards.BitBoard do
 
   def update(board, %Move{from: from, to: to}, color) do
     coordinates = Coordinates.index_to_coordinates(from)
+
     case find_piece_type_at(board, color, coordinates) do
       {:ok, piece_type} ->
         board
         |> remove(from, color)
         |> add(to, color, piece_type)
-      _ -> board
+
+      _ ->
+        board
     end
   end
 end
