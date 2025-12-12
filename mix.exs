@@ -41,7 +41,7 @@ defmodule Chess.MixProject do
       {:esbuild, "~> 0.10.0", runtime: Mix.env() == :dev},
       {:ex_doc, "~> 0.38", only: :dev, runtime: false},
       {:floki, "~> 0.38", only: :test},
-      {:gettext, "~> 0.26"},
+      {:gettext, "~> 1.0"},
       {:jason, "~> 1.4"},
       {:nebulex, "~> 2.6"},
       {:oath, "~> 0.1.1", only: [:dev, :test]},
