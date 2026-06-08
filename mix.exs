@@ -43,7 +43,6 @@ defmodule Chess.MixProject do
       {:floki, "~> 0.38", only: :test},
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.4"},
-
       {:oath, "~> 0.1.1", only: [:dev, :test]},
       {:phoenix, "~> 1.8"},
       {:phoenix_ecto, "~> 4.6"},
