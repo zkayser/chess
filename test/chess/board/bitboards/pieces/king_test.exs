@@ -72,6 +72,42 @@ defmodule Chess.BitBoards.Pieces.KingTest do
 
       assert {:error, :self_capture} = King.validate_move(game, proposal)
     end
+
+    test "accepts a capture of an opponent piece" do
+      # Board state: White king on e1, black pawn on f2.
+      # Move: e1 -> f2 (capture pawn)
+      # Expected: {:ok, %Move{from: {"e", 1}, to: {"f", 2}, flag: :captures}}
+      #
+      #     a   b   c   d   e   f   g   h
+      #   +---+---+---+---+---+---+---+---+
+      # 8 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 7 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 6 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 5 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 4 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 3 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 2 |   |   |   |   |   | p |   |   |  <- black pawn (capture target)
+      #   +---+---+---+---+---+---+---+---+
+      # 1 |   |   |   |   | K |   |   |   |  <- white king
+      #   +---+---+---+---+---+---+---+---+
+      game =
+        board_with([
+          {{:white, :king}, {"e", 1}},
+          {{:black, :pawns}, {"f", 2}}
+        ])
+        |> then(&%Game{board: &1})
+
+      proposal = %Proposals{source: {"e", 1}, destination: {"f", 2}}
+
+      assert {:ok, %Move{from: {"e", 1}, to: {"f", 2}, flag: :captures}} =
+               King.validate_move(game, proposal)
+    end
   end
 
   defp game_with_white_king_on(square) do
