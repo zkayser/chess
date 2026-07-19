@@ -1,8 +1,8 @@
 defmodule Chess.BitBoards.Pieces.KingTest do
   use ExUnit.Case, async: true
 
-  alias Chess.BitBoards.Pieces.King
   alias Chess.Bitboards.Move
+  alias Chess.BitBoards.Pieces.King
   alias Chess.Boards.BitBoard
   alias Chess.Boards.Bitboards.Square
   alias Chess.Game
