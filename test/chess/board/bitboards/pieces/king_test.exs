@@ -108,6 +108,35 @@ defmodule Chess.BitBoards.Pieces.KingTest do
       assert {:ok, %Move{from: {"e", 1}, to: {"f", 2}, flag: :captures}} =
                King.validate_move(game, proposal)
     end
+
+    test "rejects a move that is more than one square away" do
+      # Board state: White king on e1.
+      # Move: e1 -> e3 (two squares — not valid king move, not castling)
+      # Expected: {:error, :invalid_geometry}
+      #
+      #     a   b   c   d   e   f   g   h
+      #   +---+---+---+---+---+---+---+---+
+      # 8 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 7 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 6 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 5 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 4 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 3 |   |   |   |   | X |   |   |   |  <- invalid destination
+      #   +---+---+---+---+---+---+---+---+
+      # 2 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 1 |   |   |   |   | K |   |   |   |  <- white king
+      #   +---+---+---+---+---+---+---+---+
+      game = game_with_white_king_on({"e", 1})
+      proposal = %Proposals{source: {"e", 1}, destination: {"e", 3}}
+
+      assert {:error, :invalid_geometry} = King.validate_move(game, proposal)
+    end
   end
 
   defp game_with_white_king_on(square) do
