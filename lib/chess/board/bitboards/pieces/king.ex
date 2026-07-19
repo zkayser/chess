@@ -5,6 +5,8 @@ defmodule Chess.BitBoards.Pieces.King do
 
   @behaviour Chess.Moves.Validator
 
+  import Bitwise
+
   alias Chess.Bitboards.Move
   alias Chess.Boards.BitBoard
   alias Chess.Boards.Bitboards.Square
@@ -24,11 +26,10 @@ defmodule Chess.BitBoards.Pieces.King do
 
   @impl Chess.Moves.Validator
   @spec validate_move(Game.t(), Proposals.t()) :: {:ok, Move.t()} | {:error, atom()}
-  def validate_move(_game, %Proposals{source: source, destination: destination}) do
-    if king_step?(source, destination) do
+  def validate_move(game, %Proposals{source: source, destination: destination}) do
+    with :ok <- validate_geometry(source, destination),
+         :ok <- validate_not_self_capture(game, destination) do
       {:ok, %Move{from: source, to: destination, flag: :quiet}}
-    else
-      {:error, :invalid_geometry}
     end
   end
 
@@ -39,6 +40,25 @@ defmodule Chess.BitBoards.Pieces.King do
   @spec in_check?(BitBoard.t(), Chess.player()) :: boolean()
   def in_check?(_board, _color) do
     false
+  end
+
+  defp validate_geometry(source, destination) do
+    if king_step?(source, destination) do
+      :ok
+    else
+      {:error, :invalid_geometry}
+    end
+  end
+
+  defp validate_not_self_capture(game, destination) do
+    own_pieces = BitBoard.get_raw(game.board, game.current_player)
+    dest_mask = Square.bitboard(destination)
+
+    if (own_pieces &&& dest_mask) != 0 do
+      {:error, :self_capture}
+    else
+      :ok
+    end
   end
 
   defp king_step?(source, destination) do
