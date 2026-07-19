@@ -38,6 +38,36 @@ defmodule Chess.BitBoards.Pieces.KingTest do
                King.validate_move(game, proposal)
     end
 
+    test "accepts a quiet diagonal move" do
+      # Board state: White king on d4, no obstructions.
+      # Move: d4 -> e5 (diagonal NE)
+      # Expected: {:ok, %Move{from: {"d", 4}, to: {"e", 5}, flag: :quiet}}
+      #
+      #     a   b   c   d   e   f   g   h
+      #   +---+---+---+---+---+---+---+---+
+      # 8 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 7 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 6 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 5 |   |   |   |   | * |   |   |   |  <- destination
+      #   +---+---+---+---+---+---+---+---+
+      # 4 |   |   |   | K |   |   |   |   |  <- white king
+      #   +---+---+---+---+---+---+---+---+
+      # 3 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 2 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 1 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      game = game_with_white_king_on({"d", 4})
+      proposal = %Proposals{source: {"d", 4}, destination: {"e", 5}}
+
+      assert {:ok, %Move{from: {"d", 4}, to: {"e", 5}, flag: :quiet}} =
+               King.validate_move(game, proposal)
+    end
+
     test "rejects a move onto a square occupied by an own piece" do
       # Board state: White king on e1, white pawn on e2.
       # Move: e1 -> e2
