@@ -13,17 +13,6 @@ defmodule Chess.BitBoards.Pieces.King do
   alias Chess.Game
   alias Chess.Moves.Proposals
 
-  @king_deltas [
-    {-1, -1},
-    {-1, 0},
-    {-1, 1},
-    {0, -1},
-    {0, 1},
-    {1, -1},
-    {1, 0},
-    {1, 1}
-  ]
-
   @impl Chess.Moves.Validator
   @spec validate_move(Game.t(), Proposals.t()) :: {:ok, Move.t()} | {:error, atom()}
   def validate_move(game, %Proposals{source: source, destination: destination}) do
@@ -76,9 +65,10 @@ defmodule Chess.BitBoards.Pieces.King do
   defp opponent(:white), do: :black
   defp opponent(:black), do: :white
 
-  defp king_step?(source, destination) do
-    Enum.any?(@king_deltas, fn delta ->
-      Square.try_delta(source, delta) == {:ok, destination}
-    end)
+  defp king_step?({<<from_file>>, from_rank}, {<<to_file>>, to_rank}) do
+    file_delta = abs(to_file - from_file)
+    rank_delta = abs(to_rank - from_rank)
+
+    file_delta <= 1 and rank_delta <= 1 and {file_delta, rank_delta} != {0, 0}
   end
 end
