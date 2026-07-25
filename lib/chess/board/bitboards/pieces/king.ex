@@ -7,34 +7,12 @@ defmodule Chess.BitBoards.Pieces.King do
 
   import Bitwise
 
+  alias Chess.Bitboards.Attacks
   alias Chess.Bitboards.Move
-  alias Chess.Bitboards.Slider
   alias Chess.Boards.BitBoard
   alias Chess.Boards.Bitboards.Square
   alias Chess.Game
   alias Chess.Moves.Proposals
-
-  @knight_deltas [
-    {1, 2},
-    {2, 1},
-    {-1, 2},
-    {-2, 1},
-    {1, -2},
-    {2, -1},
-    {-1, -2},
-    {-2, -1}
-  ]
-
-  @king_deltas [
-    {-1, -1},
-    {-1, 0},
-    {-1, 1},
-    {0, -1},
-    {0, 1},
-    {1, -1},
-    {1, 0},
-    {1, 1}
-  ]
 
   @piece_types [:pawns, :rooks, :knights, :bishops, :queens, :king]
 
@@ -56,7 +34,7 @@ defmodule Chess.BitBoards.Pieces.King do
   def in_check?(board, color) do
     case king_square(board, color) do
       nil -> false
-      square -> attacked_by?(board, opponent(color), square)
+      square -> Attacks.square_attacked_by?(board, opponent(color), square)
     end
   end
 
@@ -137,94 +115,6 @@ defmodule Chess.BitBoards.Pieces.King do
   defp trailing_zeros(n, index) when (n &&& 1) == 1, do: index
   defp trailing_zeros(n, index), do: trailing_zeros(n >>> 1, index + 1)
 
-  defp attacked_by?(board, attacker, square) do
-    attacked_by_king?(board, attacker, square) or
-      attacked_by_knight?(board, attacker, square) or
-      attacked_by_pawn?(board, attacker, square) or
-      attacked_by_slider?(board, attacker, square)
-  end
-
-  defp attacked_by_king?(board, attacker, square) do
-    Enum.any?(@king_deltas, fn delta ->
-      case offset_square(square, delta) do
-        {:ok, origin} -> occupied_by_piece?(board, attacker, :king, origin)
-        :error -> false
-      end
-    end)
-  end
-
-  defp attacked_by_knight?(board, attacker, square) do
-    Enum.any?(@knight_deltas, fn delta ->
-      case offset_square(square, delta) do
-        {:ok, origin} -> occupied_by_piece?(board, attacker, :knights, origin)
-        :error -> false
-      end
-    end)
-  end
-
-  defp attacked_by_pawn?(board, attacker, square) do
-    pawn_origins(attacker, square)
-    |> Enum.any?(fn origin -> occupied_by_piece?(board, attacker, :pawns, origin) end)
-  end
-
-  defp pawn_origins(:white, square) do
-    # White pawns attack one rank forward diagonally, so they sit one rank below.
-    for file_delta <- [-1, 1],
-        {:ok, origin} <- [offset_square(square, {file_delta, -1})],
-        do: origin
-  end
-
-  defp pawn_origins(:black, square) do
-    for file_delta <- [-1, 1],
-        {:ok, origin} <- [offset_square(square, {file_delta, 1})],
-        do: origin
-  end
-
-  defp attacked_by_slider?(board, attacker, square) do
-    occupied = BitBoard.get_raw(board, :full)
-
-    Enum.any?(Slider.rook().deltas ++ Slider.bishop().deltas, fn delta ->
-      case first_occupied_along(square, delta, occupied) do
-        nil ->
-          false
-
-        blocker ->
-          sliding_attacker?(board, attacker, blocker, delta)
-      end
-    end)
-  end
-
-  defp first_occupied_along(square, delta, occupied) do
-    case offset_square(square, delta) do
-      :error ->
-        nil
-
-      {:ok, next} ->
-        if (Square.bitboard(next) &&& occupied) != 0 do
-          next
-        else
-          first_occupied_along(next, delta, occupied)
-        end
-    end
-  end
-
-  defp sliding_attacker?(board, attacker, blocker, {file_delta, rank_delta}) do
-    orthogonal? = file_delta == 0 or rank_delta == 0
-
-    if orthogonal? do
-      occupied_by_piece?(board, attacker, :rooks, blocker) or
-        occupied_by_piece?(board, attacker, :queens, blocker)
-    else
-      occupied_by_piece?(board, attacker, :bishops, blocker) or
-        occupied_by_piece?(board, attacker, :queens, blocker)
-    end
-  end
-
-  defp occupied_by_piece?(board, color, piece_type, square) do
-    pieces = BitBoard.get_raw(board, {color, piece_type})
-    (pieces &&& Square.bitboard(square)) != 0
-  end
-
   defp occupied_by?(board, color, square) do
     pieces = BitBoard.get_raw(board, color)
     (pieces &&& Square.bitboard(square)) != 0
@@ -238,15 +128,5 @@ defmodule Chess.BitBoards.Pieces.King do
     rank_delta = abs(to_rank - from_rank)
 
     file_delta <= 1 and rank_delta <= 1 and {file_delta, rank_delta} != {0, 0}
-  end
-
-  defp offset_square({<<file>>, rank}, {file_delta, rank_delta}) do
-    case {<<file + file_delta>>, rank + rank_delta} do
-      {<<new_file>>, new_rank} when new_file in ?a..?h and new_rank in 1..8 ->
-        {:ok, {<<new_file>>, new_rank}}
-
-      _ ->
-        :error
-    end
   end
 end
