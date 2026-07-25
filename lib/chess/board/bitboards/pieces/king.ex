@@ -14,8 +14,6 @@ defmodule Chess.BitBoards.Pieces.King do
   alias Chess.Game
   alias Chess.Moves.Proposals
 
-  @piece_types [:pawns, :rooks, :knights, :bishops, :queens, :king]
-
   @impl Chess.Moves.Validator
   @spec validate_move(Game.t(), Proposals.t()) :: {:ok, Move.t()} | {:error, atom()}
   def validate_move(game, %Proposals{source: source, destination: destination}) do
@@ -55,7 +53,14 @@ defmodule Chess.BitBoards.Pieces.King do
   end
 
   defp validate_king_safety(game, source, destination) do
-    board_after_move = apply_king_move(game.board, game.current_player, source, destination)
+    board_after_move =
+      BitBoard.apply_candidate_move(
+        game.board,
+        game.current_player,
+        :king,
+        source,
+        destination
+      )
 
     if in_check?(board_after_move, game.current_player) do
       {:error, :king_in_check}
@@ -72,29 +77,6 @@ defmodule Chess.BitBoards.Pieces.King do
     else
       :quiet
     end
-  end
-
-  defp apply_king_move(board, color, from, to) do
-    from_mask = Square.bitboard(from)
-    to_mask = Square.bitboard(to)
-    opponent = opponent(color)
-
-    board
-    |> clear_square(opponent, to_mask)
-    |> move_piece(color, :king, from_mask, to_mask)
-  end
-
-  defp clear_square(board, color, square_mask) do
-    Enum.reduce(@piece_types, board, fn piece_type, acc ->
-      <<pieces::integer-size(64)>> = acc[{color, piece_type}]
-      put_in(acc[{color, piece_type}], BitBoard.from_integer(pieces &&& bnot(square_mask)))
-    end)
-  end
-
-  defp move_piece(board, color, piece_type, from_mask, to_mask) do
-    <<pieces::integer-size(64)>> = board[{color, piece_type}]
-    updated = (pieces &&& bnot(from_mask)) ||| to_mask
-    put_in(board[{color, piece_type}], BitBoard.from_integer(updated))
   end
 
   defp king_square(board, color) do
