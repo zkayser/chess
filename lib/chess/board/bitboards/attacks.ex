@@ -70,35 +70,35 @@ defmodule Chess.Bitboards.Attacks do
   # King attacks from a single-bit square (identical to reverse king attackers).
   defp king_attacks(bit) do
     # NW (toward a, up), N, NE (toward h, up), W, E, SW, S, SE
-    ((bit &&& @file_a_mask &&& @not_rank_8) <<< 9) |||
-      ((bit &&& @not_rank_8) <<< 8) |||
-      ((bit &&& @file_h_mask &&& @not_rank_8) <<< 7) |||
-      ((bit &&& @file_a_mask) <<< 1) |||
-      ((bit &&& @file_h_mask) >>> 1) |||
-      ((bit &&& @file_a_mask &&& @not_rank_1) >>> 7) |||
-      ((bit &&& @not_rank_1) >>> 8) |||
-      ((bit &&& @file_h_mask &&& @not_rank_1) >>> 9)
+    (bit &&& @file_a_mask &&& @not_rank_8) <<< 9 |||
+      (bit &&& @not_rank_8) <<< 8 |||
+      (bit &&& @file_h_mask &&& @not_rank_8) <<< 7 |||
+      (bit &&& @file_a_mask) <<< 1 |||
+      (bit &&& @file_h_mask) >>> 1 |||
+      (bit &&& @file_a_mask &&& @not_rank_1) >>> 7 |||
+      (bit &&& @not_rank_1) >>> 8 |||
+      (bit &&& @file_h_mask &&& @not_rank_1) >>> 9
   end
 
   defp knight_attacks(bit) do
-    ((bit &&& @file_a_mask &&& @not_rank_78) <<< 17) |||
-      ((bit &&& @file_h_mask &&& @not_rank_78) <<< 15) |||
-      ((bit &&& @file_ab_mask &&& @not_rank_8) <<< 10) |||
-      ((bit &&& @file_gh_mask &&& @not_rank_8) <<< 6) |||
-      ((bit &&& @file_ab_mask &&& @not_rank_1) >>> 6) |||
-      ((bit &&& @file_gh_mask &&& @not_rank_1) >>> 10) |||
-      ((bit &&& @file_a_mask &&& @not_rank_12) >>> 15) |||
-      ((bit &&& @file_h_mask &&& @not_rank_12) >>> 17)
+    (bit &&& @file_a_mask &&& @not_rank_78) <<< 17 |||
+      (bit &&& @file_h_mask &&& @not_rank_78) <<< 15 |||
+      (bit &&& @file_ab_mask &&& @not_rank_8) <<< 10 |||
+      (bit &&& @file_gh_mask &&& @not_rank_8) <<< 6 |||
+      (bit &&& @file_ab_mask &&& @not_rank_1) >>> 6 |||
+      (bit &&& @file_gh_mask &&& @not_rank_1) >>> 10 |||
+      (bit &&& @file_a_mask &&& @not_rank_12) >>> 15 |||
+      (bit &&& @file_h_mask &&& @not_rank_12) >>> 17
   end
 
   # Squares from which a pawn of `attacker` color attacks `target`.
   # White pawns attack via <<<7 / <<<9; black via >>>7 / >>>9 (see Pawn).
   defp pawn_attackers(:white, target) do
-    ((target &&& @file_a_mask) >>> 7) ||| ((target &&& @file_h_mask) >>> 9)
+    (target &&& @file_a_mask) >>> 7 ||| (target &&& @file_h_mask) >>> 9
   end
 
   defp pawn_attackers(:black, target) do
-    ((target &&& @file_a_mask) <<< 9) ||| ((target &&& @file_h_mask) <<< 7)
+    (target &&& @file_a_mask) <<< 9 ||| (target &&& @file_h_mask) <<< 7
   end
 
   defp rook_attacks(bit, occupied) do
