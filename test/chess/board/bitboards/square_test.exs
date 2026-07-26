@@ -51,4 +51,27 @@ defmodule Chess.Boards.Bitboards.SquareTest do
       end
     end
   end
+
+  describe "from_bitboard/1" do
+    test "returns nil when no bits are set" do
+      assert Square.from_bitboard(0) == nil
+    end
+
+    squares =
+      for rank <- 1..8, file <- ?h..?a//-1 do
+        {<<file>>, rank}
+      end
+
+    for {square, index} <- Enum.with_index(squares) do
+      test "round-trips #{inspect(square)} through bitboard/1" do
+        assert Square.from_bitboard(1 <<< unquote(index)) == unquote(square)
+        assert Square.from_bitboard(Square.bitboard(unquote(square))) == unquote(square)
+      end
+    end
+
+    test "returns the least-significant set bit when multiple bits are set" do
+      assert Square.from_bitboard(Square.bitboard({"h", 1}) ||| Square.bitboard({"a", 8})) ==
+               {"h", 1}
+    end
+  end
 end

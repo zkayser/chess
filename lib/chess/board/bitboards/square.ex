@@ -39,4 +39,24 @@ defmodule Chess.Boards.Bitboards.Square do
 
     1 <<< (rank_offset + file_index)
   end
+
+  @doc """
+  Converts a single-bit bitboard integer to a square coordinate.
+
+  Returns `nil` when no bits are set. When multiple bits are set, returns
+  the square corresponding to the least-significant set bit.
+  """
+  @spec from_bitboard(integer()) :: t() | nil
+  def from_bitboard(0), do: nil
+
+  def from_bitboard(bits) when is_integer(bits) and bits > 0 do
+    bit_index = trailing_zeros(bits)
+    rank = div(bit_index, 8) + 1
+    file = Enum.at(~w(h g f e d c b a), rem(bit_index, 8))
+    {file, rank}
+  end
+
+  defp trailing_zeros(n), do: trailing_zeros(n, 0)
+  defp trailing_zeros(n, index) when (n &&& 1) == 1, do: index
+  defp trailing_zeros(n, index), do: trailing_zeros(n >>> 1, index + 1)
 end
