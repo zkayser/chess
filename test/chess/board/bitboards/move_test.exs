@@ -3,6 +3,9 @@ defmodule Chess.Bitboards.MoveTest do
   use ExUnitProperties
 
   alias Chess.Bitboards.Move
+  alias Chess.Boards.BitBoard
+  alias Chess.Boards.Bitboards.Square
+  alias Chess.Game
 
   describe "flags/0" do
     test "returns the list of all possible move flags" do
@@ -31,6 +34,46 @@ defmodule Chess.Bitboards.MoveTest do
 
              #{inspect(Move.flags())}
              """
+    end
+  end
+
+  describe "make/3" do
+    test "builds a quiet move when the destination is empty" do
+      game = game_with([{{:white, :king}, {"e", 1}}])
+
+      assert %Move{from: {"e", 1}, to: {"e", 2}, flag: :quiet} =
+               Move.make(game, {"e", 1}, {"e", 2})
+    end
+
+    test "builds a capture when the destination has an opponent piece" do
+      game =
+        game_with([
+          {{:white, :king}, {"e", 1}},
+          {{:black, :pawns}, {"f", 2}}
+        ])
+
+      assert %Move{from: {"e", 1}, to: {"f", 2}, flag: :captures} =
+               Move.make(game, {"e", 1}, {"f", 2})
+    end
+
+    test "builds a quiet move when the destination has a friendly piece" do
+      game =
+        game_with([
+          {{:white, :king}, {"e", 1}},
+          {{:white, :pawns}, {"e", 2}}
+        ])
+
+      assert %Move{from: {"e", 1}, to: {"e", 2}, flag: :quiet} =
+               Move.make(game, {"e", 1}, {"e", 2})
+    end
+  end
+
+  describe "make/4" do
+    test "uses the explicit flag" do
+      game = game_with([{{:white, :king}, {"e", 1}}])
+
+      assert %Move{from: {"e", 1}, to: {"g", 1}, flag: :king_castle} =
+               Move.make(game, {"e", 1}, {"g", 1}, :king_castle)
     end
   end
 
@@ -74,5 +117,27 @@ defmodule Chess.Bitboards.MoveTest do
         flag: flag
       }
     end
+  end
+
+  defp game_with(pieces) do
+    %Game{board: board_with(pieces)}
+  end
+
+  defp board_with(pieces) do
+    empty = BitBoard.empty()
+
+    empty_pieces = %{
+      pawns: empty,
+      rooks: empty,
+      knights: empty,
+      bishops: empty,
+      queens: empty,
+      king: empty
+    }
+
+    Enum.reduce(pieces, %BitBoard{white: empty_pieces, black: empty_pieces}, fn
+      {{color, piece_type}, square}, board ->
+        put_in(board[{color, piece_type}], BitBoard.from_integer(Square.bitboard(square)))
+    end)
   end
 end

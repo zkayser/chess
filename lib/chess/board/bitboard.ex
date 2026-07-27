@@ -10,7 +10,6 @@ defmodule Chess.Boards.BitBoard do
   import Bitwise
 
   alias Chess.Board.Coordinates
-  alias Chess.Boards.Bitboards.Square
   alias Chess.Color
 
   @behaviour Access
@@ -176,30 +175,14 @@ defmodule Chess.Boards.BitBoard do
   Moves a piece of `piece_type` for `color` from `from_mask` to `to_mask`.
 
   Does not remove opponent pieces on the destination square; use
-  `apply_candidate_move/5` (or `clear_square/3` first) when simulating captures.
+  `Chess.Game.apply_candidate_move/4` (or `clear_square/3` first) when
+  simulating captures.
   """
   @spec move_piece(t(), Color.t(), piece_keys(), integer(), integer()) :: t()
   def move_piece(board, color, piece_type, from_mask, to_mask) do
     <<pieces::integer-size(64)>> = board[{color, piece_type}]
     updated = (pieces &&& bnot(from_mask)) ||| to_mask
     put_in(board[{color, piece_type}], from_integer(updated))
-  end
-
-  @doc """
-  Applies a candidate move for validation / king-safety simulation.
-
-  Clears any opponent piece on the destination square, then moves the given
-  piece from `from` to `to`. Does not update game metadata (move list, side to
-  move, castling rights, en passant, etc.).
-  """
-  @spec apply_candidate_move(t(), Color.t(), piece_keys(), Square.t(), Square.t()) :: t()
-  def apply_candidate_move(board, color, piece_type, from, to) do
-    from_mask = Square.bitboard(from)
-    to_mask = Square.bitboard(to)
-
-    board
-    |> clear_square(opponent(color), to_mask)
-    |> move_piece(color, piece_type, from_mask, to_mask)
   end
 
   @doc """
@@ -266,7 +249,4 @@ defmodule Chess.Boards.BitBoard do
       false -> board
     end
   end
-
-  defp opponent(:white), do: :black
-  defp opponent(:black), do: :white
 end

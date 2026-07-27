@@ -41,6 +41,9 @@ defmodule Chess.Bitboards.Move do
   """
   import Bitwise
 
+  alias Chess.Boards.BitBoard
+  alias Chess.Game
+
   defstruct [:from, :to, :flag]
 
   @flag_codes %{
@@ -116,6 +119,27 @@ defmodule Chess.Bitboards.Move do
 
   @spec flags() :: list(flag())
   def flags, do: Map.keys(@flag_codes)
+
+  @doc """
+  Builds a move from `from` to `to` for the side to move in `game`.
+
+  Sets the flag to `:captures` when the destination is occupied by the
+  opponent, otherwise `:quiet`. Piece-specific flags (castling, double
+  pawn push, promotions, en passant) should be supplied by the piece
+  module via `make/4`.
+  """
+  @spec make(Game.t(), coordinate(), coordinate()) :: t()
+  def make(%Game{} = game, from, to) do
+    make(game, from, to, quiet_or_capture(game, to))
+  end
+
+  @doc """
+  Builds a move with an explicit `flag`.
+  """
+  @spec make(Game.t(), coordinate(), coordinate(), flag()) :: t()
+  def make(%Game{}, from, to, flag) do
+    %__MODULE__{from: from, to: to, flag: flag}
+  end
 
   @file_to_value ?a..?h |> Enum.with_index() |> Map.new(fn {k, v} -> {<<k>>, v} end)
   @value_to_file Map.new(@file_to_value, fn {file, value} -> {value, file} end)
@@ -198,6 +222,14 @@ defmodule Chess.Bitboards.Move do
     case Map.get(@code_to_flag, (encoded &&& @flag_mask) >>> @flags_starting_bit) do
       nil -> :error
       flag -> {:ok, flag}
+    end
+  end
+
+  defp quiet_or_capture(%Game{} = game, destination) do
+    if BitBoard.square_occupied?(BitBoard.get(game.board, Game.opponent(game)), destination) do
+      :captures
+    else
+      :quiet
     end
   end
 end

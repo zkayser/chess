@@ -1,11 +1,13 @@
 defmodule Chess.BitBoards.Pieces.King do
   @moduledoc """
-  Functions for generating and validating king moves on a bitboard.
+  King move validation (`Chess.Moves.Validator`).
+
+  Orchestrates geometry, self-capture, and king-safety checks. Attack
+  detection lives in `Chess.Bitboards.Attacks`; candidate-move simulation
+  lives on `Chess.Boards.BitBoard`. Castling is reserved for a follow-up.
   """
 
   @behaviour Chess.Moves.Validator
-
-  import Bitwise
 
   alias Chess.Bitboards.Attacks
   alias Chess.Bitboards.Move
@@ -20,19 +22,18 @@ defmodule Chess.BitBoards.Pieces.King do
     with :ok <- validate_geometry(source, destination),
          :ok <- validate_not_self_capture(game, destination),
          :ok <- validate_king_safety(game, source, destination) do
-      {:ok, %Move{from: source, to: destination, flag: move_flag(game, destination)}}
+      {:ok, Move.make(game, source, destination)}
     end
   end
 
   @doc """
-  Returns true if the king of the given color is under attack
-  in the given board position.
+  Returns true if the side to move's king is under attack in `game`.
   """
-  @spec in_check?(BitBoard.t(), Chess.player()) :: boolean()
-  def in_check?(board, color) do
-    case king_square(board, color) do
+  @spec in_check?(Game.t()) :: boolean()
+  def in_check?(%Game{} = game) do
+    case king_square(game.board, game.current_player) do
       nil -> false
-      square -> Attacks.square_attacked_by?(board, opponent(color), square)
+      square -> Attacks.square_attacked_by?(game.board, Game.opponent(game), square)
     end
   end
 
@@ -53,57 +54,24 @@ defmodule Chess.BitBoards.Pieces.King do
   end
 
   defp validate_king_safety(game, source, destination) do
-    board_after_move =
-      BitBoard.apply_candidate_move(
-        game.board,
-        game.current_player,
-        :king,
-        source,
-        destination
-      )
-
-    if in_check?(board_after_move, game.current_player) do
+    if game |> Game.apply_candidate_move(:king, source, destination) |> in_check?() do
       {:error, :king_in_check}
     else
       :ok
     end
   end
 
-  defp move_flag(game, destination) do
-    opponent = opponent(game.current_player)
-
-    if occupied_by?(game.board, opponent, destination) do
-      :captures
-    else
-      :quiet
-    end
-  end
-
   defp king_square(board, color) do
-    case BitBoard.get_raw(board, {color, :king}) do
-      0 -> nil
-      king_bits -> bit_to_square(king_bits)
-    end
+    board
+    |> BitBoard.get_raw({color, :king})
+    |> Square.from_bitboard()
   end
-
-  defp bit_to_square(bits) do
-    bit_index = trailing_zeros(bits)
-    rank = div(bit_index, 8) + 1
-    file = Enum.at(~w(h g f e d c b a), rem(bit_index, 8))
-    {file, rank}
-  end
-
-  defp trailing_zeros(n), do: trailing_zeros(n, 0)
-  defp trailing_zeros(n, index) when (n &&& 1) == 1, do: index
-  defp trailing_zeros(n, index), do: trailing_zeros(n >>> 1, index + 1)
 
   defp occupied_by?(board, color, square) do
-    pieces = BitBoard.get_raw(board, color)
-    (pieces &&& Square.bitboard(square)) != 0
+    board
+    |> BitBoard.get(color)
+    |> BitBoard.square_occupied?(square)
   end
-
-  defp opponent(:white), do: :black
-  defp opponent(:black), do: :white
 
   defp king_step?({<<from_file>>, from_rank}, {<<to_file>>, to_rank}) do
     file_delta = abs(to_file - from_file)
