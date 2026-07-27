@@ -198,7 +198,7 @@ defmodule Chess.Boards.BitBoard do
     to_mask = Square.bitboard(to)
 
     board
-    |> clear_square(opponent(color), to_mask)
+    |> clear_square(Color.opponent(color), to_mask)
     |> move_piece(color, piece_type, from_mask, to_mask)
   end
 
@@ -266,7 +266,4 @@ defmodule Chess.Boards.BitBoard do
       false -> board
     end
   end
-
-  defp opponent(:white), do: :black
-  defp opponent(:black), do: :white
 end

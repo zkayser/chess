@@ -22,6 +22,13 @@ defmodule Chess.Game do
   """
   def new, do: %__MODULE__{}
 
+  @doc """
+  Returns the opposing side to the game's current player.
+  """
+  @spec opponent(t()) :: Chess.player()
+  def opponent(%__MODULE__{current_player: :white}), do: :black
+  def opponent(%__MODULE__{current_player: :black}), do: :white
+
   ##########################################
   # Tentative interface for game play here #
   # Let's start implementing the Proposals #

@@ -42,6 +42,7 @@ defmodule Chess.Bitboards.Move do
   import Bitwise
 
   alias Chess.Boards.BitBoard
+  alias Chess.Game
 
   defstruct [:from, :to, :flag]
 
@@ -120,22 +121,24 @@ defmodule Chess.Bitboards.Move do
   def flags, do: Map.keys(@flag_codes)
 
   @doc """
-  Returns `:captures` when `destination` is occupied by an opponent of `color`,
-  otherwise `:quiet`.
+  Builds a move from `from` to `to` for the side to move in `game`.
 
-  Shared by piece validators for ordinary non-special moves. Piece-specific
-  flags (castling, double pawn push, promotions, en passant) should be chosen
-  by the piece module before falling back to this helper.
+  Sets the flag to `:captures` when the destination is occupied by the
+  opponent, otherwise `:quiet`. Piece-specific flags (castling, double
+  pawn push, promotions, en passant) should be supplied by the piece
+  module via `make/4`.
   """
-  @spec quiet_or_capture(BitBoard.t(), Chess.player(), coordinate()) :: :quiet | :captures
-  def quiet_or_capture(board, color, destination) do
-    opponent = opponent(color)
+  @spec make(Game.t(), coordinate(), coordinate()) :: t()
+  def make(%Game{} = game, from, to) do
+    make(game, from, to, quiet_or_capture(game, to))
+  end
 
-    if BitBoard.square_occupied?(BitBoard.get(board, opponent), destination) do
-      :captures
-    else
-      :quiet
-    end
+  @doc """
+  Builds a move with an explicit `flag`.
+  """
+  @spec make(Game.t(), coordinate(), coordinate(), flag()) :: t()
+  def make(%Game{}, from, to, flag) do
+    %__MODULE__{from: from, to: to, flag: flag}
   end
 
   @file_to_value ?a..?h |> Enum.with_index() |> Map.new(fn {k, v} -> {<<k>>, v} end)
@@ -222,6 +225,11 @@ defmodule Chess.Bitboards.Move do
     end
   end
 
-  defp opponent(:white), do: :black
-  defp opponent(:black), do: :white
+  defp quiet_or_capture(%Game{} = game, destination) do
+    if BitBoard.square_occupied?(BitBoard.get(game.board, Game.opponent(game)), destination) do
+      :captures
+    else
+      :quiet
+    end
+  end
 end

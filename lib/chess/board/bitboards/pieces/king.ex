@@ -13,6 +13,7 @@ defmodule Chess.BitBoards.Pieces.King do
   alias Chess.Bitboards.Move
   alias Chess.Boards.BitBoard
   alias Chess.Boards.Bitboards.Square
+  alias Chess.Color
   alias Chess.Game
   alias Chess.Moves.Proposals
 
@@ -22,8 +23,7 @@ defmodule Chess.BitBoards.Pieces.King do
     with :ok <- validate_geometry(source, destination),
          :ok <- validate_not_self_capture(game, destination),
          :ok <- validate_king_safety(game, source, destination) do
-      flag = Move.quiet_or_capture(game.board, game.current_player, destination)
-      {:ok, %Move{from: source, to: destination, flag: flag}}
+      {:ok, Move.make(game, source, destination)}
     end
   end
 
@@ -35,7 +35,7 @@ defmodule Chess.BitBoards.Pieces.King do
   def in_check?(board, color) do
     case king_square(board, color) do
       nil -> false
-      square -> Attacks.square_attacked_by?(board, opponent(color), square)
+      square -> Attacks.square_attacked_by?(board, Color.opponent(color), square)
     end
   end
 
@@ -83,9 +83,6 @@ defmodule Chess.BitBoards.Pieces.King do
     |> BitBoard.get(color)
     |> BitBoard.square_occupied?(square)
   end
-
-  defp opponent(:white), do: :black
-  defp opponent(:black), do: :white
 
   defp king_step?({<<from_file>>, from_rank}, {<<to_file>>, to_rank}) do
     file_delta = abs(to_file - from_file)

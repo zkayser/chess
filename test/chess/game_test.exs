@@ -11,4 +11,14 @@ defmodule Chess.GameTest do
                Game.new()
     end
   end
+
+  describe "opponent/1" do
+    test "returns black when white is to move" do
+      assert Game.opponent(%Game{current_player: :white}) == :black
+    end
+
+    test "returns white when black is to move" do
+      assert Game.opponent(%Game{current_player: :black}) == :white
+    end
+  end
 end
