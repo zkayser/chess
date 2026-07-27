@@ -234,77 +234,81 @@ defmodule Chess.BitBoards.Pieces.KingTest do
     end
   end
 
-  describe "in_check?/2" do
+  describe "in_check?/1" do
     test "returns false when the king is not under attack" do
-      board = board_with([{{:white, :king}, {"e", 1}}])
+      game = game_with([{{:white, :king}, {"e", 1}}])
 
-      refute King.in_check?(board, :white)
+      refute King.in_check?(game)
     end
 
     test "returns true when an opponent rook attacks the king" do
-      board =
-        board_with([
+      game =
+        game_with([
           {{:white, :king}, {"e", 1}},
           {{:black, :rooks}, {"e", 8}}
         ])
 
-      assert King.in_check?(board, :white)
+      assert King.in_check?(game)
     end
 
     test "returns false when a friendly piece blocks an opponent rook" do
-      board =
-        board_with([
+      game =
+        game_with([
           {{:white, :king}, {"e", 1}},
           {{:white, :pawns}, {"e", 2}},
           {{:black, :rooks}, {"e", 8}}
         ])
 
-      refute King.in_check?(board, :white)
+      refute King.in_check?(game)
     end
 
     test "returns true when an opponent bishop attacks the king diagonally" do
-      board =
-        board_with([
+      game =
+        game_with([
           {{:white, :king}, {"e", 1}},
           {{:black, :bishops}, {"b", 4}}
         ])
 
-      assert King.in_check?(board, :white)
+      assert King.in_check?(game)
     end
 
     test "returns true when an opponent knight attacks the king" do
-      board =
-        board_with([
+      game =
+        game_with([
           {{:white, :king}, {"e", 4}},
           {{:black, :knights}, {"d", 6}}
         ])
 
-      assert King.in_check?(board, :white)
+      assert King.in_check?(game)
     end
 
     test "returns true when an opponent pawn attacks the king" do
-      board =
-        board_with([
+      game =
+        game_with([
           {{:white, :king}, {"e", 4}},
           {{:black, :pawns}, {"d", 5}}
         ])
 
-      assert King.in_check?(board, :white)
+      assert King.in_check?(game)
     end
 
     test "returns true when an opponent king is adjacent" do
-      board =
-        board_with([
+      game =
+        game_with([
           {{:white, :king}, {"e", 4}},
           {{:black, :king}, {"e", 5}}
         ])
 
-      assert King.in_check?(board, :white)
+      assert King.in_check?(game)
     end
   end
 
   defp game_with_white_king_on(square) do
-    %Game{board: board_with([{{:white, :king}, square}])}
+    game_with([{{:white, :king}, square}])
+  end
+
+  defp game_with(pieces) do
+    %Game{board: board_with(pieces)}
   end
 
   defp board_with(pieces) do

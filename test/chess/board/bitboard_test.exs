@@ -385,43 +385,6 @@ defmodule Chess.Boards.BitBoardTest do
     end
   end
 
-  describe "apply_candidate_move/5" do
-    test "moves a piece onto an empty square" do
-      board = board_with([{{:white, :king}, {"e", 1}}])
-
-      after_move = BitBoard.apply_candidate_move(board, :white, :king, {"e", 1}, {"e", 2})
-
-      assert BitBoard.get_raw(after_move, {:white, :king}) == Square.bitboard({"e", 2})
-    end
-
-    test "captures an opponent piece on the destination square" do
-      board =
-        board_with([
-          {{:white, :king}, {"e", 1}},
-          {{:black, :pawns}, {"f", 2}}
-        ])
-
-      after_move = BitBoard.apply_candidate_move(board, :white, :king, {"e", 1}, {"f", 2})
-
-      assert BitBoard.get_raw(after_move, {:white, :king}) == Square.bitboard({"f", 2})
-      assert BitBoard.get_raw(after_move, {:black, :pawns}) == 0
-    end
-
-    test "does not clear friendly pieces from unrelated squares" do
-      board =
-        board_with([
-          {{:white, :king}, {"e", 1}},
-          {{:white, :pawns}, {"a", 2}},
-          {{:black, :rooks}, {"h", 8}}
-        ])
-
-      after_move = BitBoard.apply_candidate_move(board, :white, :king, {"e", 1}, {"d", 1})
-
-      assert BitBoard.get_raw(after_move, {:white, :pawns}) == Square.bitboard({"a", 2})
-      assert BitBoard.get_raw(after_move, {:black, :rooks}) == Square.bitboard({"h", 8})
-    end
-  end
-
   describe "Access Behaviour" do
     test "fetch/2 accepts a valid {color, piece_type} tuple and returns {:ok, piece_bitboard}" do
       bitboard = BitBoard.new()

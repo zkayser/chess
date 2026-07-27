@@ -13,7 +13,6 @@ defmodule Chess.BitBoards.Pieces.King do
   alias Chess.Bitboards.Move
   alias Chess.Boards.BitBoard
   alias Chess.Boards.Bitboards.Square
-  alias Chess.Color
   alias Chess.Game
   alias Chess.Moves.Proposals
 
@@ -28,14 +27,13 @@ defmodule Chess.BitBoards.Pieces.King do
   end
 
   @doc """
-  Returns true if the king of the given color is under attack
-  in the given board position.
+  Returns true if the side to move's king is under attack in `game`.
   """
-  @spec in_check?(BitBoard.t(), Chess.player()) :: boolean()
-  def in_check?(board, color) do
-    case king_square(board, color) do
+  @spec in_check?(Game.t()) :: boolean()
+  def in_check?(%Game{} = game) do
+    case king_square(game.board, game.current_player) do
       nil -> false
-      square -> Attacks.square_attacked_by?(board, Color.opponent(color), square)
+      square -> Attacks.square_attacked_by?(game.board, Game.opponent(game), square)
     end
   end
 
@@ -56,16 +54,7 @@ defmodule Chess.BitBoards.Pieces.King do
   end
 
   defp validate_king_safety(game, source, destination) do
-    board_after_move =
-      BitBoard.apply_candidate_move(
-        game.board,
-        game.current_player,
-        :king,
-        source,
-        destination
-      )
-
-    if in_check?(board_after_move, game.current_player) do
+    if game |> Game.apply_candidate_move(:king, source, destination) |> in_check?() do
       {:error, :king_in_check}
     else
       :ok

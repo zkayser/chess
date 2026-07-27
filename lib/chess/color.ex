@@ -8,11 +8,4 @@ defmodule Chess.Color do
 
   def white, do: :white
   def black, do: :black
-
-  @doc """
-  Returns the opposing color.
-  """
-  @spec opponent(t()) :: t()
-  def opponent(:white), do: :black
-  def opponent(:black), do: :white
 end
