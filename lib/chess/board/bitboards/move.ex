@@ -41,6 +41,8 @@ defmodule Chess.Bitboards.Move do
   """
   import Bitwise
 
+  alias Chess.Boards.BitBoard
+
   defstruct [:from, :to, :flag]
 
   @flag_codes %{
@@ -116,6 +118,25 @@ defmodule Chess.Bitboards.Move do
 
   @spec flags() :: list(flag())
   def flags, do: Map.keys(@flag_codes)
+
+  @doc """
+  Returns `:captures` when `destination` is occupied by an opponent of `color`,
+  otherwise `:quiet`.
+
+  Shared by piece validators for ordinary non-special moves. Piece-specific
+  flags (castling, double pawn push, promotions, en passant) should be chosen
+  by the piece module before falling back to this helper.
+  """
+  @spec quiet_or_capture(BitBoard.t(), Chess.player(), coordinate()) :: :quiet | :captures
+  def quiet_or_capture(board, color, destination) do
+    opponent = opponent(color)
+
+    if BitBoard.square_occupied?(BitBoard.get(board, opponent), destination) do
+      :captures
+    else
+      :quiet
+    end
+  end
 
   @file_to_value ?a..?h |> Enum.with_index() |> Map.new(fn {k, v} -> {<<k>>, v} end)
   @value_to_file Map.new(@file_to_value, fn {file, value} -> {value, file} end)
@@ -200,4 +221,7 @@ defmodule Chess.Bitboards.Move do
       flag -> {:ok, flag}
     end
   end
+
+  defp opponent(:white), do: :black
+  defp opponent(:black), do: :white
 end

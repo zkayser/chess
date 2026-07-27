@@ -3,6 +3,8 @@ defmodule Chess.Bitboards.MoveTest do
   use ExUnitProperties
 
   alias Chess.Bitboards.Move
+  alias Chess.Boards.BitBoard
+  alias Chess.Boards.Bitboards.Square
 
   describe "flags/0" do
     test "returns the list of all possible move flags" do
@@ -31,6 +33,34 @@ defmodule Chess.Bitboards.MoveTest do
 
              #{inspect(Move.flags())}
              """
+    end
+  end
+
+  describe "quiet_or_capture/3" do
+    test "returns :quiet when the destination is empty" do
+      board = board_with([{{:white, :king}, {"e", 1}}])
+
+      assert Move.quiet_or_capture(board, :white, {"e", 2}) == :quiet
+    end
+
+    test "returns :captures when the destination has an opponent piece" do
+      board =
+        board_with([
+          {{:white, :king}, {"e", 1}},
+          {{:black, :pawns}, {"f", 2}}
+        ])
+
+      assert Move.quiet_or_capture(board, :white, {"f", 2}) == :captures
+    end
+
+    test "returns :quiet when the destination has a friendly piece" do
+      board =
+        board_with([
+          {{:white, :king}, {"e", 1}},
+          {{:white, :pawns}, {"e", 2}}
+        ])
+
+      assert Move.quiet_or_capture(board, :white, {"e", 2}) == :quiet
     end
   end
 
@@ -74,5 +104,23 @@ defmodule Chess.Bitboards.MoveTest do
         flag: flag
       }
     end
+  end
+
+  defp board_with(pieces) do
+    empty = BitBoard.empty()
+
+    empty_pieces = %{
+      pawns: empty,
+      rooks: empty,
+      knights: empty,
+      bishops: empty,
+      queens: empty,
+      king: empty
+    }
+
+    Enum.reduce(pieces, %BitBoard{white: empty_pieces, black: empty_pieces}, fn
+      {{color, piece_type}, square}, board ->
+        put_in(board[{color, piece_type}], BitBoard.from_integer(Square.bitboard(square)))
+    end)
   end
 end

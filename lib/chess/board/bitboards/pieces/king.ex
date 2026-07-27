@@ -22,7 +22,8 @@ defmodule Chess.BitBoards.Pieces.King do
     with :ok <- validate_geometry(source, destination),
          :ok <- validate_not_self_capture(game, destination),
          :ok <- validate_king_safety(game, source, destination) do
-      {:ok, %Move{from: source, to: destination, flag: move_flag(game, destination)}}
+      flag = Move.quiet_or_capture(game.board, game.current_player, destination)
+      {:ok, %Move{from: source, to: destination, flag: flag}}
     end
   end
 
@@ -68,16 +69,6 @@ defmodule Chess.BitBoards.Pieces.King do
       {:error, :king_in_check}
     else
       :ok
-    end
-  end
-
-  defp move_flag(game, destination) do
-    opponent = opponent(game.current_player)
-
-    if occupied_by?(game.board, opponent, destination) do
-      :captures
-    else
-      :quiet
     end
   end
 
