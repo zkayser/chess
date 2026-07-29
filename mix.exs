@@ -42,7 +42,6 @@ defmodule Chess.MixProject do
       {:ex_doc, "~> 0.38", only: :dev, runtime: false},
       {:floki, "~> 0.38", only: :test},
       {:gettext, "~> 1.0"},
-      {:jason, "~> 1.4"},
       {:oath, "~> 0.1.1", only: [:dev, :test]},
       {:phoenix, "~> 1.8"},
       {:phoenix_ecto, "~> 4.6"},

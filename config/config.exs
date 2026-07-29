@@ -27,7 +27,9 @@ config :chess, ChessWeb.Endpoint,
 config :chess, Chess.Mailer, adapter: Swoosh.Adapters.Local
 
 # Swoosh API client is needed for adapters other than SMTP.
-config :swoosh, :api_client, false
+config :swoosh,
+  api_client: false,
+  json_library: JSON
 
 # Configure esbuild (the version is required)
 config :esbuild,
@@ -44,8 +46,9 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
-# Use Jason for JSON parsing in Phoenix
-config :phoenix, :json_library, Jason
+# Use Elixir's built-in JSON module (Jason remains only as a transitive dep
+# for tools that hard-require it, e.g. credo, esbuild, sobelow, swoosh).
+config :phoenix, :json_library, JSON
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
