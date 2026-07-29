@@ -12,7 +12,7 @@ Knight, Bishop, Rook, Queen, and King are stubs. This is expected.
 
 ## Toolchain
 
-- Elixir 1.18.4 / OTP 28 (pinned in `.tool-versions`)
+- Elixir 1.20.2 / OTP 28 (pinned in `.tool-versions`)
 - Phoenix ~> 1.8 with LiveView ~> 1.1
 - PostgreSQL (Postgrex + Ecto)
 - `stream_data` for property-based testing (available in all envs)
@@ -101,6 +101,6 @@ LiveDashboard at `/dashboard` (dev/test only).
 
 ## Devcontainer
 
-- `.devcontainer/` has docker-compose with `elixir:1.18.4-otp-28` + `postgres:17.6`
+- `.devcontainer/` has docker-compose with `elixir:1.20.2-otp-28` + `postgres:17.6`
 - `./run` script: `sudo docker compose -f .devcontainer/docker-compose.yml exec app "$@"`
 - `DATABASE_URL=ecto://postgres:postgres@db:5432/chess_dev` inside container
