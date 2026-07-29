@@ -51,7 +51,7 @@ defmodule Chess.MixProject do
       {:phoenix_live_reload, "~> 1.6", only: :dev},
       {:phoenix_live_view, "~> 1.1"},
       {:phoenix_view, "~> 2.0"},
-      {:plug_cowboy, "~> 2.7"},
+      {:bandit, "~> 1.8"},
       {:postgrex, "~> 0.21"},
       {:sobelow, "~> 0.14", only: :dev},
       {:stream_data, "~> 1.2"},

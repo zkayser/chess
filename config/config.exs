@@ -12,6 +12,7 @@ config :chess,
 
 # Configures the endpoint
 config :chess, ChessWeb.Endpoint,
+  adapter: Bandit.PhoenixAdapter,
   url: [host: "localhost"],
   render_errors: [view: ChessWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Chess.PubSub,
