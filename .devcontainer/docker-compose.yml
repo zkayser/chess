@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   app:
-    image: elixir:1.18.4-otp-28
+    image: elixir:1.20.2-otp-29
     volumes:
       - ..:/workspace:cached
     working_dir: /workspace
