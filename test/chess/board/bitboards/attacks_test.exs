@@ -1,9 +1,33 @@
 defmodule Chess.Bitboards.AttacksTest do
   use ExUnit.Case, async: true
 
+  import Bitwise
+
   alias Chess.Bitboards.Attacks
   alias Chess.Boards.BitBoard
   alias Chess.Boards.Bitboards.Square
+
+  @king_deltas [
+    {-1, -1},
+    {-1, 0},
+    {-1, 1},
+    {0, -1},
+    {0, 1},
+    {1, -1},
+    {1, 0},
+    {1, 1}
+  ]
+
+  @knight_deltas [
+    {1, 2},
+    {2, 1},
+    {-1, 2},
+    {-2, 1},
+    {1, -2},
+    {2, -1},
+    {-1, -2},
+    {-2, -1}
+  ]
 
   describe "square_attacked_by?/3" do
     test "detects adjacent king attacks" do
@@ -106,6 +130,92 @@ defmodule Chess.Bitboards.AttacksTest do
       refute Attacks.square_attacked_by?(board, :black, {"e", 1})
     end
   end
+
+  describe "king_attacks/1" do
+    test "matches coordinate-delta attack sets for every square index" do
+      for square_index <- 0..63 do
+        square = Square.from_bitboard(1 <<< square_index)
+        expected = attacks_from_deltas(square, @king_deltas)
+
+        assert Attacks.king_attacks(square_index) == expected,
+               "king attacks mismatch at index #{square_index} (#{inspect(square)})"
+      end
+    end
+
+    test "corner king on h1 attacks three squares" do
+      # h1 = index 0; attacks g1, g2, h2
+      assert Attacks.king_attacks(0) ==
+               (Square.bitboard({"g", 1}) ||| Square.bitboard({"g", 2}) |||
+                  Square.bitboard({"h", 2}))
+    end
+
+    test "central king on e4 attacks all eight neighbors" do
+      e4 = square_index({"e", 4})
+
+      expected =
+        [
+          {"d", 3},
+          {"d", 4},
+          {"d", 5},
+          {"e", 3},
+          {"e", 5},
+          {"f", 3},
+          {"f", 4},
+          {"f", 5}
+        ]
+        |> Enum.map(&Square.bitboard/1)
+        |> Enum.reduce(0, &|||/2)
+
+      assert Attacks.king_attacks(e4) == expected
+    end
+  end
+
+  describe "knight_attacks/1" do
+    test "matches coordinate-delta attack sets for every square index" do
+      for square_index <- 0..63 do
+        square = Square.from_bitboard(1 <<< square_index)
+        expected = attacks_from_deltas(square, @knight_deltas)
+
+        assert Attacks.knight_attacks(square_index) == expected,
+               "knight attacks mismatch at index #{square_index} (#{inspect(square)})"
+      end
+    end
+
+    test "corner knight on a1 has two attacks" do
+      a1 = square_index({"a", 1})
+
+      assert Attacks.knight_attacks(a1) ==
+               (Square.bitboard({"b", 3}) ||| Square.bitboard({"c", 2}))
+    end
+
+    test "does not wrap from the a-file to the h-file" do
+      a4 = square_index({"a", 4})
+      attacks = Attacks.knight_attacks(a4)
+
+      refute (attacks &&& Square.bitboard({"h", 5})) != 0
+      refute (attacks &&& Square.bitboard({"h", 3})) != 0
+      assert (attacks &&& Square.bitboard({"b", 6})) != 0
+      assert (attacks &&& Square.bitboard({"c", 5})) != 0
+    end
+  end
+
+  defp attacks_from_deltas(square, deltas) do
+    Enum.reduce(deltas, 0, fn delta, acc ->
+      case Square.try_delta(square, delta) do
+        {:ok, target} -> acc ||| Square.bitboard(target)
+        :error -> acc
+      end
+    end)
+  end
+
+  defp square_index(square) do
+    bits = Square.bitboard(square)
+    trailing_zeros(bits)
+  end
+
+  defp trailing_zeros(n), do: trailing_zeros(n, 0)
+  defp trailing_zeros(n, index) when (n &&& 1) == 1, do: index
+  defp trailing_zeros(n, index), do: trailing_zeros(n >>> 1, index + 1)
 
   defp board_with(pieces) do
     empty = BitBoard.empty()

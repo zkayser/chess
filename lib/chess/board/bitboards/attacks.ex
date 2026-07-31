@@ -7,6 +7,10 @@ defmodule Chess.Bitboards.Attacks do
   opponent piece bitboards. Prefer this over coordinate/`Enum` iteration for
   engine hot paths such as king-safety checks.
 
+  King and knight attack sets are position-independent aside from board edges,
+  so they are precomputed at compile time into 64-entry lookup tables keyed by
+  square index.
+
   Bitboard layout matches the rest of the engine: bit 0 is h1, bit 7 is a1,
   bit 8 is h2, …, bit 63 is a8. Shifts toward the a-file increase the bit
   index; shifts toward the h-file decrease it.
@@ -29,6 +33,36 @@ defmodule Chess.Bitboards.Attacks do
   @not_rank_12 0b1111111111111111111111111111111111111111111111110000000000000000
   @not_rank_78 0b0000000000000000111111111111111111111111111111111111111111111111
 
+  # Compile-time tables built with the same shift + file/rank mask formulas
+  # previously evaluated at runtime. Index `n` holds attacks from bit `n`.
+  @king_attacks (for square <- 0..63 do
+                   bit = 1 <<< square
+
+                   (bit &&& @file_a_mask &&& @not_rank_8) <<< 9 |||
+                     (bit &&& @not_rank_8) <<< 8 |||
+                     (bit &&& @file_h_mask &&& @not_rank_8) <<< 7 |||
+                     (bit &&& @file_a_mask) <<< 1 |||
+                     (bit &&& @file_h_mask) >>> 1 |||
+                     (bit &&& @file_a_mask &&& @not_rank_1) >>> 7 |||
+                     (bit &&& @not_rank_1) >>> 8 |||
+                     (bit &&& @file_h_mask &&& @not_rank_1) >>> 9
+                 end)
+                |> List.to_tuple()
+
+  @knight_attacks (for square <- 0..63 do
+                     bit = 1 <<< square
+
+                     (bit &&& @file_a_mask &&& @not_rank_78) <<< 17 |||
+                       (bit &&& @file_h_mask &&& @not_rank_78) <<< 15 |||
+                       (bit &&& @file_ab_mask &&& @not_rank_8) <<< 10 |||
+                       (bit &&& @file_gh_mask &&& @not_rank_8) <<< 6 |||
+                       (bit &&& @file_ab_mask &&& @not_rank_1) >>> 6 |||
+                       (bit &&& @file_gh_mask &&& @not_rank_1) >>> 10 |||
+                       (bit &&& @file_a_mask &&& @not_rank_12) >>> 15 |||
+                       (bit &&& @file_h_mask &&& @not_rank_12) >>> 17
+                   end)
+                  |> List.to_tuple()
+
   @doc """
   Returns true if any piece of `attacker` color attacks `square`.
   """
@@ -43,12 +77,28 @@ defmodule Chess.Bitboards.Attacks do
       attacked_by_slider?(board, attacker, target, occupied)
   end
 
+  @doc """
+  Precomputed king attack bitboard for square index `0..63` (bit 0 = h1).
+  """
+  @spec king_attacks(0..63) :: integer()
+  def king_attacks(square_index) when square_index in 0..63 do
+    elem(@king_attacks, square_index)
+  end
+
+  @doc """
+  Precomputed knight attack bitboard for square index `0..63` (bit 0 = h1).
+  """
+  @spec knight_attacks(0..63) :: integer()
+  def knight_attacks(square_index) when square_index in 0..63 do
+    elem(@knight_attacks, square_index)
+  end
+
   defp attacked_by_king?(board, attacker, target) do
-    (king_attacks(target) &&& BitBoard.get_raw(board, {attacker, :king})) != 0
+    (king_attacks(square_index(target)) &&& BitBoard.get_raw(board, {attacker, :king})) != 0
   end
 
   defp attacked_by_knight?(board, attacker, target) do
-    (knight_attacks(target) &&& BitBoard.get_raw(board, {attacker, :knights})) != 0
+    (knight_attacks(square_index(target)) &&& BitBoard.get_raw(board, {attacker, :knights})) != 0
   end
 
   defp attacked_by_pawn?(board, attacker, target) do
@@ -67,29 +117,11 @@ defmodule Chess.Bitboards.Attacks do
       (bishop_attacks(target, occupied) &&& diag) != 0
   end
 
-  # King attacks from a single-bit square (identical to reverse king attackers).
-  defp king_attacks(bit) do
-    # NW (toward a, up), N, NE (toward h, up), W, E, SW, S, SE
-    (bit &&& @file_a_mask &&& @not_rank_8) <<< 9 |||
-      (bit &&& @not_rank_8) <<< 8 |||
-      (bit &&& @file_h_mask &&& @not_rank_8) <<< 7 |||
-      (bit &&& @file_a_mask) <<< 1 |||
-      (bit &&& @file_h_mask) >>> 1 |||
-      (bit &&& @file_a_mask &&& @not_rank_1) >>> 7 |||
-      (bit &&& @not_rank_1) >>> 8 |||
-      (bit &&& @file_h_mask &&& @not_rank_1) >>> 9
-  end
+  defp square_index(bit), do: trailing_zeros(bit)
 
-  defp knight_attacks(bit) do
-    (bit &&& @file_a_mask &&& @not_rank_78) <<< 17 |||
-      (bit &&& @file_h_mask &&& @not_rank_78) <<< 15 |||
-      (bit &&& @file_ab_mask &&& @not_rank_8) <<< 10 |||
-      (bit &&& @file_gh_mask &&& @not_rank_8) <<< 6 |||
-      (bit &&& @file_ab_mask &&& @not_rank_1) >>> 6 |||
-      (bit &&& @file_gh_mask &&& @not_rank_1) >>> 10 |||
-      (bit &&& @file_a_mask &&& @not_rank_12) >>> 15 |||
-      (bit &&& @file_h_mask &&& @not_rank_12) >>> 17
-  end
+  defp trailing_zeros(n), do: trailing_zeros(n, 0)
+  defp trailing_zeros(n, index) when (n &&& 1) == 1, do: index
+  defp trailing_zeros(n, index), do: trailing_zeros(n >>> 1, index + 1)
 
   # Squares from which a pawn of `attacker` color attacks `target`.
   # White pawns attack via <<<7 / <<<9; black via >>>7 / >>>9 (see Pawn).
