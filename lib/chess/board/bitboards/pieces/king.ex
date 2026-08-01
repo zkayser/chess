@@ -19,15 +19,8 @@ defmodule Chess.BitBoards.Pieces.King do
   @impl Chess.Moves.Validator
   @spec validate_move(Game.t(), Proposals.t()) :: {:ok, Move.t()} | {:error, atom()}
   def validate_move(game, %Proposals{source: source, destination: destination}) do
-    cond do
-      king_step?(source, destination) ->
-        validate_king_step(game, source, destination)
-
-      castling_geometry?(source, destination) ->
-        validate_castling(game, source, destination)
-
-      true ->
-        {:error, :invalid_geometry}
+    with {:ok, move_type} <- classify_geometry(source, destination) do
+      validate_typed_move(move_type, game, source, destination)
     end
   end
 
@@ -42,14 +35,26 @@ defmodule Chess.BitBoards.Pieces.King do
     end
   end
 
-  defp validate_king_step(game, source, destination) do
+  defp classify_geometry({<<from_file>>, from_rank}, {<<to_file>>, to_rank}) do
+    file_delta = abs(to_file - from_file)
+    rank_delta = abs(to_rank - from_rank)
+
+    case {file_delta, rank_delta} do
+      {0, 0} -> {:error, :invalid_geometry}
+      {file, rank} when file <= 1 and rank <= 1 -> {:ok, :step}
+      {2, 0} -> {:ok, :castle}
+      _ -> {:error, :invalid_geometry}
+    end
+  end
+
+  defp validate_typed_move(:step, game, source, destination) do
     with :ok <- validate_not_self_capture(game, destination),
          :ok <- validate_king_safety(game, source, destination) do
       {:ok, Move.make(game, source, destination)}
     end
   end
 
-  defp validate_castling(game, source, destination) do
+  defp validate_typed_move(:castle, game, source, destination) do
     with {:ok, side} <- castling_side(game.current_player, source, destination),
          :ok <- validate_castling_rights(game, side),
          :ok <- validate_castling_path_clear(game, side),
@@ -75,16 +80,14 @@ defmodule Chess.BitBoards.Pieces.King do
   end
 
   defp castling_side(color, source, destination) do
-    case {source, destination, king_home(color)} do
-      {home, to, home} ->
-        case {to, kingside_destination(color), queenside_destination(color)} do
-          {kingside, kingside, _} -> {:ok, :kingside}
-          {queenside, _, queenside} -> {:ok, :queenside}
-          _ -> {:error, :cannot_castle}
-        end
+    home = king_home(color)
+    kingside = kingside_destination(color)
+    queenside = queenside_destination(color)
 
-      _ ->
-        {:error, :cannot_castle}
+    case {source, destination} do
+      {^home, ^kingside} -> {:ok, :kingside}
+      {^home, ^queenside} -> {:ok, :queenside}
+      _ -> {:error, :cannot_castle}
     end
   end
 
@@ -92,18 +95,25 @@ defmodule Chess.BitBoards.Pieces.King do
     color = game.current_player
     rook_square = rook_home(color, side)
 
-    cond do
-      piece_has_moved?(game.move_list, king_home(color)) ->
-        {:error, :cannot_castle}
+    with :ok <- require_unmoved(game.move_list, king_home(color)),
+         :ok <- require_unmoved(game.move_list, rook_square) do
+      require_rook_present(game.board, color, rook_square)
+    end
+  end
 
-      piece_has_moved?(game.move_list, rook_square) ->
-        {:error, :cannot_castle}
+  defp require_unmoved(move_list, square) do
+    if piece_has_moved?(move_list, square) do
+      {:error, :cannot_castle}
+    else
+      :ok
+    end
+  end
 
-      not rook_on_square?(game.board, color, rook_square) ->
-        {:error, :cannot_castle}
-
-      true ->
-        :ok
+  defp require_rook_present(board, color, square) do
+    if rook_on_square?(board, color, square) do
+      :ok
+    else
+      {:error, :cannot_castle}
     end
   end
 
@@ -180,16 +190,5 @@ defmodule Chess.BitBoards.Pieces.King do
     board
     |> BitBoard.get(color)
     |> BitBoard.square_occupied?(square)
-  end
-
-  defp king_step?({<<from_file>>, from_rank}, {<<to_file>>, to_rank}) do
-    file_delta = abs(to_file - from_file)
-    rank_delta = abs(to_rank - from_rank)
-
-    file_delta <= 1 and rank_delta <= 1 and {file_delta, rank_delta} != {0, 0}
-  end
-
-  defp castling_geometry?({<<from_file>>, from_rank}, {<<to_file>>, to_rank}) do
-    from_rank == to_rank and abs(to_file - from_file) == 2
   end
 end
