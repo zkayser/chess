@@ -21,9 +21,12 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-${{ hashFiles('''**/mix.lock''') }}
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: |
             ${{ runner.os }}-mix-
+
+      - name: Pull container images
+        run: bash .github/scripts/pull-devcontainer-images.sh
 
       - name: Install dependencies and compile
         uses: devcontainers/ci@v0.3
@@ -44,9 +47,12 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-${{ hashFiles('''**/mix.lock''') }}
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: |
             ${{ runner.os }}-mix-
+
+      - name: Pull container images
+        run: bash .github/scripts/pull-devcontainer-images.sh
 
       - name: Run credo and format check
         uses: devcontainers/ci@v0.3
@@ -67,7 +73,7 @@ jobs:
 #          path: |
 #            deps
 #            _build
-#          key: ${{ runner.os }}-mix-${{ hashFiles('''**/mix.lock''') }}
+#          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
 #          restore-keys: |
 #            ${{ runner.os }}-mix-
 #
@@ -76,7 +82,7 @@ jobs:
 #        id: plt_cache
 #        with:
 #          path: /root/.mix
-#          key: plt-root-${{ runner.os }}-${{ hashFiles('''**/mix.lock''') }}
+#          key: plt-root-${{ runner.os }}-${{ hashFiles('**/mix.lock') }}
 #          restore-keys: |
 #            plt-root-${{ runner.os }}-
 #
@@ -103,9 +109,12 @@ jobs:
           path: |
             deps
             _build
-          key: ${{ runner.os }}-mix-${{ hashFiles('''**/mix.lock''') }}
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: |
             ${{ runner.os }}-mix-
+
+      - name: Pull container images
+        run: bash .github/scripts/pull-devcontainer-images.sh
 
       - name: Run tests
         uses: devcontainers/ci@v0.3
