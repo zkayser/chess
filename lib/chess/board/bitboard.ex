@@ -143,12 +143,33 @@ defmodule Chess.Boards.BitBoard do
   order of ranks in the binary goes from 8 to 1, so we need
   to reverse the ranks. Same with the files (columns) within
   each part of the binary, going from h to a.
+
+  For engine hot paths, prefer `occupied?/2` with a square mask from
+  `Chess.Boards.Bitboards.Square.mask/1` or `mask_from_index/1` so the
+  coordinate need not be re-parsed on every check.
   """
   @spec square_occupied?(bitboard(), Coordinates.t()) :: boolean()
   def square_occupied?(bitboard, {file, rank}) do
     <<rank_byte::integer-size(8)>> = :binary.part(bitboard, {8 - rank, 1})
     mask = 1 <<< Coordinates.file_bit_index(file)
     (rank_byte &&& mask) != 0
+  end
+
+  @doc """
+  Returns true if any bit set in `square_mask` is also set in the bitboard.
+
+  Accepts either a 64-bit bitboard binary or a raw integer bitboard. This is
+  the preferred occupancy check on move/attack hot paths — pass a mask from
+  `Chess.Boards.Bitboards.Square.mask/1` or `mask_from_index/1` (convert a
+  square index with the latter) rather than a `{file, rank}` tuple.
+  """
+  @spec occupied?(bitboard() | integer(), integer()) :: boolean()
+  def occupied?(<<raw::integer-size(64)>>, square_mask) when is_integer(square_mask) do
+    occupied?(raw, square_mask)
+  end
+
+  def occupied?(raw, square_mask) when is_integer(raw) and is_integer(square_mask) do
+    (raw &&& square_mask) != 0
   end
 
   @doc """

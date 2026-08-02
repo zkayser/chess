@@ -39,6 +39,48 @@ defmodule Chess.Boards.Bitboards.SquareTest do
     end
   end
 
+  describe "to_index/1 and from_index/1" do
+    squares =
+      for rank <- 1..8, file <- ?h..?a//-1 do
+        {<<file>>, rank}
+      end
+
+    for {square, index} <- Enum.with_index(squares) do
+      test "round-trips #{inspect(square)} through index #{index}" do
+        assert Square.to_index(unquote(square)) == unquote(index)
+        assert Square.from_index(unquote(index)) == unquote(square)
+        assert Square.from_index(Square.to_index(unquote(square))) == unquote(square)
+      end
+    end
+
+    test "maps corner and center squares to known indices" do
+      assert Square.to_index({"h", 1}) == 0
+      assert Square.to_index({"a", 1}) == 7
+      assert Square.to_index({"h", 8}) == 56
+      assert Square.to_index({"a", 8}) == 63
+      assert Square.to_index({"e", 1}) == 3
+      assert Square.to_index({"e", 4}) == 27
+    end
+  end
+
+  describe "mask_from_index/1 and mask/1" do
+    squares =
+      for rank <- 1..8, file <- ?h..?a//-1 do
+        {<<file>>, rank}
+      end
+
+    for {square, index} <- Enum.with_index(squares) do
+      test "mask_from_index/1 sets only bit #{index} for #{inspect(square)}" do
+        assert Square.mask_from_index(unquote(index)) == 1 <<< unquote(index)
+      end
+
+      test "mask/1 matches mask_from_index/1 for #{inspect(square)}" do
+        assert Square.mask(unquote(square)) == Square.mask_from_index(unquote(index))
+        assert Square.mask(unquote(square)) == Square.bitboard(unquote(square))
+      end
+    end
+  end
+
   describe "bitboard/1" do
     squares =
       for rank <- 1..8, file <- ?h..?a//-1 do
