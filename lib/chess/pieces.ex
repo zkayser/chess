@@ -3,10 +3,10 @@ defmodule Chess.Pieces do
   Functions and types for defining and working with
   the different type of chess pieces.
   """
+  alias Chess.BitBoards.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
   alias Chess.Board.Coordinates
   alias Chess.Boards.BitBoard
   alias Chess.Boards.Bitboards.Square
-  alias Chess.BitBoards.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
   alias Chess.Game
 
   @typedoc """
