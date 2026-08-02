@@ -5,6 +5,7 @@ defmodule Chess.Pieces do
   """
   alias Chess.Board.Coordinates
   alias Chess.Boards.BitBoard
+  alias Chess.Boards.Bitboards.Square
   alias Chess.BitBoards.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
   alias Chess.Game
 
@@ -14,18 +15,25 @@ defmodule Chess.Pieces do
   @type piece() :: Bishop | King | Knight | Pawn | Queen | Rook
 
   @doc """
-  Takes in a game and a source position (given as a `{file, rank}` tuple)
-  and returns the piece module for the piece that is present at the given
-  source position.
+  Classifies the piece of the side to move occupying `source`.
 
-  If the source position is not occupied, returns an error tuple instead.
+  `source` may be a single-bit square mask (`Square.mask/1`) or a
+  `{file, rank}` coordinate. Tuples are converted once at this boundary;
+  classification itself uses mask intersection against each piece bitboard.
+
+  Returns `{:ok, piece_module}` when occupied, or `{:error, :unoccupied}`.
   """
-  @spec classify(Game.t(), Coordinates.t()) :: {:ok, piece()} | {:error, :unoccupied}
-  def classify(%Game{} = game, source_coordinates) do
+  @spec classify(Game.t(), Square.mask() | Coordinates.t()) ::
+          {:ok, piece()} | {:error, :unoccupied}
+  def classify(%Game{} = game, {file, rank}) when is_binary(file) and is_integer(rank) do
+    classify(game, Square.mask({file, rank}))
+  end
+
+  def classify(%Game{} = game, source_mask) when is_integer(source_mask) do
     bitboards = BitBoard.get_boards_by_color(game.board, game.current_player)
 
     Enum.reduce_while(bitboards, {:error, :unoccupied}, fn {piece, bitboard}, _result ->
-      if BitBoard.square_occupied?(bitboard, source_coordinates) do
+      if BitBoard.occupied?(bitboard, source_mask) do
         {:halt, {:ok, modularize(piece)}}
       else
         {:cont, {:error, :unoccupied}}

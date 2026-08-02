@@ -67,17 +67,21 @@ defmodule Chess.Bitboards.Attacks do
                   |> List.to_tuple()
 
   @doc """
-  Returns true if any piece of `attacker` color attacks `square`.
+  Returns true if any piece of `attacker` color attacks the square identified
+  by `square_mask`.
+
+  `square_mask` is a single-bit integer mask (`Square.mask/1` /
+  `Square.mask_from_index/1`). Callers should convert from `{file, rank}`
+  once at the API boundary — this function does not accept tuples.
   """
-  @spec square_attacked_by?(BitBoard.t(), Chess.player(), Square.t()) :: boolean()
-  def square_attacked_by?(board, attacker, square) do
-    target = Square.bitboard(square)
+  @spec square_attacked_by?(BitBoard.t(), Chess.player(), Square.mask()) :: boolean()
+  def square_attacked_by?(board, attacker, square_mask) when is_integer(square_mask) do
     occupied = BitBoard.get_raw(board, :full)
 
-    attacked_by_king?(board, attacker, target) or
-      attacked_by_knight?(board, attacker, target) or
-      attacked_by_pawn?(board, attacker, target) or
-      attacked_by_slider?(board, attacker, target, occupied)
+    attacked_by_king?(board, attacker, square_mask) or
+      attacked_by_knight?(board, attacker, square_mask) or
+      attacked_by_pawn?(board, attacker, square_mask) or
+      attacked_by_slider?(board, attacker, square_mask, occupied)
   end
 
   @doc """

@@ -34,20 +34,22 @@ defmodule Chess.Game do
   Applies a candidate move for validation / king-safety simulation.
 
   Clears any opponent piece on the destination square, then moves the given
-  piece for the side to move from `from` to `to`. Returns a game with the
-  updated board only — move list, side to move, castling rights, en passant,
-  etc. are left unchanged.
+  piece for the side to move from `from_mask` to `to_mask`. Both arguments
+  are single-bit integer masks (`Square.mask/1` / `Square.mask_from_index/1`).
+  Convert from `{file, rank}` once at the caller (e.g. validator entry), not
+  inside simulation loops.
+
+  Returns a game with the updated board only — move list, side to move,
+  castling rights, en passant, etc. are left unchanged.
   """
-  @spec apply_candidate_move(t(), atom(), Square.t(), Square.t()) :: t()
+  @spec apply_candidate_move(t(), atom(), Square.mask(), Square.mask()) :: t()
   def apply_candidate_move(
         %__MODULE__{board: board, current_player: color} = game,
         piece_type,
-        from,
-        to
-      ) do
-    from_mask = Square.bitboard(from)
-    to_mask = Square.bitboard(to)
-
+        from_mask,
+        to_mask
+      )
+      when is_integer(from_mask) and is_integer(to_mask) do
     updated_board =
       board
       |> BitBoard.clear_square(opponent(game), to_mask)

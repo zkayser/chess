@@ -3,6 +3,7 @@ defmodule Chess.PiecesTest do
   use ExUnitProperties
 
   alias Chess.BitBoards.Pieces.{Bishop, King, Knight, Pawn, Queen, Rook}
+  alias Chess.Boards.Bitboards.Square
   alias Chess.Game
   alias Chess.Pieces
 
@@ -55,6 +56,17 @@ defmodule Chess.PiecesTest do
 
     test "returns {:error, :unoccupied} for squares occupied by the player of the other color" do
       assert {:error, :unoccupied} = Pieces.classify(Game.new(), {"a", 8})
+    end
+
+    test "classifies via a square mask without a tuple" do
+      game = Game.new()
+
+      assert {:ok, King} = Pieces.classify(game, Square.mask({"e", 1}))
+
+      assert {:ok, Pawn} =
+               Pieces.classify(game, Square.mask_from_index(Square.to_index({"a", 2})))
+
+      assert {:error, :unoccupied} = Pieces.classify(game, Square.mask({"e", 4}))
     end
 
     property "returns {:error, :unoccupied} for blank squares" do

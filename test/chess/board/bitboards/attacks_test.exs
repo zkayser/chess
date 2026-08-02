@@ -37,7 +37,7 @@ defmodule Chess.Bitboards.AttacksTest do
           {{:black, :king}, {"e", 5}}
         ])
 
-      assert Attacks.square_attacked_by?(board, :black, {"e", 4})
+      assert Attacks.square_attacked_by?(board, :black, Square.mask({"e", 4}))
     end
 
     test "detects knight attacks without wraparound from the a-file" do
@@ -47,7 +47,7 @@ defmodule Chess.Bitboards.AttacksTest do
           {{:black, :knights}, {"b", 6}}
         ])
 
-      assert Attacks.square_attacked_by?(board, :black, {"a", 4})
+      assert Attacks.square_attacked_by?(board, :black, Square.mask({"a", 4}))
 
       # Knight on h5 must not wrap and appear to attack a4.
       wrapped =
@@ -56,7 +56,7 @@ defmodule Chess.Bitboards.AttacksTest do
           {{:black, :knights}, {"h", 5}}
         ])
 
-      refute Attacks.square_attacked_by?(wrapped, :black, {"a", 4})
+      refute Attacks.square_attacked_by?(wrapped, :black, Square.mask({"a", 4}))
     end
 
     test "detects black pawn attacks and ignores the wrong direction" do
@@ -66,7 +66,7 @@ defmodule Chess.Bitboards.AttacksTest do
           {{:black, :pawns}, {"d", 5}}
         ])
 
-      assert Attacks.square_attacked_by?(attacked, :black, {"e", 4})
+      assert Attacks.square_attacked_by?(attacked, :black, Square.mask({"e", 4}))
 
       behind =
         board_with([
@@ -74,7 +74,7 @@ defmodule Chess.Bitboards.AttacksTest do
           {{:black, :pawns}, {"d", 3}}
         ])
 
-      refute Attacks.square_attacked_by?(behind, :black, {"e", 4})
+      refute Attacks.square_attacked_by?(behind, :black, Square.mask({"e", 4}))
     end
 
     test "detects white pawn reverse attacks" do
@@ -84,7 +84,7 @@ defmodule Chess.Bitboards.AttacksTest do
           {{:white, :pawns}, {"d", 4}}
         ])
 
-      assert Attacks.square_attacked_by?(board, :white, {"e", 5})
+      assert Attacks.square_attacked_by?(board, :white, Square.mask({"e", 5}))
     end
 
     test "detects rook attacks and stops at the first blocker" do
@@ -94,7 +94,7 @@ defmodule Chess.Bitboards.AttacksTest do
           {{:black, :rooks}, {"e", 8}}
         ])
 
-      assert Attacks.square_attacked_by?(open_file, :black, {"e", 1})
+      assert Attacks.square_attacked_by?(open_file, :black, Square.mask({"e", 1}))
 
       blocked =
         board_with([
@@ -103,7 +103,7 @@ defmodule Chess.Bitboards.AttacksTest do
           {{:black, :rooks}, {"e", 8}}
         ])
 
-      refute Attacks.square_attacked_by?(blocked, :black, {"e", 1})
+      refute Attacks.square_attacked_by?(blocked, :black, Square.mask({"e", 1}))
     end
 
     test "detects bishop and queen diagonal attacks" do
@@ -113,7 +113,7 @@ defmodule Chess.Bitboards.AttacksTest do
           {{:black, :bishops}, {"b", 4}}
         ])
 
-      assert Attacks.square_attacked_by?(bishop, :black, {"e", 1})
+      assert Attacks.square_attacked_by?(bishop, :black, Square.mask({"e", 1}))
 
       queen =
         board_with([
@@ -121,13 +121,24 @@ defmodule Chess.Bitboards.AttacksTest do
           {{:black, :queens}, {"e", 8}}
         ])
 
-      assert Attacks.square_attacked_by?(queen, :black, {"e", 4})
+      assert Attacks.square_attacked_by?(queen, :black, Square.mask({"e", 4}))
     end
 
     test "returns false when no attacker hits the square" do
       board = board_with([{{:white, :king}, {"e", 1}}])
 
-      refute Attacks.square_attacked_by?(board, :black, {"e", 1})
+      refute Attacks.square_attacked_by?(board, :black, Square.mask({"e", 1}))
+    end
+
+    test "accepts a mask built from a square index" do
+      board =
+        board_with([
+          {{:white, :king}, {"e", 1}},
+          {{:black, :rooks}, {"e", 8}}
+        ])
+
+      mask = Square.mask_from_index(Square.to_index({"e", 1}))
+      assert Attacks.square_attacked_by?(board, :black, mask)
     end
   end
 
@@ -153,9 +164,9 @@ defmodule Chess.Bitboards.AttacksTest do
           {{:black, :rooks}, {"e", 8}}
         ])
 
-      assert Attacks.mask_attacked_by?(board, :black, Square.bitboard({"e", 1}))
-      assert Attacks.square_attacked_by?(board, :black, {"e", 1})
-      refute Attacks.mask_attacked_by?(board, :black, Square.bitboard({"f", 1}))
+      assert Attacks.mask_attacked_by?(board, :black, Square.mask({"e", 1}))
+      assert Attacks.square_attacked_by?(board, :black, Square.mask({"e", 1}))
+      refute Attacks.mask_attacked_by?(board, :black, Square.mask({"f", 1}))
     end
   end
 
