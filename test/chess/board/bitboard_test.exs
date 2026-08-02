@@ -347,6 +347,44 @@ defmodule Chess.Boards.BitBoardTest do
     end
   end
 
+  describe "occupied?/2" do
+    test "returns true when the mask intersects a bitboard binary" do
+      black_pawns = BitBoard.get(BitBoard.new(), {Color.black(), :pawns})
+      assert BitBoard.occupied?(black_pawns, Square.mask({"a", 7}))
+    end
+
+    test "returns false when the mask does not intersect a bitboard binary" do
+      white_pawns = BitBoard.get(BitBoard.new(), {Color.white(), :pawns})
+      refute BitBoard.occupied?(white_pawns, Square.mask({"a", 7}))
+    end
+
+    test "accepts a raw integer bitboard and a mask from an index" do
+      raw = BitBoard.get_raw(BitBoard.new(), {:black, :pawns})
+      index = Square.to_index({"a", 7})
+
+      assert BitBoard.occupied?(raw, Square.mask_from_index(index))
+      refute BitBoard.occupied?(raw, Square.mask_from_index(Square.to_index({"a", 2})))
+    end
+
+    test "agrees with square_occupied?/2 for starting positions" do
+      board = BitBoard.new()
+
+      for color <- [Color.white(), Color.black()],
+          piece <- [:pawns, :rooks, :knights, :bishops, :queens, :king] do
+        bitboard = BitBoard.get(board, {color, piece})
+        raw = BitBoard.get_raw(board, {color, piece})
+
+        for rank <- 1..8, file <- ?a..?h do
+          square = {<<file>>, rank}
+          mask = Square.mask(square)
+
+          assert BitBoard.occupied?(bitboard, mask) == BitBoard.square_occupied?(bitboard, square)
+          assert BitBoard.occupied?(raw, mask) == BitBoard.square_occupied?(bitboard, square)
+        end
+      end
+    end
+  end
+
   describe "empty/0" do
     test "returns an empty bitboard" do
       assert <<0, 0, 0, 0, 0, 0, 0, 0>> == BitBoard.empty()
