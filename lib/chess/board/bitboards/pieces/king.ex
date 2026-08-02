@@ -122,10 +122,9 @@ defmodule Chess.BitBoards.Pieces.King do
   end
 
   defp validate_castling_safe(game, side) do
-    opponent = Game.opponent(game)
-    squares = Castling.transit_squares(game.current_player, side)
+    mask = Castling.transit_mask(game.current_player, side)
 
-    if Enum.any?(squares, &Attacks.square_attacked_by?(game.board, opponent, &1)) do
+    if Attacks.mask_attacked_by?(game.board, Game.opponent(game), mask) do
       {:error, :cannot_castle}
     else
       :ok

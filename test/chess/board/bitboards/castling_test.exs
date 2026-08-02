@@ -39,6 +39,15 @@ defmodule Chess.Bitboards.CastlingTest do
     end
   end
 
+  describe "transit_mask/2" do
+    test "is the bitwise OR of king start, pass-through, and landing squares" do
+      expected =
+        Square.bitboard({"e", 1}) ||| Square.bitboard({"f", 1}) ||| Square.bitboard({"g", 1})
+
+      assert Castling.transit_mask(:white, :kingside) == expected
+    end
+  end
+
   describe "side/3" do
     test "classifies white kingside and queenside castling" do
       assert {:ok, :kingside} = Castling.side(:white, {"e", 1}, {"g", 1})

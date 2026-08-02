@@ -2,10 +2,10 @@ defmodule Chess.Bitboards.Castling do
   @moduledoc """
   Static castling geometry for bitboard move validation.
 
-  Owns king/rook home squares, king destinations, and the path masks of
-  squares that must be empty between king and rook. Consumers compose
-  these masks with occupancy bitboards via bitwise AND rather than
-  iterating coordinates.
+  Owns king/rook home squares, king destinations, path masks (squares that
+  must be empty), and transit masks (squares that must be unattacked).
+  Consumers compose these masks with occupancy or attack bitboards via
+  bitwise AND rather than iterating coordinates.
   """
 
   import Bitwise
@@ -54,6 +54,10 @@ defmodule Chess.Bitboards.Castling do
                 {key, squares |> Enum.map(&Square.bitboard/1) |> Enum.reduce(0, &bor/2)}
               end)
 
+  @transit_masks Map.new(@transit_squares, fn {key, squares} ->
+                   {key, squares |> Enum.map(&Square.bitboard/1) |> Enum.reduce(0, &bor/2)}
+                 end)
+
   @doc """
   Returns the king's starting square for `color`.
   """
@@ -88,10 +92,11 @@ defmodule Chess.Bitboards.Castling do
   end
 
   @doc """
-  Squares the king occupies, passes through, or lands on while castling.
+  Bitboard mask of squares the king occupies, passes through, or lands on
+  while castling — none may be attacked.
   """
-  @spec transit_squares(Color.t(), side()) :: list(Square.t())
-  def transit_squares(color, side), do: Map.fetch!(@transit_squares, {color, side})
+  @spec transit_mask(Color.t(), side()) :: integer()
+  def transit_mask(color, side), do: Map.fetch!(@transit_masks, {color, side})
 
   @doc """
   Classifies a king move from `source` to `destination` as kingside or
