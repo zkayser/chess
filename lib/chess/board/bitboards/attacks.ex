@@ -7,6 +7,9 @@ defmodule Chess.Bitboards.Attacks do
   opponent piece bitboards. Prefer this over coordinate/`Enum` iteration for
   engine hot paths such as king-safety checks.
 
+  For multi-square queries (e.g. castling transit), `attacks_by/2` builds the
+  forward attack bitboard for a color so callers can AND it with a mask.
+
   King and knight attack sets are position-independent aside from board edges,
   so they are precomputed at compile time into 64-entry lookup tables keyed by
   square index.
@@ -78,6 +81,38 @@ defmodule Chess.Bitboards.Attacks do
   end
 
   @doc """
+  Returns true if any square set in `mask` is attacked by `attacker`.
+
+  Computes the forward attack bitboard for `attacker` and intersects it with
+  `mask` via bitwise AND.
+  """
+  @spec mask_attacked_by?(BitBoard.t(), Chess.player(), integer()) :: boolean()
+  def mask_attacked_by?(board, attacker, mask) when is_integer(mask) do
+    (attacks_by(board, attacker) &&& mask) != 0
+  end
+
+  @doc """
+  Bitboard of all squares attacked by pieces of `attacker` color.
+  """
+  @spec attacks_by(BitBoard.t(), Chess.player()) :: integer()
+  def attacks_by(board, attacker) do
+    occupied = BitBoard.get_raw(board, :full)
+
+    ortho =
+      BitBoard.get_raw(board, {attacker, :rooks}) ||| BitBoard.get_raw(board, {attacker, :queens})
+
+    diag =
+      BitBoard.get_raw(board, {attacker, :bishops}) |||
+        BitBoard.get_raw(board, {attacker, :queens})
+
+    attacks_from_kings(BitBoard.get_raw(board, {attacker, :king})) |||
+      attacks_from_knights(BitBoard.get_raw(board, {attacker, :knights})) |||
+      attacks_from_pawns(BitBoard.get_raw(board, {attacker, :pawns}), attacker) |||
+      attacks_from_sliders(ortho, occupied, &rook_attacks/2) |||
+      attacks_from_sliders(diag, occupied, &bishop_attacks/2)
+  end
+
+  @doc """
   Precomputed king attack bitboard for square index `0..63` (bit 0 = h1).
   """
   @spec king_attacks(0..63) :: integer()
@@ -115,6 +150,45 @@ defmodule Chess.Bitboards.Attacks do
 
     (rook_attacks(target, occupied) &&& ortho) != 0 or
       (bishop_attacks(target, occupied) &&& diag) != 0
+  end
+
+  defp attacks_from_kings(bits) do
+    (bits &&& @file_a_mask &&& @not_rank_8) <<< 9 |||
+      (bits &&& @not_rank_8) <<< 8 |||
+      (bits &&& @file_h_mask &&& @not_rank_8) <<< 7 |||
+      (bits &&& @file_a_mask) <<< 1 |||
+      (bits &&& @file_h_mask) >>> 1 |||
+      (bits &&& @file_a_mask &&& @not_rank_1) >>> 7 |||
+      (bits &&& @not_rank_1) >>> 8 |||
+      (bits &&& @file_h_mask &&& @not_rank_1) >>> 9
+  end
+
+  defp attacks_from_knights(bits) do
+    (bits &&& @file_a_mask &&& @not_rank_78) <<< 17 |||
+      (bits &&& @file_h_mask &&& @not_rank_78) <<< 15 |||
+      (bits &&& @file_ab_mask &&& @not_rank_8) <<< 10 |||
+      (bits &&& @file_gh_mask &&& @not_rank_8) <<< 6 |||
+      (bits &&& @file_ab_mask &&& @not_rank_1) >>> 6 |||
+      (bits &&& @file_gh_mask &&& @not_rank_1) >>> 10 |||
+      (bits &&& @file_a_mask &&& @not_rank_12) >>> 15 |||
+      (bits &&& @file_h_mask &&& @not_rank_12) >>> 17
+  end
+
+  defp attacks_from_pawns(bits, :white) do
+    (bits &&& @file_a_mask) <<< 9 ||| (bits &&& @file_h_mask) <<< 7
+  end
+
+  defp attacks_from_pawns(bits, :black) do
+    (bits &&& @file_a_mask) >>> 7 ||| (bits &&& @file_h_mask) >>> 9
+  end
+
+  defp attacks_from_sliders(0, _occupied, _attack_fn), do: 0
+
+  defp attacks_from_sliders(pieces, occupied, attack_fn) do
+    bit = 1 <<< trailing_zeros(pieces)
+
+    attack_fn.(bit, occupied) |||
+      attacks_from_sliders(pieces &&& bnot(bit), occupied, attack_fn)
   end
 
   defp square_index(bit), do: trailing_zeros(bit)

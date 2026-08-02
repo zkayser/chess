@@ -203,6 +203,134 @@ defmodule Chess.BitBoards.Pieces.KingTest do
       assert {:error, :king_in_check} = King.validate_move(game, proposal)
     end
 
+    test "accepts kingside castling when rights and path are clear" do
+      # Board state: White king on e1 (unmoved), white rook on h1 (unmoved),
+      #              squares f1 and g1 empty, not attacked.
+      # Move: e1 -> g1
+      # Expected: {:ok, %Move{from: {"e", 1}, to: {"g", 1}, flag: :king_castle}}
+      #
+      #     a   b   c   d   e   f   g   h
+      #   +---+---+---+---+---+---+---+---+
+      # 8 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 7 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 6 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 5 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 4 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 3 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 2 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 1 |   |   |   |   | K |   | * | R |  <- king castles to g1
+      #   +---+---+---+---+---+---+---+---+
+      game =
+        game_with([
+          {{:white, :king}, {"e", 1}},
+          {{:white, :rooks}, {"h", 1}}
+        ])
+
+      proposal = %Proposals{source: {"e", 1}, destination: {"g", 1}}
+
+      assert {:ok, %Move{from: {"e", 1}, to: {"g", 1}, flag: :king_castle}} =
+               King.validate_move(game, proposal)
+    end
+
+    test "accepts queenside castling when rights and path are clear" do
+      # Board state: White king on e1 (unmoved), white rook on a1 (unmoved),
+      #              squares b1, c1, d1 empty, king doesn't pass through check.
+      # Move: e1 -> c1
+      # Expected: {:ok, %Move{from: {"e", 1}, to: {"c", 1}, flag: :queen_castle}}
+      #
+      #     a   b   c   d   e   f   g   h
+      #   +---+---+---+---+---+---+---+---+
+      # 8 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 7 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 6 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 5 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 4 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 3 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 2 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 1 | R |   | * |   | K |   |   |   |  <- king castles to c1
+      #   +---+---+---+---+---+---+---+---+
+      game =
+        game_with([
+          {{:white, :king}, {"e", 1}},
+          {{:white, :rooks}, {"a", 1}}
+        ])
+
+      proposal = %Proposals{source: {"e", 1}, destination: {"c", 1}}
+
+      assert {:ok, %Move{from: {"e", 1}, to: {"c", 1}, flag: :queen_castle}} =
+               King.validate_move(game, proposal)
+    end
+
+    test "rejects castling when the king has previously moved" do
+      # Board state: Same as kingside castling success, but move_list contains
+      #              a prior king move (king moved away and back to e1).
+      # Move: e1 -> g1
+      # Expected: {:error, :cannot_castle}
+      game =
+        game_with([
+          {{:white, :king}, {"e", 1}},
+          {{:white, :rooks}, {"h", 1}}
+        ])
+        |> Map.put(:move_list, [
+          %Move{from: {"e", 1}, to: {"e", 2}, flag: :quiet},
+          %Move{from: {"e", 2}, to: {"e", 1}, flag: :quiet}
+        ])
+
+      proposal = %Proposals{source: {"e", 1}, destination: {"g", 1}}
+
+      assert {:error, :cannot_castle} = King.validate_move(game, proposal)
+    end
+
+    test "rejects castling when the king would pass through an attacked square" do
+      # Board state: White king on e1, white rook on h1, black bishop on a6
+      #              (which attacks f1 diagonally, so king would pass through check).
+      # Move: e1 -> g1
+      # Expected: {:error, :cannot_castle}
+      #
+      #     a   b   c   d   e   f   g   h
+      #   +---+---+---+---+---+---+---+---+
+      # 8 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 7 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 6 | b |   |   |   |   |   |   |   |  <- black bishop attacks f1
+      #   +---+---+---+---+---+---+---+---+
+      # 5 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 4 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 3 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 2 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 1 |   |   |   |   | K | X |   | R |  <- f1 attacked, can't castle
+      #   +---+---+---+---+---+---+---+---+
+      game =
+        game_with([
+          {{:white, :king}, {"e", 1}},
+          {{:white, :rooks}, {"h", 1}},
+          {{:black, :bishops}, {"a", 6}}
+        ])
+
+      proposal = %Proposals{source: {"e", 1}, destination: {"g", 1}}
+
+      assert {:error, :cannot_castle} = King.validate_move(game, proposal)
+    end
+
     test "accepts a corner move to an adjacent diagonal square" do
       # Board state: White king on a1.
       # Move: a1 -> b2 (only 3 valid moves from a1: a2, b1, b2)

@@ -131,6 +131,34 @@ defmodule Chess.Bitboards.AttacksTest do
     end
   end
 
+  describe "mask_attacked_by?/3" do
+    test "returns true when any square in the mask is attacked" do
+      board = board_with([{{:black, :bishops}, {"a", 6}}])
+      mask = Square.bitboard({"e", 1}) ||| Square.bitboard({"f", 1}) ||| Square.bitboard({"g", 1})
+
+      assert Attacks.mask_attacked_by?(board, :black, mask)
+    end
+
+    test "returns false when the mask is clear of attacks" do
+      board = board_with([{{:black, :rooks}, {"a", 8}}])
+      mask = Square.bitboard({"e", 1}) ||| Square.bitboard({"f", 1}) ||| Square.bitboard({"g", 1})
+
+      refute Attacks.mask_attacked_by?(board, :black, mask)
+    end
+
+    test "agrees with square_attacked_by?/3 for a single-square mask" do
+      board =
+        board_with([
+          {{:white, :king}, {"e", 1}},
+          {{:black, :rooks}, {"e", 8}}
+        ])
+
+      assert Attacks.mask_attacked_by?(board, :black, Square.bitboard({"e", 1}))
+      assert Attacks.square_attacked_by?(board, :black, {"e", 1})
+      refute Attacks.mask_attacked_by?(board, :black, Square.bitboard({"f", 1}))
+    end
+  end
+
   describe "king_attacks/1" do
     test "matches coordinate-delta attack sets for every square index" do
       for square_index <- 0..63 do
