@@ -276,8 +276,8 @@ defmodule Chess.BitBoards.Pieces.KingTest do
     end
 
     test "rejects castling when the king has previously moved" do
-      # Board state: Same as kingside castling success, but move_list contains
-      #              a prior king move (king moved away and back to e1).
+      # Board state: Same as kingside castling success, but white castling
+      #              rights were revoked when the king moved earlier.
       # Move: e1 -> g1
       # Expected: {:error, :cannot_castle}
       game =
@@ -285,10 +285,20 @@ defmodule Chess.BitBoards.Pieces.KingTest do
           {{:white, :king}, {"e", 1}},
           {{:white, :rooks}, {"h", 1}}
         ])
-        |> Map.put(:move_list, [
-          %Move{from: {"e", 1}, to: {"e", 2}, flag: :quiet},
-          %Move{from: {"e", 2}, to: {"e", 1}, flag: :quiet}
+        |> Game.revoke_castling(:white, :king)
+
+      proposal = %Proposals{source: {"e", 1}, destination: {"g", 1}}
+
+      assert {:error, :cannot_castle} = King.validate_move(game, proposal)
+    end
+
+    test "rejects castling when only the castling-side rook rights were revoked" do
+      game =
+        game_with([
+          {{:white, :king}, {"e", 1}},
+          {{:white, :rooks}, {"h", 1}}
         ])
+        |> Game.revoke_castling(:white, :kingside)
 
       proposal = %Proposals{source: {"e", 1}, destination: {"g", 1}}
 

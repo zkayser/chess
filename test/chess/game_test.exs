@@ -5,11 +5,17 @@ defmodule Chess.GameTest do
   alias Chess.Boards.Bitboards.Square
   alias Chess.Color
   alias Chess.Game
+  alias Chess.Game.CastlingRights
 
   describe "new/0" do
     test "creates a new chess game instance" do
-      assert %Game{board: BitBoard.new(), move_list: [], current_player: Color.white()} ==
-               Game.new()
+      assert %Game{
+               board: BitBoard.new(),
+               move_list: [],
+               current_player: Color.white(),
+               white_castling: %CastlingRights{kingside: true, queenside: true},
+               black_castling: %CastlingRights{kingside: true, queenside: true}
+             } == Game.new()
     end
   end
 
@@ -20,6 +26,33 @@ defmodule Chess.GameTest do
 
     test "returns white when black is to move" do
       assert Game.opponent(%Game{current_player: :black}) == :white
+    end
+  end
+
+  describe "castling rights" do
+    test "both sides start with kingside and queenside available" do
+      game = Game.new()
+
+      assert Game.can_castle?(game, :white, :kingside)
+      assert Game.can_castle?(game, :white, :queenside)
+      assert Game.can_castle?(game, :black, :kingside)
+      assert Game.can_castle?(game, :black, :queenside)
+    end
+
+    test "revoking the king clears both sides for that color only" do
+      game = Game.new() |> Game.revoke_castling(:white, :king)
+
+      refute Game.can_castle?(game, :white, :kingside)
+      refute Game.can_castle?(game, :white, :queenside)
+      assert Game.can_castle?(game, :black, :kingside)
+      assert Game.can_castle?(game, :black, :queenside)
+    end
+
+    test "revoking one side leaves the other intact" do
+      game = Game.new() |> Game.revoke_castling(:black, :queenside)
+
+      assert Game.can_castle?(game, :black, :kingside)
+      refute Game.can_castle?(game, :black, :queenside)
     end
   end
 
@@ -60,6 +93,16 @@ defmodule Chess.GameTest do
 
       assert BitBoard.get_raw(after_move.board, {:white, :pawns}) == Square.mask({"a", 2})
       assert BitBoard.get_raw(after_move.board, {:black, :rooks}) == Square.mask({"h", 8})
+    end
+
+    test "does not mutate castling rights during simulation" do
+      game = Game.new()
+
+      after_move =
+        Game.apply_candidate_move(game, :king, Square.mask({"e", 1}), Square.mask({"e", 2}))
+
+      assert after_move.white_castling == game.white_castling
+      assert after_move.black_castling == game.black_castling
     end
   end
 

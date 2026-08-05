@@ -7,15 +7,20 @@ defmodule Chess.Game do
   alias Chess.Boards.BitBoard
   alias Chess.Boards.Bitboards.Square
   alias Chess.Color
+  alias Chess.Game.CastlingRights
 
   defstruct board: BitBoard.new(),
             move_list: [],
-            current_player: Color.white()
+            current_player: Color.white(),
+            white_castling: %CastlingRights{},
+            black_castling: %CastlingRights{}
 
   @type t() :: %__MODULE__{
           board: BitBoard.t(),
           move_list: list(Move.t()),
-          current_player: Chess.player()
+          current_player: Chess.player(),
+          white_castling: CastlingRights.t(),
+          black_castling: CastlingRights.t()
         }
 
   @doc """
@@ -29,6 +34,41 @@ defmodule Chess.Game do
   @spec opponent(t()) :: Chess.player()
   def opponent(%__MODULE__{current_player: :white}), do: :black
   def opponent(%__MODULE__{current_player: :black}), do: :white
+
+  @doc """
+  Returns the castling rights for `color`.
+  """
+  @spec castling_rights(t(), Color.t()) :: CastlingRights.t()
+  def castling_rights(%__MODULE__{white_castling: rights}, :white), do: rights
+  def castling_rights(%__MODULE__{black_castling: rights}, :black), do: rights
+
+  @doc """
+  Returns true when `color` may still castle on `side` according to stored
+  rights (independent of path clearance and check).
+  """
+  @spec can_castle?(t(), Color.t(), CastlingRights.side()) :: boolean()
+  def can_castle?(%__MODULE__{} = game, color, side) do
+    game
+    |> castling_rights(color)
+    |> CastlingRights.available?(side)
+  end
+
+  @doc """
+  Clears castling rights for `color`.
+
+  Pass `:king` to revoke both sides, or `:kingside` / `:queenside` for one side.
+  Intended for move application when the king or a rook moves (or a rook is
+  captured); validation reads rights via `can_castle?/3` in O(1).
+  """
+  @spec revoke_castling(t(), Color.t(), CastlingRights.revoke_target()) :: t()
+  def revoke_castling(%__MODULE__{} = game, color, target) do
+    rights =
+      game
+      |> castling_rights(color)
+      |> CastlingRights.revoke(target)
+
+    put_castling_rights(game, color, rights)
+  end
 
   @doc """
   Applies a candidate move for validation / king-safety simulation.
@@ -57,6 +97,9 @@ defmodule Chess.Game do
 
     %{game | board: updated_board}
   end
+
+  defp put_castling_rights(game, :white, rights), do: %{game | white_castling: rights}
+  defp put_castling_rights(game, :black, rights), do: %{game | black_castling: rights}
 
   ##########################################
   # Tentative interface for game play here #
