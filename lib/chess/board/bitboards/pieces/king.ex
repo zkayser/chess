@@ -5,12 +5,10 @@ defmodule Chess.BitBoards.Pieces.King do
   Orchestrates geometry, self-capture, king-safety, and castling checks.
   Castling geometry lives in `Chess.Bitboards.Castling`; attack detection
   lives in `Chess.Bitboards.Attacks`; candidate-move simulation lives on
-  `Chess.Boards.BitBoard`.
+  `Chess.Boards.BitBoard`. Castling rights are read from `Game` in O(1).
   """
 
   @behaviour Chess.Moves.Validator
-
-  import Bitwise
 
   alias Chess.Bitboards.Attacks
   alias Chess.Bitboards.Castling
@@ -23,8 +21,11 @@ defmodule Chess.BitBoards.Pieces.King do
   @impl Chess.Moves.Validator
   @spec validate_move(Game.t(), Proposals.t()) :: {:ok, Move.t()} | {:error, atom()}
   def validate_move(game, %Proposals{source: source, destination: destination}) do
+    from_mask = Square.mask(source)
+    to_mask = Square.mask(destination)
+
     with {:ok, move_type} <- classify_geometry(source, destination) do
-      validate_typed_move(move_type, game, source, destination)
+      validate_typed_move(move_type, game, source, destination, from_mask, to_mask)
     end
   end
 
@@ -42,6 +43,8 @@ defmodule Chess.BitBoards.Pieces.King do
     end
   end
 
+  # Geometry uses integer file/rank codepoints (`?a`..`?h`) and ranks —
+  # not string file compares — then castling continues on masks.
   defp classify_geometry({<<from_file>>, from_rank}, {<<to_file>>, to_rank}) do
     file_delta = abs(to_file - from_file)
     rank_delta = abs(to_rank - from_rank)
@@ -54,15 +57,15 @@ defmodule Chess.BitBoards.Pieces.King do
     end
   end
 
-  defp validate_typed_move(:step, game, source, destination) do
-    with :ok <- validate_not_self_capture(game, destination),
-         :ok <- validate_king_safety(game, source, destination) do
+  defp validate_typed_move(:step, game, source, destination, from_mask, to_mask) do
+    with :ok <- validate_not_self_capture(game, to_mask),
+         :ok <- validate_king_safety(game, from_mask, to_mask) do
       {:ok, Move.make(game, source, destination)}
     end
   end
 
-  defp validate_typed_move(:castle, game, source, destination) do
-    with {:ok, side} <- Castling.side(game.current_player, source, destination),
+  defp validate_typed_move(:castle, game, source, destination, from_mask, to_mask) do
+    with {:ok, side} <- Castling.side(game.current_player, from_mask, to_mask),
          :ok <- validate_castling_rights(game, side),
          :ok <- validate_castling_path_clear(game, side),
          :ok <- validate_castling_safe(game, side) do
@@ -70,18 +73,17 @@ defmodule Chess.BitBoards.Pieces.King do
     end
   end
 
-  defp validate_not_self_capture(game, destination) do
-    if occupied_by?(game.board, game.current_player, destination) do
+  defp validate_not_self_capture(game, to_mask) do
+    own_pieces = BitBoard.get_raw(game.board, game.current_player)
+
+    if BitBoard.occupied?(own_pieces, to_mask) do
       {:error, :self_capture}
     else
       :ok
     end
   end
 
-  defp validate_king_safety(game, source, destination) do
-    from_mask = Square.mask(source)
-    to_mask = Square.mask(destination)
-
+  defp validate_king_safety(game, from_mask, to_mask) do
     if game |> Game.apply_candidate_move(:king, from_mask, to_mask) |> in_check?() do
       {:error, :king_in_check}
     else
@@ -91,26 +93,19 @@ defmodule Chess.BitBoards.Pieces.King do
 
   defp validate_castling_rights(game, side) do
     color = game.current_player
-    rook_square = Castling.rook_home(color, side)
+    rook_mask = Castling.rook_home(color, side)
 
-    with :ok <- require_unmoved(game.move_list, Castling.king_home(color)),
-         :ok <- require_unmoved(game.move_list, rook_square) do
-      require_rook_present(game.board, color, rook_square)
-    end
-  end
-
-  defp require_unmoved(move_list, square) do
-    if piece_has_moved?(move_list, square) do
-      {:error, :cannot_castle}
+    if Game.can_castle?(game, color, side) do
+      require_rook_present(game.board, color, rook_mask)
     else
-      :ok
+      {:error, :cannot_castle}
     end
   end
 
-  defp require_rook_present(board, color, square) do
+  defp require_rook_present(board, color, rook_mask) do
     rooks = BitBoard.get_raw(board, {color, :rooks})
 
-    if (rooks &&& Square.bitboard(square)) != 0 do
+    if BitBoard.occupied?(rooks, rook_mask) do
       :ok
     else
       {:error, :cannot_castle}
@@ -135,15 +130,5 @@ defmodule Chess.BitBoards.Pieces.King do
     else
       :ok
     end
-  end
-
-  defp piece_has_moved?(move_list, square) do
-    Enum.any?(move_list, fn %Move{from: from} -> from == square end)
-  end
-
-  defp occupied_by?(board, color, square) do
-    board
-    |> BitBoard.get(color)
-    |> BitBoard.square_occupied?(square)
   end
 end
