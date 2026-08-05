@@ -27,9 +27,10 @@ defmodule Chess.GameTest do
     test "moves a piece onto an empty square" do
       game = game_with([{{:white, :king}, {"e", 1}}])
 
-      after_move = Game.apply_candidate_move(game, :king, {"e", 1}, {"e", 2})
+      after_move =
+        Game.apply_candidate_move(game, :king, Square.mask({"e", 1}), Square.mask({"e", 2}))
 
-      assert BitBoard.get_raw(after_move.board, {:white, :king}) == Square.bitboard({"e", 2})
+      assert BitBoard.get_raw(after_move.board, {:white, :king}) == Square.mask({"e", 2})
     end
 
     test "captures an opponent piece on the destination square" do
@@ -39,9 +40,10 @@ defmodule Chess.GameTest do
           {{:black, :pawns}, {"f", 2}}
         ])
 
-      after_move = Game.apply_candidate_move(game, :king, {"e", 1}, {"f", 2})
+      after_move =
+        Game.apply_candidate_move(game, :king, Square.mask({"e", 1}), Square.mask({"f", 2}))
 
-      assert BitBoard.get_raw(after_move.board, {:white, :king}) == Square.bitboard({"f", 2})
+      assert BitBoard.get_raw(after_move.board, {:white, :king}) == Square.mask({"f", 2})
       assert BitBoard.get_raw(after_move.board, {:black, :pawns}) == 0
     end
 
@@ -53,10 +55,11 @@ defmodule Chess.GameTest do
           {{:black, :rooks}, {"h", 8}}
         ])
 
-      after_move = Game.apply_candidate_move(game, :king, {"e", 1}, {"d", 1})
+      after_move =
+        Game.apply_candidate_move(game, :king, Square.mask({"e", 1}), Square.mask({"d", 1}))
 
-      assert BitBoard.get_raw(after_move.board, {:white, :pawns}) == Square.bitboard({"a", 2})
-      assert BitBoard.get_raw(after_move.board, {:black, :rooks}) == Square.bitboard({"h", 8})
+      assert BitBoard.get_raw(after_move.board, {:white, :pawns}) == Square.mask({"a", 2})
+      assert BitBoard.get_raw(after_move.board, {:black, :rooks}) == Square.mask({"h", 8})
     end
   end
 

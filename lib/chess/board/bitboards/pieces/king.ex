@@ -30,12 +30,15 @@ defmodule Chess.BitBoards.Pieces.King do
 
   @doc """
   Returns true if the side to move's king is under attack in `game`.
+
+  Passes the king's bitboard mask straight to attack detection — no
+  tuple round-trip via `Square.from_bitboard/1`.
   """
   @spec in_check?(Game.t()) :: boolean()
   def in_check?(%Game{} = game) do
-    case king_square(game.board, game.current_player) do
-      nil -> false
-      square -> Attacks.square_attacked_by?(game.board, Game.opponent(game), square)
+    case BitBoard.get_raw(game.board, {game.current_player, :king}) do
+      0 -> false
+      king_mask -> Attacks.square_attacked_by?(game.board, Game.opponent(game), king_mask)
     end
   end
 
@@ -76,7 +79,10 @@ defmodule Chess.BitBoards.Pieces.King do
   end
 
   defp validate_king_safety(game, source, destination) do
-    if game |> Game.apply_candidate_move(:king, source, destination) |> in_check?() do
+    from_mask = Square.mask(source)
+    to_mask = Square.mask(destination)
+
+    if game |> Game.apply_candidate_move(:king, from_mask, to_mask) |> in_check?() do
       {:error, :king_in_check}
     else
       :ok
@@ -133,12 +139,6 @@ defmodule Chess.BitBoards.Pieces.King do
 
   defp piece_has_moved?(move_list, square) do
     Enum.any?(move_list, fn %Move{from: from} -> from == square end)
-  end
-
-  defp king_square(board, color) do
-    board
-    |> BitBoard.get_raw({color, :king})
-    |> Square.from_bitboard()
   end
 
   defp occupied_by?(board, color, square) do
