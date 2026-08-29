@@ -42,6 +42,7 @@ defmodule Chess.Bitboards.Move do
   import Bitwise
 
   alias Chess.Boards.BitBoard
+  alias Chess.Boards.Bitboards.Square
   alias Chess.Game
 
   defstruct [:from, :to, :flag]
@@ -226,7 +227,10 @@ defmodule Chess.Bitboards.Move do
   end
 
   defp quiet_or_capture(%Game{} = game, destination) do
-    if BitBoard.square_occupied?(BitBoard.get(game.board, Game.opponent(game)), destination) do
+    opponent_pieces = BitBoard.get(game.board, Game.opponent(game))
+    dest_mask = Square.mask(destination)
+
+    if BitBoard.occupied?(opponent_pieces, dest_mask) do
       :captures
     else
       :quiet
