@@ -4,6 +4,7 @@ defmodule Chess.Boards.BitBoardTest do
   alias Chess.Boards.BitBoard
   alias Chess.Boards.Bitboards.Square
   alias Chess.Color
+  alias Chess.Game
 
   describe "new/0" do
     test "creates a BitBoard struct" do
@@ -332,6 +333,20 @@ defmodule Chess.Boards.BitBoardTest do
                knights: _,
                king: _
              } = BitBoard.get_boards_by_color(BitBoard.new(), Color.black())
+    end
+  end
+
+  describe "opponent_board/1" do
+    test "returns the composite board for the opponent when white is to move" do
+      game = %Game{board: BitBoard.new(), current_player: :white}
+
+      assert BitBoard.opponent_board(game) == BitBoard.get(game.board, :black)
+    end
+
+    test "returns the composite board for the opponent when black is to move" do
+      game = %Game{board: BitBoard.new(), current_player: :black}
+
+      assert BitBoard.opponent_board(game) == BitBoard.get(game.board, :white)
     end
   end
 

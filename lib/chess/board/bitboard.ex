@@ -11,6 +11,7 @@ defmodule Chess.Boards.BitBoard do
 
   alias Chess.Board.Coordinates
   alias Chess.Color
+  alias Chess.Game
 
   @behaviour Access
 
@@ -109,6 +110,14 @@ defmodule Chess.Boards.BitBoard do
       board ||| composite
     end)
     |> from_integer()
+  end
+
+  @doc """
+  Returns the composite bitboard of all opponent pieces for the side to move in `game`.
+  """
+  @spec opponent_board(Game.t()) :: bitboard()
+  def opponent_board(%Game{board: board} = game) do
+    get(board, Game.opponent(game))
   end
 
   @doc """
