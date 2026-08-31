@@ -227,9 +227,7 @@ defmodule Chess.Bitboards.Move do
   end
 
   defp quiet_or_capture(%Game{} = game, destination) do
-    if game.board
-       |> BitBoard.get(Game.opponent(game))
-       |> BitBoard.occupied?(Square.mask(destination)) do
+    if BitBoard.occupied?(BitBoard.opponent_board(game), Square.mask(destination)) do
       :captures
     else
       :quiet
