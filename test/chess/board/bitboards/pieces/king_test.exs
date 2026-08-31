@@ -305,6 +305,42 @@ defmodule Chess.BitBoards.Pieces.KingTest do
       assert {:error, :cannot_castle} = King.validate_move(game, proposal)
     end
 
+    test "rejects castling when the king is currently in check" do
+      # Board state: White king on e1, white rook on h1, black rook on e8
+      #              (king is in check on e1).
+      # Move: e1 -> g1
+      # Expected: {:error, :cannot_castle}
+      #
+      #     a   b   c   d   e   f   g   h
+      #   +---+---+---+---+---+---+---+---+
+      # 8 |   |   |   |   | r |   |   |   |  <- black rook gives check
+      #   +---+---+---+---+---+---+---+---+
+      # 7 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 6 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 5 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 4 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 3 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 2 |   |   |   |   |   |   |   |   |
+      #   +---+---+---+---+---+---+---+---+
+      # 1 |   |   |   |   | K |   |   | R |  <- can't castle out of check
+      #   +---+---+---+---+---+---+---+---+
+      game =
+        game_with([
+          {{:white, :king}, {"e", 1}},
+          {{:white, :rooks}, {"h", 1}},
+          {{:black, :rooks}, {"e", 8}}
+        ])
+
+      proposal = %Proposals{source: {"e", 1}, destination: {"g", 1}}
+
+      assert {:error, :cannot_castle} = King.validate_move(game, proposal)
+    end
+
     test "rejects castling when the king would pass through an attacked square" do
       # Board state: White king on e1, white rook on h1, black bishop on a6
       #              (which attacks f1 diagonally, so king would pass through check).
