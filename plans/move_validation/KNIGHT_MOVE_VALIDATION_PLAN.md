@@ -5,6 +5,14 @@
 **File:** `lib/chess/board/bitboards/pieces/knight.ex`
 **Test:** `test/chess/board/bitboards/pieces/knight_test.exs`
 
+## Hot-path square types
+
+Convert once at validator entry with `Proposals.masks/1`, then use masks for
+occupancy / attacks / simulation. Keep proposal tuples when building the
+returned `%Move{}` via `Move.make/4` (pass the destination mask or an
+explicit flag). See the "Hot-path square types" section in
+`MOVE_VALIDATION_PLAN.md`.
+
 ## Overview
 
 The Knight moves in an L-shape: two squares in one axis and one square in the

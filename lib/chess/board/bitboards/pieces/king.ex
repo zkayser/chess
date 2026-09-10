@@ -6,6 +6,10 @@ defmodule Chess.BitBoards.Pieces.King do
   Castling geometry lives in `Chess.Bitboards.Castling`; attack detection
   lives in `Chess.Bitboards.Attacks`; candidate-move simulation lives on
   `Chess.Boards.BitBoard`. Castling rights are read from `Game` in O(1).
+
+  Hot-path squares use masks from `Proposals.masks/1` (converted once at
+  entry). The returned `%Move{}` still stores the proposal's coordinate
+  tuples for legibility.
   """
 
   @behaviour Chess.Moves.Validator
@@ -14,15 +18,13 @@ defmodule Chess.BitBoards.Pieces.King do
   alias Chess.Bitboards.Castling
   alias Chess.Bitboards.Move
   alias Chess.Boards.BitBoard
-  alias Chess.Boards.Bitboards.Square
   alias Chess.Game
   alias Chess.Moves.Proposals
 
   @impl Chess.Moves.Validator
   @spec validate_move(Game.t(), Proposals.t()) :: {:ok, Move.t()} | {:error, atom()}
-  def validate_move(game, %Proposals{source: source, destination: destination}) do
-    from_mask = Square.mask(source)
-    to_mask = Square.mask(destination)
+  def validate_move(game, %Proposals{source: source, destination: destination} = proposal) do
+    {from_mask, to_mask} = Proposals.masks(proposal)
 
     with {:ok, move_type} <- classify_geometry(source, destination) do
       validate_typed_move(move_type, game, source, destination, from_mask, to_mask)
@@ -60,7 +62,7 @@ defmodule Chess.BitBoards.Pieces.King do
   defp validate_typed_move(:step, game, source, destination, from_mask, to_mask) do
     with :ok <- validate_not_self_capture(game, to_mask),
          :ok <- validate_king_safety(game, from_mask, to_mask) do
-      {:ok, Move.make(game, source, destination)}
+      {:ok, Move.make(game, source, destination, to_mask)}
     end
   end
 

@@ -3,7 +3,15 @@ defmodule Chess.Moves.Proposals do
   This module deals with validating proposed chess moves given
   the state of a game, and exposes functions for converting
   proposed moves into concrete moves.
+
+  Coordinate tuples (`source` / `destination`) are the human-facing
+  representation from user input and tests. Validators should call
+  `masks/1` once at entry and compute with those masks on the hot path,
+  then keep the tuples when building the returned `%Chess.Bitboards.Move{}`
+  (Option A of the bitboard hot-path migration).
   """
+
+  alias Chess.Boards.Bitboards.Square
 
   # alias Chess.Bitboards.Move
   # alias Chess.Game
@@ -15,7 +23,6 @@ defmodule Chess.Moves.Proposals do
             destination: nil
 
   @type coordinates() :: {file :: String.t(), rank :: integer()}
-
   @typedoc """
   An `input_string` is a 16-bit (2-byte) string
   containing a rank and file, where each takes up
@@ -59,6 +66,19 @@ defmodule Chess.Moves.Proposals do
   end
 
   def from_inputs(inputs), do: {:error, {:invalid_inputs, inputs}}
+
+  @doc """
+  Converts the proposal's source and destination coordinates to single-bit
+  square masks once for validator hot paths.
+
+  Piece modules should call this at the start of `validate_move/2` and reuse
+  the masks for occupancy, attacks, and candidate-move simulation. Keep the
+  original `source` / `destination` tuples for the returned `%Move{}`.
+  """
+  @spec masks(t()) :: {Square.mask(), Square.mask()}
+  def masks(%__MODULE__{source: source, destination: destination}) do
+    {Square.mask(source), Square.mask(destination)}
+  end
 
   #######################################################
   # Just templating this for now as I think through how #
