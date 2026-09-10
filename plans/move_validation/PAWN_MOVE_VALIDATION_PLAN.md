@@ -5,6 +5,14 @@
 **File:** `lib/chess/board/bitboards/pieces/pawn.ex`
 **Test:** `test/chess/board/bitboards/pieces/pawn_test.exs`
 
+## Hot-path square types
+
+Convert once at validator entry with `Proposals.masks/1`, then use masks for
+occupancy / attacks / simulation. Keep proposal tuples when building the
+returned `%Move{}` via `Move.make/4` (pass the destination mask or an
+explicit flag). See the "Hot-path square types" section in
+`MOVE_VALIDATION_PLAN.md`.
+
 ## Overview
 
 The Pawn is the most complex piece to validate due to its directional movement,

@@ -34,6 +34,27 @@ def validate_move(game, proposal)
 - `{:ok, %Chess.Bitboards.Move{from: coord, to: coord, flag: flag}}` on success
 - `{:error, reason_atom}` on failure
 
+### Hot-path square types (Option A)
+
+`Proposals` and `%Move{}` keep `{file, rank}` tuples for legibility (tests,
+docs, I/O). Validators convert **once** at entry and compute with masks:
+
+```elixir
+{from_mask, to_mask} = Proposals.masks(proposal)
+
+# occupancy / attacks / simulation use from_mask and to_mask
+# ...
+
+# Build the returned move with the original tuples; pass to_mask so
+# quiet/capture inference does not convert destination again:
+{:ok, Move.make(game, proposal.source, proposal.destination, to_mask)}
+# or an explicit flag: Move.make(game, from, to, :king_castle)
+```
+
+Prefer `BitBoard.occupied?/2`, `Square.mask/1` / `mask_from_index/1`, and
+`Proposals.masks/1` over `BitBoard.square_occupied?/2` and repeated
+`Coordinates.file_bit_index/1` calls inside validation.
+
 ### Standard error atoms
 
 | Atom | Meaning |
@@ -55,18 +76,21 @@ All validation should use these existing modules — no local coordinate math:
 
 | Module | Key functions | Purpose |
 |---|---|---|
-| `Chess.Boards.BitBoard` | `get/2`, `get_raw/2`, `get_boards_by_color/2`, `square_occupied?/2`, `from_integer/1`, `empty/0` | Read and compose bitboards |
-| `Chess.Boards.Bitboards.Square` | `try_delta/2`, `bitboard/1` | Coordinate arithmetic, single-square bitboard mask |
-| `Chess.Bitboards.Move` | `encode/1`, `decode/1`, `flags/0` | Move encoding/decoding, flag constants |
+| `Chess.Boards.BitBoard` | `get/2`, `get_raw/2`, `get_boards_by_color/2`, `occupied?/2`, `from_integer/1`, `empty/0` | Read and compose bitboards; mask-based occupancy |
+| `Chess.Boards.Bitboards.Square` | `try_delta/2`, `mask/1`, `mask_from_index/1`, `to_index/1` | Coordinate arithmetic, single-square masks / indices |
+| `Chess.Moves.Proposals` | `masks/1` | Tuple → mask conversion once at validator entry |
+| `Chess.Bitboards.Move` | `make/3`, `make/4`, `encode/1`, `decode/1`, `flags/0` | Build `%Move{}` (tuples stored; mask or flag for inference) |
 | `Chess.Bitboards.Slider` | `rook/0`, `bishop/0` | Delta lists for sliding directions |
-| `Chess.Board.Coordinates` | `file_bit_index/1` | File-to-bit-index mapping |
-| `Chess.Pieces` | `classify/2` | Identify which piece occupies a square |
+| `Chess.Board.Coordinates` | `file_bit_index/1` | File-to-bit-index mapping (prefer via `Square`) |
+| `Chess.Pieces` | `classify/2` | Identify which piece occupies a square (mask or tuple) |
 
 ## Shared helper: occupancy checks
 
 Most pieces need these operations — factor them out or inline per module:
 
 ```elixir
+{from_mask, to_mask} = Proposals.masks(proposal)
+
 # Composite bitboard of all own pieces
 own_pieces = BitBoard.get_raw(game.board, game.current_player)
 
@@ -77,12 +101,9 @@ opponent_pieces = BitBoard.get_raw(game.board, opponent)
 # All occupied squares
 all_occupied = own_pieces ||| opponent_pieces
 
-# Check self-capture
-dest_mask = Square.bitboard(proposal.destination)
-self_capture? = (dest_mask &&& own_pieces) != 0
-
-# Check capture
-capture? = (dest_mask &&& opponent_pieces) != 0
+# Check self-capture / capture via mask AND (no tuple parsing)
+self_capture? = BitBoard.occupied?(own_pieces, to_mask)
+capture? = BitBoard.occupied?(opponent_pieces, to_mask)
 ```
 
 ## Shared helper: king safety

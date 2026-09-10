@@ -127,19 +127,32 @@ defmodule Chess.Bitboards.Move do
   Sets the flag to `:captures` when the destination is occupied by the
   opponent, otherwise `:quiet`. Piece-specific flags (castling, double
   pawn push, promotions, en passant) should be supplied by the piece
-  module via `make/4`.
+  module via `make/4` with an explicit flag atom.
+
+  `%Move{}` stores human-readable `{file, rank}` tuples (Option A). When the
+  caller already has a destination mask from `Proposals.masks/1`, prefer
+  `make/4` with that mask so tuple→mask conversion happens at most once.
   """
   @spec make(Game.t(), coordinate(), coordinate()) :: t()
   def make(%Game{} = game, from, to) do
-    make(game, from, to, quiet_or_capture(game, to))
+    make(game, from, to, Square.mask(to))
   end
 
   @doc """
-  Builds a move with an explicit `flag`.
+  Builds a move with an explicit `flag`, or infers `:quiet` / `:captures`
+  from a precomputed destination `Square.mask()`.
+
+  Pass a mask when validating a proposal that already converted coordinates
+  once via `Proposals.masks/1`. Pass a flag atom for piece-specific moves
+  (castling, promotions, etc.).
   """
-  @spec make(Game.t(), coordinate(), coordinate(), flag()) :: t()
-  def make(%Game{}, from, to, flag) do
+  @spec make(Game.t(), coordinate(), coordinate(), flag() | Square.mask()) :: t()
+  def make(%Game{}, from, to, flag) when is_atom(flag) do
     %__MODULE__{from: from, to: to, flag: flag}
+  end
+
+  def make(%Game{} = game, from, to, to_mask) when is_integer(to_mask) do
+    make(game, from, to, quiet_or_capture(game, to_mask))
   end
 
   @file_to_value ?a..?h |> Enum.with_index() |> Map.new(fn {k, v} -> {<<k>>, v} end)
@@ -226,8 +239,8 @@ defmodule Chess.Bitboards.Move do
     end
   end
 
-  defp quiet_or_capture(%Game{} = game, destination) do
-    if BitBoard.occupied?(BitBoard.opponent_board(game), Square.mask(destination)) do
+  defp quiet_or_capture(%Game{} = game, destination_mask) when is_integer(destination_mask) do
+    if BitBoard.occupied?(BitBoard.opponent_board(game), destination_mask) do
       :captures
     else
       :quiet
