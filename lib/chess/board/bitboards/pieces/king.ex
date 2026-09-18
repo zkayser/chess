@@ -3,8 +3,10 @@ defmodule Chess.BitBoards.Pieces.King do
   King move validation (`Chess.Moves.Validator`).
 
   Orchestrates geometry, self-capture, king-safety, and castling checks.
-  Castling geometry lives in `Chess.Bitboards.Castling`; attack detection
-  lives in `Chess.Bitboards.Attacks`; candidate-move simulation lives on
+  Consumes `source_mask` / `destination_mask` from `Chess.Moves.Proposals`
+  (converted once at the proposal boundary). Castling geometry lives in
+  `Chess.Bitboards.Castling`; attack detection lives in
+  `Chess.Bitboards.Attacks`; candidate-move simulation lives on
   `Chess.Boards.BitBoard`. Castling rights are read from `Game` in O(1).
   """
 

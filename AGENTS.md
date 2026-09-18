@@ -64,14 +64,19 @@ trying to normalize.
 - Bitboards are 64-bit binaries, not integers. Use `Chess.Boards.BitBoard.from_integer/1` to convert.
 - `import Bitwise` (not `use Bitwise`) in bitboard modules.
 - File masks (`@file_a_mask`, `@file_h_mask`) prevent wraparound in shift-based attack generation.
-- Coordinate conversion utilities live in `lib/chess/board/bitboards/move.ex`.
+- **Tuples for humans, indices/masks for the engine:** convert once via
+  `Chess.Moves.Proposals.from_inputs/1` or `from_coordinates/2` (or
+  `Square.to_index/1` / `mask_from_index/1` at other boundaries). Validators
+  should read `proposal.source_mask` / `destination_mask`, not re-mask tuples.
+- Coordinate conversion utilities also live on `Chess.Boards.Bitboards.Square`
+  and in `lib/chess/board/bitboards/move.ex` (16-bit encode/decode).
 - Slider deltas (rook/bishop directions) are in `lib/chess/board/bitboards/slider.ex`.
 
 ### Move system
 
-- `Chess.Moves.Validator` behaviour defines `validate_move/2` — **not yet implemented** by any piece module.
+- `Chess.Moves.Validator` behaviour defines `validate_move/2` — implemented by King; other pieces are stubs.
 - `MOVE_VALIDATION_PLAN.md` specifies implementation order: King -> Knight -> Rook -> Bishop -> Queen -> Pawn.
-- `Chess.Moves.Proposals` parses raw user input (e.g., `"a2"`, `"a4"`) into structured proposals.
+- `Chess.Moves.Proposals` parses raw user input (e.g., `"a2"`, `"a4"`) into structured proposals **with indices and masks**.
 
 ### Web layer
 
