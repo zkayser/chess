@@ -26,8 +26,12 @@ def validate_move(game, proposal)
   - `board` — `Chess.Boards.BitBoard.t()` (per-color, per-piece-type bitboards)
   - `move_list` — `list(Chess.Bitboards.Move.t())` (needed for en passant, castling rights)
   - `current_player` — `:white | :black`
-- `proposal` — `Chess.Moves.Proposals.t()` with `source` and `destination` as
-  `{file_string, rank_int}` coordinates
+- `proposal` — `Chess.Moves.Proposals.t()` with human `source`/`destination`
+  coordinates **plus** precomputed `source_index`/`destination_index` and
+  `source_mask`/`destination_mask`. Build via `Proposals.from_inputs/1` or
+  `Proposals.from_coordinates/2` so conversion happens once at the boundary.
+  Validators must use the mask/index fields — do not call `Square.mask/1`
+  again on the tuples.
 
 ### Return values
 
@@ -55,12 +59,12 @@ All validation should use these existing modules — no local coordinate math:
 
 | Module | Key functions | Purpose |
 |---|---|---|
-| `Chess.Boards.BitBoard` | `get/2`, `get_raw/2`, `get_boards_by_color/2`, `square_occupied?/2`, `from_integer/1`, `empty/0` | Read and compose bitboards |
-| `Chess.Boards.Bitboards.Square` | `try_delta/2`, `bitboard/1` | Coordinate arithmetic, single-square bitboard mask |
-| `Chess.Bitboards.Move` | `encode/1`, `decode/1`, `flags/0` | Move encoding/decoding, flag constants |
-| `Chess.Bitboards.Slider` | `rook/0`, `bishop/0` | Delta lists for sliding directions |
-| `Chess.Board.Coordinates` | `file_bit_index/1` | File-to-bit-index mapping |
-| `Chess.Pieces` | `classify/2` | Identify which piece occupies a square |
+| `Chess.Boards.BitBoard` | `get/2`, `get_raw/2`, `get_boards_by_color/2`, `occupied?/2`, `from_integer/1`, `empty/0` | Read and compose bitboards |
+| `Chess.Boards.Bitboards.Square` | `to_index/1`, `mask_from_index/1`, `mask/1` | Boundary conversion; prefer proposal masks on the hot path |
+| `Chess.Bitboards.Move` | `make/3`, `make/4`, `encode/1`, `decode/1`, `flags/0` | Build moves (mask for quiet/capture); encoding |
+| `Chess.Bitboards.Attacks` | `square_attacked_by?/3`, king/knight tables | Bitwise attack detection |
+| `Chess.Moves.Proposals` | `from_inputs/1`, `from_coordinates/2` | Convert human input → coords + indices + masks once |
+| `Chess.Pieces` | `classify/2` | Identify which piece occupies a square (prefer mask) |
 
 ## Shared helper: occupancy checks
 
@@ -77,12 +81,10 @@ opponent_pieces = BitBoard.get_raw(game.board, opponent)
 # All occupied squares
 all_occupied = own_pieces ||| opponent_pieces
 
-# Check self-capture
-dest_mask = Square.bitboard(proposal.destination)
-self_capture? = (dest_mask &&& own_pieces) != 0
-
-# Check capture
-capture? = (dest_mask &&& opponent_pieces) != 0
+# Check self-capture / capture using the proposal's destination mask
+dest_mask = proposal.destination_mask
+self_capture? = BitBoard.occupied?(own_pieces, dest_mask)
+capture? = BitBoard.occupied?(opponent_pieces, dest_mask)
 ```
 
 ## Shared helper: king safety

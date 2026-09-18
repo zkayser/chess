@@ -3,8 +3,10 @@ defmodule Chess.BitBoards.Pieces.King do
   King move validation (`Chess.Moves.Validator`).
 
   Orchestrates geometry, self-capture, king-safety, and castling checks.
-  Castling geometry lives in `Chess.Bitboards.Castling`; attack detection
-  lives in `Chess.Bitboards.Attacks`; candidate-move simulation lives on
+  Consumes `source_mask` / `destination_mask` from `Chess.Moves.Proposals`
+  (converted once at the proposal boundary). Castling geometry lives in
+  `Chess.Bitboards.Castling`; attack detection lives in
+  `Chess.Bitboards.Attacks`; candidate-move simulation lives on
   `Chess.Boards.BitBoard`. Castling rights are read from `Game` in O(1).
   """
 
@@ -14,16 +16,21 @@ defmodule Chess.BitBoards.Pieces.King do
   alias Chess.Bitboards.Castling
   alias Chess.Bitboards.Move
   alias Chess.Boards.BitBoard
-  alias Chess.Boards.Bitboards.Square
   alias Chess.Game
   alias Chess.Moves.Proposals
 
   @impl Chess.Moves.Validator
   @spec validate_move(Game.t(), Proposals.t()) :: {:ok, Move.t()} | {:error, atom()}
-  def validate_move(game, %Proposals{source: source, destination: destination}) do
-    from_mask = Square.mask(source)
-    to_mask = Square.mask(destination)
-
+  def validate_move(
+        game,
+        %Proposals{
+          source: source,
+          destination: destination,
+          source_mask: from_mask,
+          destination_mask: to_mask
+        }
+      )
+      when is_integer(from_mask) and is_integer(to_mask) do
     with {:ok, move_type} <- classify_geometry(source, destination) do
       validate_typed_move(move_type, game, source, destination, from_mask, to_mask)
     end
@@ -45,6 +52,7 @@ defmodule Chess.BitBoards.Pieces.King do
 
   # Geometry uses integer file/rank codepoints (`?a`..`?h`) and ranks —
   # not string file compares — then castling continues on masks.
+  # Index/mask geometry is tracked separately (see related bitboard issues).
   defp classify_geometry({<<from_file>>, from_rank}, {<<to_file>>, to_rank}) do
     file_delta = abs(to_file - from_file)
     rank_delta = abs(to_rank - from_rank)
@@ -60,7 +68,7 @@ defmodule Chess.BitBoards.Pieces.King do
   defp validate_typed_move(:step, game, source, destination, from_mask, to_mask) do
     with :ok <- validate_not_self_capture(game, to_mask),
          :ok <- validate_king_safety(game, from_mask, to_mask) do
-      {:ok, Move.make(game, source, destination)}
+      {:ok, Move.make(game, source, destination, to_mask)}
     end
   end
 

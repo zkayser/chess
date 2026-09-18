@@ -128,17 +128,30 @@ defmodule Chess.Bitboards.Move do
   opponent, otherwise `:quiet`. Piece-specific flags (castling, double
   pawn push, promotions, en passant) should be supplied by the piece
   module via `make/4`.
+
+  Prefer `make/4` with a destination mask when the caller already has one
+  (e.g. from `Chess.Moves.Proposals`) so occupancy is checked without
+  re-deriving a mask from the `{file, rank}` tuple.
   """
   @spec make(Game.t(), coordinate(), coordinate()) :: t()
   def make(%Game{} = game, from, to) do
-    make(game, from, to, quiet_or_capture(game, to))
+    make(game, from, to, Square.mask(to))
   end
 
   @doc """
-  Builds a move with an explicit `flag`.
+  Builds a move with an explicit `flag`, or derives `:quiet` / `:captures`
+  from a destination square mask.
+
+  When the fourth argument is an integer mask, occupancy is checked with
+  `BitBoard.occupied?/2` against the opponent composite board. When it is
+  a flag atom, that flag is stored as-is.
   """
-  @spec make(Game.t(), coordinate(), coordinate(), flag()) :: t()
-  def make(%Game{}, from, to, flag) do
+  @spec make(Game.t(), coordinate(), coordinate(), flag() | Square.mask()) :: t()
+  def make(%Game{} = game, from, to, destination_mask) when is_integer(destination_mask) do
+    make(game, from, to, quiet_or_capture(game, destination_mask))
+  end
+
+  def make(%Game{}, from, to, flag) when is_atom(flag) do
     %__MODULE__{from: from, to: to, flag: flag}
   end
 
@@ -226,8 +239,8 @@ defmodule Chess.Bitboards.Move do
     end
   end
 
-  defp quiet_or_capture(%Game{} = game, destination) do
-    if BitBoard.occupied?(BitBoard.opponent_board(game), Square.mask(destination)) do
+  defp quiet_or_capture(%Game{} = game, destination_mask) when is_integer(destination_mask) do
+    if BitBoard.occupied?(BitBoard.opponent_board(game), destination_mask) do
       :captures
     else
       :quiet
