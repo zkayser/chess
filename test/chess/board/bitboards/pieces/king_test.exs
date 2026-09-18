@@ -9,6 +9,30 @@ defmodule Chess.BitBoards.Pieces.KingTest do
   alias Chess.Moves.Proposals
 
   describe "validate_move/2" do
+    test "uses proposal masks for occupancy and move building without re-masking tuples" do
+      game =
+        board_with([
+          {{:white, :king}, {"e", 1}},
+          {{:black, :pawns}, {"f", 2}}
+        ])
+        |> then(&%Game{board: &1})
+
+      # Human coords describe e1 -> e2 (empty), but destination_mask points at the
+      # occupied f2 square. Capture detection and king-safety simulation must
+      # follow the mask supplied on the proposal.
+      proposal = %Proposals{
+        source: {"e", 1},
+        destination: {"e", 2},
+        source_index: Square.to_index({"e", 1}),
+        destination_index: Square.to_index({"e", 2}),
+        source_mask: Square.mask({"e", 1}),
+        destination_mask: Square.mask({"f", 2})
+      }
+
+      assert {:ok, %Move{from: {"e", 1}, to: {"e", 2}, flag: :captures}} =
+               King.validate_move(game, proposal)
+    end
+
     test "accepts a quiet move one square forward" do
       # Board state: White king on e1, no other pieces nearby.
       # Move: e1 -> e2 (one square forward)
