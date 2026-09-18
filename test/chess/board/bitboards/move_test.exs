@@ -75,6 +75,24 @@ defmodule Chess.Bitboards.MoveTest do
       assert %Move{from: {"e", 1}, to: {"g", 1}, flag: :king_castle} =
                Move.make(game, {"e", 1}, {"g", 1}, :king_castle)
     end
+
+    test "uses a destination mask for quiet vs capture without re-deriving from the tuple" do
+      game =
+        game_with([
+          {{:white, :king}, {"e", 1}},
+          {{:black, :pawns}, {"f", 2}}
+        ])
+
+      destination_mask = Square.mask({"f", 2})
+
+      assert %Move{from: {"e", 1}, to: {"f", 2}, flag: :captures} =
+               Move.make(game, {"e", 1}, {"f", 2}, destination_mask)
+
+      empty_mask = Square.mask({"e", 2})
+
+      assert %Move{from: {"e", 1}, to: {"e", 2}, flag: :quiet} =
+               Move.make(game, {"e", 1}, {"e", 2}, empty_mask)
+    end
   end
 
   describe "encode/1 and decode/1" do
