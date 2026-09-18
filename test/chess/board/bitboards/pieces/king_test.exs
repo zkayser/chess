@@ -56,7 +56,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
       # 1 |   |   |   |   | K |   |   |   |  <- white king
       #   +---+---+---+---+---+---+---+---+
       game = game_with_white_king_on({"e", 1})
-      proposal = %Proposals{source: {"e", 1}, destination: {"e", 2}}
+      proposal = Proposals.from_coordinates({"e", 1}, {"e", 2})
 
       assert {:ok, %Move{from: {"e", 1}, to: {"e", 2}, flag: :quiet}} =
                King.validate_move(game, proposal)
@@ -86,7 +86,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
       # 1 |   |   |   |   |   |   |   |   |
       #   +---+---+---+---+---+---+---+---+
       game = game_with_white_king_on({"d", 4})
-      proposal = %Proposals{source: {"d", 4}, destination: {"e", 5}}
+      proposal = Proposals.from_coordinates({"d", 4}, {"e", 5})
 
       assert {:ok, %Move{from: {"d", 4}, to: {"e", 5}, flag: :quiet}} =
                King.validate_move(game, proposal)
@@ -122,7 +122,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
         ])
         |> then(&%Game{board: &1})
 
-      proposal = %Proposals{source: {"e", 1}, destination: {"e", 2}}
+      proposal = Proposals.from_coordinates({"e", 1}, {"e", 2})
 
       assert {:error, :self_capture} = King.validate_move(game, proposal)
     end
@@ -157,7 +157,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
         ])
         |> then(&%Game{board: &1})
 
-      proposal = %Proposals{source: {"e", 1}, destination: {"f", 2}}
+      proposal = Proposals.from_coordinates({"e", 1}, {"f", 2})
 
       assert {:ok, %Move{from: {"e", 1}, to: {"f", 2}, flag: :captures}} =
                King.validate_move(game, proposal)
@@ -187,7 +187,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
       # 1 |   |   |   |   | K |   |   |   |  <- white king
       #   +---+---+---+---+---+---+---+---+
       game = game_with_white_king_on({"e", 1})
-      proposal = %Proposals{source: {"e", 1}, destination: {"e", 3}}
+      proposal = Proposals.from_coordinates({"e", 1}, {"e", 3})
 
       assert {:error, :invalid_geometry} = King.validate_move(game, proposal)
     end
@@ -222,7 +222,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
         ])
         |> then(&%Game{board: &1})
 
-      proposal = %Proposals{source: {"e", 1}, destination: {"f", 1}}
+      proposal = Proposals.from_coordinates({"e", 1}, {"f", 1})
 
       assert {:error, :king_in_check} = King.validate_move(game, proposal)
     end
@@ -257,7 +257,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
           {{:white, :rooks}, {"h", 1}}
         ])
 
-      proposal = %Proposals{source: {"e", 1}, destination: {"g", 1}}
+      proposal = Proposals.from_coordinates({"e", 1}, {"g", 1})
 
       assert {:ok, %Move{from: {"e", 1}, to: {"g", 1}, flag: :king_castle}} =
                King.validate_move(game, proposal)
@@ -293,7 +293,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
           {{:white, :rooks}, {"a", 1}}
         ])
 
-      proposal = %Proposals{source: {"e", 1}, destination: {"c", 1}}
+      proposal = Proposals.from_coordinates({"e", 1}, {"c", 1})
 
       assert {:ok, %Move{from: {"e", 1}, to: {"c", 1}, flag: :queen_castle}} =
                King.validate_move(game, proposal)
@@ -311,7 +311,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
         ])
         |> Game.revoke_castling(:white, :king)
 
-      proposal = %Proposals{source: {"e", 1}, destination: {"g", 1}}
+      proposal = Proposals.from_coordinates({"e", 1}, {"g", 1})
 
       assert {:error, :cannot_castle} = King.validate_move(game, proposal)
     end
@@ -324,7 +324,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
         ])
         |> Game.revoke_castling(:white, :kingside)
 
-      proposal = %Proposals{source: {"e", 1}, destination: {"g", 1}}
+      proposal = Proposals.from_coordinates({"e", 1}, {"g", 1})
 
       assert {:error, :cannot_castle} = King.validate_move(game, proposal)
     end
@@ -360,7 +360,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
           {{:black, :rooks}, {"e", 8}}
         ])
 
-      proposal = %Proposals{source: {"e", 1}, destination: {"g", 1}}
+      proposal = Proposals.from_coordinates({"e", 1}, {"g", 1})
 
       assert {:error, :cannot_castle} = King.validate_move(game, proposal)
     end
@@ -396,7 +396,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
           {{:black, :bishops}, {"a", 6}}
         ])
 
-      proposal = %Proposals{source: {"e", 1}, destination: {"g", 1}}
+      proposal = Proposals.from_coordinates({"e", 1}, {"g", 1})
 
       assert {:error, :cannot_castle} = King.validate_move(game, proposal)
     end
@@ -425,7 +425,7 @@ defmodule Chess.BitBoards.Pieces.KingTest do
       # 1 | K |   |   |   |   |   |   |   |  <- white king in corner
       #   +---+---+---+---+---+---+---+---+
       game = game_with_white_king_on({"a", 1})
-      proposal = %Proposals{source: {"a", 1}, destination: {"b", 2}}
+      proposal = Proposals.from_coordinates({"a", 1}, {"b", 2})
 
       assert {:ok, %Move{from: {"a", 1}, to: {"b", 2}, flag: :quiet}} =
                King.validate_move(game, proposal)
